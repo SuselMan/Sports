@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "Sports",
+    "slug": "sports-mobile",
+    "scheme": "sports",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "assetBundlePatterns": ["**/*"],
+    "platforms": ["ios", "android", "web"]
+  }
+}
+
