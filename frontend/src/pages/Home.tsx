@@ -7,6 +7,7 @@ import { ExerciseRecordCard } from '../components/ExerciseRecordCard';
 import { ExerciseRecordForm, ExerciseRecordFormValue } from '../components/ExerciseRecordForm';
 import { MusclesMap } from '../components/MusclesMap';
 import { Muscles } from '../../../docs/Shared.model';
+import { AddFab } from '../components/AddFab';
 
 type Exercise = { _id: string; name: string; type: 'REPS' | 'TIME' };
 type ExerciseRecord = {
@@ -81,12 +82,7 @@ export default function Home() {
 
   return (
     <Box>
-      <PageHeader
-        title="Home"
-        range={range}
-        onChange={setRange}
-        right={<Button variant="contained" onClick={() => setOpen(true)}>Add</Button>}
-      />
+      <PageHeader title="Home" range={range} onChange={setRange} />
 
       <Box sx={{ my: 2, height: { xs: 260, sm: 320 } }}>
         <MusclesMap muscles={highlightedMuscles} onMuscleClicked={() => {}} />
@@ -118,6 +114,8 @@ export default function Home() {
           <Typography variant="body2" color="text.secondary">No data for chosen period.</Typography>
         )}
       </Stack>
+
+      <AddFab onClick={() => setOpen(true)} />
 
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth>
         <DialogTitle>Add Exercise Record</DialogTitle>

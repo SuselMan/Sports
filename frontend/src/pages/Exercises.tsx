@@ -3,6 +3,7 @@ import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, 
 import { api } from '../api/client';
 import { ExerciseForm } from '../components/ExerciseForm';
 import { ExerciseCard } from '../components/ExerciseCard';
+import { AddFab } from '../components/AddFab';
 
 type Exercise = { _id: string; name: string; type: 'REPS' | 'TIME'; muscles: string[] };
 
@@ -42,7 +43,6 @@ export default function Exercises() {
     <Box>
       <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'stretch', sm: 'center' }} justifyContent="space-between" spacing={1.5} sx={{ mb: 2 }}>
         <Typography variant="h6">Exercises</Typography>
-        <Button sx={{ alignSelf: { xs: 'stretch', sm: 'center' } }} variant="contained" onClick={() => setOpen(true)}>Add</Button>
       </Stack>
 
       <Stack spacing={1}>
@@ -100,6 +100,8 @@ export default function Exercises() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <AddFab onClick={() => setOpen(true)} />
     </Box>
   );
 }

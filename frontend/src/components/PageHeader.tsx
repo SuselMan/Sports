@@ -18,7 +18,6 @@ export function PageHeader({ title, range, onChange, right }: Props) {
       spacing={1.5}
       sx={{ mb: 2 }}
     >
-      <Typography variant="h6">{title}</Typography>
       <DateRange value={range} onChange={onChange} />
       {right && (
         <Box
