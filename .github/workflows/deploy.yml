@@ -20,6 +20,7 @@ jobs:
         working-directory: frontend
         run: |
           echo "VITE_API_URL=${{ secrets.PUBLIC_API_URL }}" > .env.production
+          echo "VITE_GOOGLE_CLIENT_ID=${{ secrets.PUBLIC_GOOGLE_CLIENT_ID }}" >> .env.production
           if [ -f package-lock.json ]; then npm ci; else npm install; fi
           npm run build
 
@@ -41,7 +42,8 @@ jobs:
           host: ${{ secrets.VPS_IP }}
           username: ${{ secrets.SSH_LOGIN }}
           password: ${{ secrets.SSH_PASS }}
-          source: "frontend/dist/*"
+          source: "frontend/dist/**"
+          strip_components: 2
           target: "/var/www/sports-frontend"
 
       - name: Upload backend source to VPS
