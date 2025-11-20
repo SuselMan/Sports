@@ -23,7 +23,7 @@ metricsRouter.get('/', async (req: AuthedRequest, res) => {
   const q: any = { userId };
   const total = await MetricModel.countDocuments(q);
   const list = await MetricModel.find(q)
-    .sort(buildSort(sortBy!, sortOrder!))
+    .sort(buildSort(sortBy!, sortOrder!) as any)
     .skip((page - 1) * pageSize)
     .limit(pageSize);
   res.json({ list, pagination: { total, page, pageSize } });
