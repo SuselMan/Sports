@@ -1,11 +1,8 @@
 name: Deploy to VPS
 
 on:
-  workflow_dispatch:
   push:
     branches: [ "main" ]
-    paths:
-      - "backend/**"
 
 jobs:
   deploy:
@@ -13,24 +10,67 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
+
+      - name: Use Node 20
+        uses: actions/setup-node@v4
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_KEY }}
+          node-version: '20'
+
+      - name: Build frontend
+        working_directory: frontend
+        run: |
+          cd frontend
+          echo "VITE_API_URL=${{ secrets.PUBLIC_API_URL }}" > .env.production
+          npm ci
+          npm run build
+
+      - name: Ensure frontend dir on VPS
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.VPS_IP }}
+          username: ${{ secrets.SSH_LOGIN }}
+          password: ${{ secrets.SSH_PASS }}
           script: |
             set -e
-            mkdir -p ${{ secrets.APP_DIR }}
-            if [ -d "${{ secrets.APP_DIR }}/.git" ]; then
-              cd ${{ secrets.APP_DIR }}
-              git pull
-            else
-              git clone git@github.com:SuselMan/Sports.git ${{ secrets.APP_DIR }}
-              cd ${{ secrets.APP_DIR }}
+            sudo mkdir -p /var/www/sports-frontend
+            sudo chown -R $USER:$USER /var/www/sports-frontend
+            mkdir -p ~/apps/sports-backend ~/apps/sports-backend-src
+
+      - name: Upload frontend build to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_IP }}
+          username: ${{ secrets.SSH_LOGIN }}
+          password: ${{ secrets.SSH_PASS }}
+          source: "frontend/dist/*"
+          target: "/var/www/sports-frontend"
+
+      - name: Upload backend source to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_IP }}
+          username: ${{ secrets.SSH_LOGIN }}
+          password: ${{ secrets.SSH_PASS }}
+          source: "backend/**"
+          target: "~/apps/sports-backend-src"
+
+      - name: Deploy backend with PM2
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.VPS_IP }}
+          username: ${{ secrets.SSH_LOGIN }}
+          password: ${{ secrets.SSH_PASS }}
+          script: |
+            set -e
+            if ! command -v pm2 >/dev/null 2>&1; then
+              sudo npm i -g pm2
             fi
-            cd backend
-            npm install
+            mkdir -p ~/apps/sports-backend
+            rsync -a --delete ~/apps/sports-backend-src/backend/ ~/apps/sports-backend/
+            cd ~/apps/sports-backend
+            npm ci
             npm run build
-            pm2 restart sports-backend || pm2 start dist/index.js --name sports-backend
+            pm2 describe sports-api >/dev/null 2>&1 || PORT=4000 pm2 start dist/index.js --name sports-api
+            pm2 reload sports-api
+            pm2 save
 
