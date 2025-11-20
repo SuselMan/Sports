@@ -65,7 +65,12 @@ jobs:
               sudo npm i -g pm2
             fi
             mkdir -p ~/apps/sports-backend
-            rsync -a --delete ~/apps/sports-backend-src/backend/ ~/apps/sports-backend/
+            # sync backend sources without rsync
+            mkdir -p ~/apps/sports-backend
+            if [ -d \"~/apps/sports-backend\" ]; then
+              find ~/apps/sports-backend -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+            fi
+            cp -a ~/apps/sports-backend-src/backend/. ~/apps/sports-backend/
             cd ~/apps/sports-backend
             npm ci
             npm run build
