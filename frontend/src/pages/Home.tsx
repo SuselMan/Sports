@@ -33,7 +33,7 @@ export default function Home() {
   const [form, setForm] = useState<ExerciseRecordFormValue>({
     exerciseId: '',
     kind: 'REPS',
-    date: new Date().toISOString(),
+    date: range.from,
   });
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export default function Home() {
       note: form.note || undefined,
     });
     setOpen(false);
-    setForm({ exerciseId: '', kind: 'REPS', date: new Date().toISOString() });
+    setForm({ exerciseId: '', kind: 'REPS', date: range.from });
     const resp = await api.get('/exercises/records', {
       params: { page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to },
     });
@@ -115,7 +115,7 @@ export default function Home() {
         )}
       </Stack>
 
-      <AddFab onClick={() => setOpen(true)} />
+      <AddFab onClick={() => { setForm({ exerciseId: '', kind: 'REPS', date: range.from }); setOpen(true); }} />
 
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth>
         <DialogTitle>Add Exercise Record</DialogTitle>

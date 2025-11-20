@@ -1,5 +1,9 @@
 import React from 'react';
 import { Stack, TextField, MenuItem } from '@mui/material';
+import dayjs from 'dayjs';
+import { isMobile } from 'react-device-detect';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 type Exercise = { _id: string; name: string; type: 'REPS' | 'TIME' };
 
@@ -22,6 +26,9 @@ export function ExerciseRecordForm({
   form: ExerciseRecordFormValue;
   onChange: (next: ExerciseRecordFormValue) => void;
 }) {
+  const today = dayjs();
+  const dateValue = dayjs(form.date);
+
   return (
     <Stack spacing={2} sx={{ mt: 1 }}>
       <TextField
@@ -37,6 +44,31 @@ export function ExerciseRecordForm({
           <MenuItem key={e._id} value={e._id}>{e.name}</MenuItem>
         ))}
       </TextField>
+      {isMobile ? (
+        <TextField
+          label="Date"
+          type="date"
+          value={dateValue.format('YYYY-MM-DD')}
+          onChange={(e) => {
+            const d = dayjs(e.target.value);
+            if (d.isValid()) onChange({ ...form, date: d.startOf('day').toISOString() });
+          }}
+          inputProps={{ max: today.format('YYYY-MM-DD') }}
+        />
+      ) : (
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DatePicker
+            label="Date"
+            value={dateValue}
+            onChange={(d) => {
+              if (d) onChange({ ...form, date: d.startOf('day').toISOString() });
+            }}
+            disableFuture
+            maxDate={today}
+            slotProps={{ textField: { size: 'small', fullWidth: true } }}
+          />
+        </LocalizationProvider>
+      )}
       {form.kind === 'REPS' ? (
         <TextField
           label="Reps"
