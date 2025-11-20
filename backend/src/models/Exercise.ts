@@ -8,6 +8,7 @@ const exerciseSchema = new mongoose.Schema(
     name: { type: String, required: true, maxlength: 100, index: true },
     type: { type: String, enum: ['REPS', 'TIME'], required: true },
     muscles: { type: [String], required: true, default: [] },
+    archived: { type: Boolean, default: false, index: true },
   },
   { timestamps: true }
 );

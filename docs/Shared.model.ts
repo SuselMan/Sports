@@ -1,103 +1,88 @@
 export enum Muscles {
-  // ===== Chest / Torso (anterior) =====
-  Chest_PectoralisMajor_Clavicular = "Chest_PectoralisMajor_Clavicular",
-  Chest_PectoralisMajor_Sternal = "Chest_PectoralisMajor_Sternal",
-  Chest_PectoralisMinor = "Chest_PectoralisMinor",
-  Torso_SerratusAnterior = "Torso_SerratusAnterior",
-  Torso_Intercostals = "Torso_Intercostals",
-
-  // ===== Back / Scapular region =====
-  Back_LatissimusDorsi = "Back_LatissimusDorsi",
-  Back_Trapezius_Upper = "Back_Trapezius_Upper",
-  Back_Trapezius_Middle = "Back_Trapezius_Middle",
-  Back_Trapezius_Lower = "Back_Trapezius_Lower",
-  Back_RhomboidMajor = "Back_RhomboidMajor",
-  Back_RhomboidMinor = "Back_RhomboidMinor",
-  Back_LevatorScapulae = "Back_LevatorScapulae",
-  Back_TeresMajor = "Back_TeresMajor",
-  Back_TeresMinor = "Back_TeresMinor",
-  Back_Infraspinatus = "Back_Infraspinatus",
-  Back_Supraspinatus = "Back_Supraspinatus",
-  Back_Subscapularis = "Back_Subscapularis",
-  Back_ErectorSpinae = "Back_ErectorSpinae",
-  Back_QuadratusLumborum = "Back_QuadratusLumborum",
-
-  // ===== Shoulders (Delts) =====
-  Shoulder_Deltoid_Anterior = "Shoulder_Deltoid_Anterior",
-  Shoulder_Deltoid_Lateral = "Shoulder_Deltoid_Lateral",
-  Shoulder_Deltoid_Posterior = "Shoulder_Deltoid_Posterior",
-
-  // ===== Arms — Biceps/Triceps/Brachialis =====
-  Arm_BicepsBrachii_LongHead = "Arm_BicepsBrachii_LongHead",
-  Arm_BicepsBrachii_ShortHead = "Arm_BicepsBrachii_ShortHead",
-  Arm_Brachialis = "Arm_Brachialis",
-  Arm_Brachioradialis = "Arm_Brachioradialis",
-  Arm_Triceps_LongHead = "Arm_Triceps_LongHead",
-  Arm_Triceps_LateralHead = "Arm_Triceps_LateralHead",
-  Arm_Triceps_MedialHead = "Arm_Triceps_MedialHead",
-
-  // ===== Forearms (key trainable compartments) =====
-  Forearm_WristFlexors_Group = "Forearm_WristFlexors_Group",
-  Forearm_WristExtensors_Group = "Forearm_WristExtensors_Group",
-  Forearm_FlexorCarpiRadialis = "Forearm_FlexorCarpiRadialis",
-  Forearm_FlexorCarpiUlnaris = "Forearm_FlexorCarpiUlnaris",
-  Forearm_PalmarisLongus = "Forearm_PalmarisLongus",
-  Forearm_PronatorTeres = "Forearm_PronatorTeres",
-  Forearm_Supinator = "Forearm_Supinator",
-  Forearm_ExtensorCarpiRadialisLongus = "Forearm_ExtensorCarpiRadialisLongus",
-  Forearm_ExtensorCarpiRadialisBrevis = "Forearm_ExtensorCarpiRadialisBrevis",
-  Forearm_ExtensorCarpiUlnaris = "Forearm_ExtensorCarpiUlnaris",
-
-  // ===== Core / Abs =====
-  Core_RectusAbdominis_Upper = "Core_RectusAbdominis_Upper",
-  Core_RectusAbdominis_Lower = "Core_RectusAbdominis_Lower",
-  Core_ExternalOblique = "Core_ExternalOblique",
-  Core_InternalOblique = "Core_InternalOblique",
-  Core_TransversusAbdominis = "Core_TransversusAbdominis",
-  Core_Multifidus = "Core_Multifidus",
-
-  // ===== Glutes & Lateral Hip =====
-  Glute_GluteusMaximus = "Glute_GluteusMaximus",
-  Glute_GluteusMedius = "Glute_GluteusMedius",
-  Glute_GluteusMinimus = "Glute_GluteusMinimus",
-  Hip_TensorFasciaeLatae = "Hip_TensorFasciaeLatae",
-  Hip_Piriformis = "Hip_Piriformis",
-
-  // ===== Hip Flexors & Adductors =====
-  Hip_Iliacus = "Hip_Iliacus",
-  Hip_PsoasMajor = "Hip_PsoasMajor",
-  Hip_Sartorius = "Hip_Sartorius",
-  Hip_Pectineus = "Hip_Pectineus",
-  Hip_AdductorLongus = "Hip_AdductorLongus",
-  Hip_AdductorBrevis = "Hip_AdductorBrevis",
-  Hip_AdductorMagnus = "Hip_AdductorMagnus",
-  Hip_Gracilis = "Hip_Gracilis",
-
-  // ===== Quads =====
-  Quad_RectusFemoris = "Quad_RectusFemoris",
-  Quad_VastusLateralis = "Quad_VastusLateralis",
-  Quad_VastusMedialis = "Quad_VastusMedialis",
-  Quad_VastusIntermedius = "Quad_VastusIntermedius",
-
-  // ===== Hamstrings =====
-  Ham_BicepsFemoris_LongHead = "Ham_BicepsFemoris_LongHead",
-  Ham_BicepsFemoris_ShortHead = "Ham_BicepsFemoris_ShortHead",
-  Ham_Semitendinosus = "Ham_Semitendinosus",
-  Ham_Semimembranosus = "Ham_Semimembranosus",
-
-  // ===== Calves & Lower Leg =====
-  Calf_Gastrocnemius_MedialHead = "Calf_Gastrocnemius_MedialHead",
-  Calf_Gastrocnemius_LateralHead = "Calf_Gastrocnemius_LateralHead",
-  Calf_Soleus = "Calf_Soleus",
-  Shin_TibialisAnterior = "Shin_TibialisAnterior",
-  Shin_TibialisPosterior = "Shin_TibialisPosterior",
-  Shin_FibularisLongus = "Shin_FibularisLongus",
-  Shin_FibularisBrevis = "Shin_FibularisBrevis",
-
-  // ===== Neck =====
-  Neck_Sternocleidomastoid = "Neck_Sternocleidomastoid",
-  Neck_Scalenes = "Neck_Scalenes",
+    Neck = "Neck",
+    Feet = "Feet",
+    UpperTrapezius = "UpperTrapezius",
+    Gastrocnemius = "Gastrocnemius",
+    Soleus = "Soleus",
+    LateralDeltoid = "LateralDeltoid",
+    InnerThigh = "InnerThigh",
+    WristExtensors = "WristExtensors",
+    WristFlexors = "WristFlexors",
+    Hands = "Hands",
+    Groin = "Groin",
+    Tibialis = "Tibialis",
+    OuterQuadricep = "OuterQuadricep",
+    RectusFemoris = "RectusFemoris",
+    InnerQuadricep = "InnerQuadricep",
+    LongHeadBicep = "LongHeadBicep",
+    ShortHeadBicep = "ShortHeadBicep",
+    Obliques = "Obliques",
+    LowerAbdominals = "LowerAbdominals",
+    UpperAbdominals = "UpperAbdominals",
+    MidLowerPectoralis = "MidLowerPectoralis",
+    UpperPectoralis = "UpperPectoralis",
+    AnteriorDeltoid = "AnteriorDeltoid",
+    MedialHamstrings = "MedialHamstrings",
+    LateralHamstrings = "LateralHamstrings",
+    GluteusMaximus = "GluteusMaximus",
+    GluteusMedius = "GluteusMedius",
+    LowerBack = "LowerBack",
+    Lats = "Lats",
+    MedialHeadTriceps = "MedialHeadTriceps",
+    LongHeadTriceps = "LongHeadTriceps",
+    LateralHeadTriceps = "LateralHeadTriceps",
+    PosteriorDeltoid = "PosteriorDeltoid",
+    LowerTrapezius = "LowerTrapezius",
+    TrapsMiddle = "TrapsMiddle",
 }
+
+type MuscleMapIds = {
+    front? : string,
+    back? : string,
+}
+
+export const muscleIdMap: Record<Muscles, any> = {
+    // both
+    Neck:                 { front: '#neck', back: '#neck' },
+    Feet:                 { front: '#feet', back: '#feet' },
+    UpperTrapezius:       { front: '#upper-trapezius', back: '#upper-trapezius' },
+    Gastrocnemius:        { front: '#gastrocnemius', back: '#gastrocnemius' },
+    Soleus:               { front: '#soleus', back: '#soleus' },
+    LateralDeltoid:       { front: '#lateral-deltoid', back: '#lateral-deltoid' },
+    InnerThigh:           { front: '#inner-thigh', back: '#inner-thigh' },
+    WristExtensors:       { front: '#wrist-extensors', back: '#wrist-extensors' },
+    WristFlexors:         { front: '#wrist-flexors', back: '#wrist-flexors' },
+    Hands:                { front: '#hands', back: '#hands' },
+
+    // front
+    Groin:                { front: '#groin' },
+    Tibialis:             { front: '#tibialis' },
+    OuterQuadricep:       { front: '#outer-quadricep' },
+    RectusFemoris:        { front: '#rectus-femoris' },
+    InnerQuadricep:       { front: '#inner-quadricep' },
+    LongHeadBicep:        { front: '#long-head-bicep' },
+    ShortHeadBicep:       { front: '#short-head-bicep' },
+    Obliques:             { front: '#obliques' },
+    LowerAbdominals:      { front: '#lower-abdominals' },
+    UpperAbdominals:      { front: '#upper-abdominals' },
+    MidLowerPectoralis:   { front: '#mid-lower-pectoralis' },
+    UpperPectoralis:      { front: '#upper-pectoralis' },
+    AnteriorDeltoid:      { front: '#anterior-deltoid' },
+
+    // back
+    MedialHamstrings:     { back: '#medial-hamstrings' },
+    LateralHamstrings:    { back: '#lateral-hamstrings' },
+    GluteusMaximus:       { back: '#gluteus-maximus' },
+    GluteusMedius:        { back: '#gluteus-medius' },
+    LowerBack:            { back: '#lowerback' },
+    Lats:                 { back: '#lats' },
+    MedialHeadTriceps:    { back: '#medial-head-triceps' },
+    LongHeadTriceps:      { back: '#long-head-triceps' },
+    LateralHeadTriceps:   { back: '#lateral-head-triceps' },
+    PosteriorDeltoid:     { back: '#posterior-deltoid' },
+    LowerTrapezius:       { back: '#lower-trapezius' },
+    TrapsMiddle:          { back: '#traps-middle' },
+};
 
 export type ISODateString = string; // ISO 8601, e.g. "2025-11-10T10:00:00Z"
 

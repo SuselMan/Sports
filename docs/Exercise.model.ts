@@ -26,6 +26,7 @@ type ExerciseRecordBase = {
     weight?: number, // weight in kg; default value is current user weight;
     rpe?: number,
     restSec?: number,
+    trainingId: string, // Training Id
 };
 
 export type RepsExerciseRecord = ExerciseRecordBase & {
