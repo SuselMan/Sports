@@ -20,7 +20,7 @@ jobs:
         working-directory: frontend
         run: |
           echo "VITE_API_URL=${{ secrets.PUBLIC_API_URL }}" > .env.production
-          npm ci
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
           npm run build
 
       - name: Ensure frontend dir on VPS
