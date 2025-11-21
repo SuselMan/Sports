@@ -1,5 +1,5 @@
 import React from 'react';
-import { Stack, TextField, IconButton } from '@mui/material';
+import { Stack, TextField, IconButton, Button } from '@mui/material';
 import dayjs from 'dayjs';
 import { isMobile } from 'react-device-detect';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
@@ -29,53 +29,85 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
   };
 
   return (
-    <Stack direction={{ xs: 'row', sm: 'row' }} spacing={1} alignItems={{ xs: 'stretch', sm: 'center' }} sx={{ width: { xs: '100%', sm: 'auto' } }}>
-      <IconButton onClick={() => shift(-1)} sx={{ alignSelf: { xs: 'flex-start', sm: 'center' } }}>{'←'}</IconButton>
-      {isMobile ? (
-        <>
-          <TextField
-            type="date"
-            value={from.format('YYYY-MM-DD')}
-            onChange={(e) => onChange({ from: dayjs(e.target.value).startOf('day').toISOString(), to: to.toISOString() })}
-            size="small"
-            fullWidth
-            inputProps={{ max: fromMaxMobile }}
-          />
-          <TextField
-            type="date"
-            value={to.format('YYYY-MM-DD')}
-            onChange={(e) => onChange({ from: from.toISOString(), to: dayjs(e.target.value).endOf('day').toISOString() })}
-            size="small"
-            fullWidth
-            inputProps={{ min: toMinMobile, max: today.format('YYYY-MM-DD') }}
-          />
-        </>
-      ) : (
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DatePicker
-            label="From"
-            value={from}
-            onChange={(d) => {
-              if (d) onChange({ from: d.startOf('day').toISOString(), to: to.toISOString() });
-            }}
-            disableFuture
-            maxDate={maxFromDate}
-            slotProps={{ textField: { size: 'small', fullWidth: true } }}
-          />
-          <DatePicker
-            label="To"
-            value={to}
-            onChange={(d) => {
-              if (d) onChange({ from: from.toISOString(), to: d.endOf('day').toISOString() });
-            }}
-            disableFuture
-            minDate={from}
-            maxDate={today}
-            slotProps={{ textField: { size: 'small', fullWidth: true } }}
-          />
-        </LocalizationProvider>
-      )}
-      <IconButton onClick={() => shift(1)} sx={{ alignSelf: { xs: 'flex-start', sm: 'center' } }} disabled={rightDisabled}>{'→'}</IconButton>
+    <Stack spacing={1} sx={{ width: { xs: '100%', sm: 'auto' } }}>
+      <Stack direction={{ xs: 'row', sm: 'row' }} spacing={1} alignItems={{ xs: 'stretch', sm: 'center' }}>
+        <IconButton onClick={() => shift(-1)} sx={{ alignSelf: { xs: 'flex-start', sm: 'center' } }}>{'←'}</IconButton>
+        {isMobile ? (
+          <>
+            <TextField
+              type="date"
+              value={from.format('YYYY-MM-DD')}
+              onChange={(e) => onChange({ from: dayjs(e.target.value).startOf('day').toISOString(), to: to.toISOString() })}
+              size="small"
+              fullWidth
+              inputProps={{ max: fromMaxMobile }}
+            />
+            <TextField
+              type="date"
+              value={to.format('YYYY-MM-DD')}
+              onChange={(e) => onChange({ from: from.toISOString(), to: dayjs(e.target.value).endOf('day').toISOString() })}
+              size="small"
+              fullWidth
+              inputProps={{ min: toMinMobile, max: today.format('YYYY-MM-DD') }}
+            />
+          </>
+        ) : (
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              label="From"
+              value={from}
+              onChange={(d) => {
+                if (d) onChange({ from: d.startOf('day').toISOString(), to: to.toISOString() });
+              }}
+              disableFuture
+              maxDate={maxFromDate}
+              slotProps={{ textField: { size: 'small', fullWidth: true } }}
+            />
+            <DatePicker
+              label="To"
+              value={to}
+              onChange={(d) => {
+                if (d) onChange({ from: from.toISOString(), to: d.endOf('day').toISOString() });
+              }}
+              disableFuture
+              minDate={from}
+              maxDate={today}
+              slotProps={{ textField: { size: 'small', fullWidth: true } }}
+            />
+          </LocalizationProvider>
+        )}
+        <IconButton onClick={() => shift(1)} sx={{ alignSelf: { xs: 'flex-start', sm: 'center' } }} disabled={rightDisabled}>{'→'}</IconButton>
+      </Stack>
+      <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+        <Button
+          size="small"
+          variant="outlined"
+          onClick={() => onChange({ from: today.startOf('day').toISOString(), to: today.endOf('day').toISOString() })}
+        >
+          Today
+        </Button>
+        <Button
+          size="small"
+          variant="outlined"
+          onClick={() => onChange({ from: dayjs().subtract(7, 'day').startOf('day').toISOString(), to: today.endOf('day').toISOString() })}
+        >
+          Last week
+        </Button>
+        <Button
+          size="small"
+          variant="outlined"
+          onClick={() => onChange({ from: dayjs().subtract(30, 'day').startOf('day').toISOString(), to: today.endOf('day').toISOString() })}
+        >
+          Last month
+        </Button>
+        <Button
+          size="small"
+          variant="outlined"
+          onClick={() => onChange({ from: dayjs().subtract(365, 'day').startOf('day').toISOString(), to: today.endOf('day').toISOString() })}
+        >
+          Last year
+        </Button>
+      </Stack>
     </Stack>
   );
 }

@@ -4,6 +4,7 @@ import { PageHeader } from '../components/PageHeader';
 import { useDateRangeStore } from '../store/filters';
 import { api } from '../api/client';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import dayjs from 'dayjs';
 
 type Exercise = { _id: string; name: string };
 type ExerciseRecord = { exerciseId: string; kind: 'REPS'|'TIME'; repsAmount?: number; durationMs?: number; weight?: number; date: string };
@@ -14,6 +15,12 @@ export default function Statistics() {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [exerciseId, setExerciseId] = useState<string>('');
   const [exerciseRecords, setExerciseRecords] = useState<ExerciseRecord[]>([]);
+
+  useEffect(() => {
+    const to = dayjs().endOf('day').toISOString();
+    const from = dayjs().subtract(30, 'day').startOf('day').toISOString();
+    setRange({ from, to });
+  }, [setRange]);
 
   useEffect(() => {
     (async () => {
