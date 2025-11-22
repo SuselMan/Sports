@@ -4,6 +4,7 @@ import { api } from '../api/client';
 import { ExerciseForm } from '../components/ExerciseForm';
 import { ExerciseCard } from '../components/ExerciseCard';
 import { AddFab } from '../components/AddFab';
+import { useModalBackClose } from '../hooks/useModalBackClose';
 
 type Exercise = { _id: string; name: string; type: 'REPS' | 'TIME'; muscles: string[] };
 
@@ -38,6 +39,10 @@ export default function Exercises() {
     setForm({ name: '', type: 'REPS', muscles: [] });
     await load();
   };
+
+  // Close dialogs on mobile back button
+  useModalBackClose(open, () => setOpen(false));
+  useModalBackClose(editOpen, () => setEditOpen(false));
 
   return (
     <Box>

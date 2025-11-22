@@ -8,6 +8,7 @@ import { ExerciseRecordForm, ExerciseRecordFormValue } from '../components/Exerc
 import { MusclesMap } from '../components/MusclesMap';
 import { Muscles } from '../../../docs/Shared.model';
 import { AddFab } from '../components/AddFab';
+import { useModalBackClose } from '../hooks/useModalBackClose';
 
 type Exercise = { _id: string; name: string; type: 'REPS' | 'TIME' };
 type ExerciseRecord = {
@@ -79,6 +80,10 @@ export default function Home() {
     });
     setRecords(resp.data.list);
   };
+
+  // Close dialogs on mobile back button
+  useModalBackClose(open, () => setOpen(false));
+  useModalBackClose(editOpen, () => setEditOpen(false));
 
   return (
     <Box>
