@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import { isMobile } from 'react-device-detect';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { useTranslation } from 'react-i18next';
 
 type Exercise = { _id: string; name: string; type: 'REPS' | 'TIME' };
 
@@ -28,12 +29,13 @@ export function ExerciseRecordForm({
 }) {
   const today = dayjs();
   const dateValue = dayjs(form.date);
+  const { t } = useTranslation();
 
   return (
     <Stack spacing={2} sx={{ mt: 1 }}>
       <TextField
         select
-        label="Exercise"
+        label={t('records.exercise')}
         value={form.exerciseId}
         onChange={(e) => {
           const ex = exercises.find((x) => x._id === e.target.value);
@@ -46,7 +48,7 @@ export function ExerciseRecordForm({
       </TextField>
       {isMobile ? (
         <TextField
-          label="Date"
+          label={t('records.date')}
           type="date"
           value={dateValue.format('YYYY-MM-DD')}
           onChange={(e) => {
@@ -58,7 +60,7 @@ export function ExerciseRecordForm({
       ) : (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DatePicker
-            label="Date"
+            label={t('records.date')}
             value={dateValue}
             onChange={(d) => {
               if (d) onChange({ ...form, date: d.startOf('day').toISOString() });
@@ -71,27 +73,27 @@ export function ExerciseRecordForm({
       )}
       {form.kind === 'REPS' ? (
         <TextField
-          label="Reps"
+          label={t('records.reps')}
           type="number"
           value={form.repsAmount || ''}
           onChange={(e) => onChange({ ...form, repsAmount: e.target.value })}
         />
       ) : (
         <TextField
-          label="Duration (ms)"
+          label={t('records.durationMs')}
           type="number"
           value={form.durationMs || ''}
           onChange={(e) => onChange({ ...form, durationMs: e.target.value })}
         />
       )}
       <TextField
-        label="Weight (kg)"
+        label={t('records.weightKg')}
         type="number"
         value={form.weight || ''}
         onChange={(e) => onChange({ ...form, weight: e.target.value })}
       />
       <TextField
-        label="Note"
+        label={t('records.note')}
         value={form.note || ''}
         onChange={(e) => onChange({ ...form, note: e.target.value })}
         multiline

@@ -6,6 +6,7 @@ import { ExerciseCard } from '../components/ExerciseCard';
 import { AddFab } from '../components/AddFab';
 import { useModalBackClose } from '../hooks/useModalBackClose';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 type Exercise = { _id: string; name: string; type: 'REPS' | 'TIME'; muscles: string[] };
 
@@ -25,6 +26,7 @@ export default function Exercises() {
     muscles: [],
   });
   const [searchParams, setSearchParams] = useSearchParams();
+  const { t } = useTranslation();
 
   const load = async () => {
     const resp = await api.get('/exercises', { params: { page: 1, pageSize: 200, sortBy: 'name', sortOrder: 'asc' } });
@@ -67,7 +69,7 @@ export default function Exercises() {
   return (
     <Box>
       <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'stretch', sm: 'center' }} justifyContent="space-between" spacing={1.5} sx={{ mb: 2 }}>
-        <Typography variant="h6">Exercises</Typography>
+        <Typography variant="h6">{t('exercises.title')}</Typography>
       </Stack>
 
       <Stack spacing={1}>
@@ -90,23 +92,23 @@ export default function Exercises() {
       </Stack>
 
       <Dialog open={open} onClose={closeCreateDialog} fullWidth>
-        <DialogTitle>Add Exercise</DialogTitle>
+        <DialogTitle>{t('exercises.addTitle')}</DialogTitle>
         <DialogContent>
           <ExerciseForm form={form} onChange={setForm} />
         </DialogContent>
         <DialogActions>
-          <Button onClick={closeCreateDialog}>Cancel</Button>
-          <Button variant="contained" onClick={submit} disabled={!form.name.trim()}>Save</Button>
+          <Button onClick={closeCreateDialog}>{t('actions.cancel')}</Button>
+          <Button variant="contained" onClick={submit} disabled={!form.name.trim()}>{t('actions.save')}</Button>
         </DialogActions>
       </Dialog>
 
       <Dialog open={editOpen} onClose={() => setEditOpen(false)} fullWidth>
-        <DialogTitle>Edit Exercise</DialogTitle>
+        <DialogTitle>{t('exercises.editTitle')}</DialogTitle>
         <DialogContent>
           <ExerciseForm form={editForm} onChange={setEditForm} />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEditOpen(false)}>Cancel</Button>
+          <Button onClick={() => setEditOpen(false)}>{t('actions.cancel')}</Button>
           <Button
             variant="contained"
             onClick={async () => {
@@ -121,7 +123,7 @@ export default function Exercises() {
             }}
             disabled={!editForm.name.trim()}
           >
-            Save
+            {t('actions.save')}
           </Button>
         </DialogActions>
       </Dialog>

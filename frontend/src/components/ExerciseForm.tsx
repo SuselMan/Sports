@@ -3,6 +3,7 @@ import { Autocomplete, Stack, TextField, MenuItem, Box } from '@mui/material';
 import { MUSCLES_OPTIONS } from '../constants/muscles';
 import { Muscles } from '../../../docs/Shared.model';
 import { MusclesMap } from './MusclesMap';
+import { useTranslation } from 'react-i18next';
 
 export type ExerciseFormValue = {
   name: string;
@@ -17,6 +18,7 @@ export function ExerciseForm({
   form: ExerciseFormValue;
   onChange: (next: ExerciseFormValue) => void;
 }) {
+  const { t } = useTranslation();
   const toggleMuscle = (m: Muscles) => {
     const exists = form.muscles.includes(m);
     const next = exists ? form.muscles.filter((x) => x !== m) : [...form.muscles, m];
@@ -26,18 +28,18 @@ export function ExerciseForm({
   return (
     <Stack spacing={2} sx={{ mt: 1 }}>
       <TextField
-        label="Name"
+        label={t('exercises.name')}
         value={form.name}
         onChange={(e) => onChange({ ...form, name: e.target.value })}
       />
       <TextField
         select
-        label="Type"
+        label={t('exercises.type')}
         value={form.type}
         onChange={(e) => onChange({ ...form, type: e.target.value as 'REPS' | 'TIME' })}
       >
-        <MenuItem value="REPS">REPS</MenuItem>
-        <MenuItem value="TIME">TIME</MenuItem>
+        <MenuItem value="REPS">{t('exercises.kindReps')}</MenuItem>
+        <MenuItem value="TIME">{t('exercises.kindTime')}</MenuItem>
       </TextField>
 
       <Autocomplete
@@ -47,7 +49,7 @@ export function ExerciseForm({
         onChange={(_, value) => onChange({ ...form, muscles: value })}
         filterSelectedOptions
         renderInput={(params) => (
-          <TextField {...params} label="Muscles" placeholder="Search muscle..." />
+          <TextField {...params} label={t('exercises.muscles')} placeholder={t('exercises.muscles')} />
         )}
       />
 

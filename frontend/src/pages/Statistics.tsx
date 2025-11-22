@@ -5,6 +5,7 @@ import { useDateRangeStore } from '../store/filters';
 import { api } from '../api/client';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import dayjs from 'dayjs';
+import { useTranslation } from 'react-i18next';
 
 type Exercise = { _id: string; name: string };
 type ExerciseRecord = { exerciseId: string; kind: 'REPS'|'TIME'; repsAmount?: number; durationMs?: number; weight?: number; date: string };
@@ -15,6 +16,7 @@ export default function Statistics() {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [exerciseId, setExerciseId] = useState<string>('');
   const [exerciseRecords, setExerciseRecords] = useState<ExerciseRecord[]>([]);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const to = dayjs().endOf('day').toISOString();
@@ -77,18 +79,18 @@ export default function Statistics() {
   return (
     <Box>
       <PageHeader
-        title="Statistics"
+        title={t('statistics.title')}
         range={range}
         onChange={setRange}
         right={
-          <TextField fullWidth select size="small" label="Exercise" value={exerciseId} onChange={(e) => setExerciseId(e.target.value)}>
+          <TextField fullWidth select size="small" label={t('statistics.exerciseLabel')} value={exerciseId} onChange={(e) => setExerciseId(e.target.value)}>
             {exercises.map((ex) => (
               <MenuItem key={ex._id} value={ex._id}>{ex.name}</MenuItem>
             ))}
           </TextField>
         }
       />
-      <Typography variant="subtitle1" sx={{ mb: 1 }}>Exercise: Total reps per set</Typography>
+      <Typography variant="subtitle1" sx={{ mb: 1 }}>{t('statistics.chartRepsPerSet')}</Typography>
       <Box sx={{ height: { xs: 200, sm: 240 } }}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={repsSeries}>
@@ -100,7 +102,7 @@ export default function Statistics() {
           </LineChart>
         </ResponsiveContainer>
       </Box>
-      <Typography variant="subtitle1" sx={{ my: 1 }}>Exercise: Weight</Typography>
+      <Typography variant="subtitle1" sx={{ my: 1 }}>{t('statistics.chartWeight')}</Typography>
       <Box sx={{ height: { xs: 200, sm: 240 } }}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={weightSeries}>
@@ -112,7 +114,7 @@ export default function Statistics() {
           </LineChart>
         </ResponsiveContainer>
       </Box>
-      <Typography variant="subtitle1" sx={{ my: 1 }}>Exercise: Sets per day</Typography>
+      <Typography variant="subtitle1" sx={{ my: 1 }}>{t('statistics.chartSetsPerDay')}</Typography>
       <Box sx={{ height: { xs: 200, sm: 240 } }}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={setsPerDay}>
@@ -124,7 +126,7 @@ export default function Statistics() {
           </LineChart>
         </ResponsiveContainer>
       </Box>
-      <Typography variant="subtitle1" sx={{ my: 1 }}>Overall: Reps per day</Typography>
+      <Typography variant="subtitle1" sx={{ my: 1 }}>{t('statistics.chartOverallRepsPerDay')}</Typography>
       <Box sx={{ height: { xs: 200, sm: 240 } }}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={overallRepsPerDay}>

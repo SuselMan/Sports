@@ -3,6 +3,7 @@ import { Box, IconButton, Typography } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ReplayIcon from '@mui/icons-material/Replay';
 import { api } from '../api/client';
+import { useTranslation } from 'react-i18next';
 
 export type ExerciseRecord = {
   _id: string;
@@ -29,6 +30,7 @@ export function ExerciseRecordCard({
   onRepeated?: (rec: ExerciseRecord) => void;
   onOpen?: (rec: ExerciseRecord) => void;
 }) {
+  const { t } = useTranslation();
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
     await api.delete(`/exercises/records/${record._id}`);
@@ -74,14 +76,16 @@ export function ExerciseRecordCard({
         <ReplayIcon fontSize="small" />
       </IconButton>
       <Typography variant="subtitle2">
-        {record.exercise?.name || 'Exercise'}
+        {record.exercise?.name || t('records.fallbackExerciseName')}
       </Typography>
       <Typography variant="body2">
-        {record.kind === 'REPS' ? `reps: ${record.repsAmount ?? 0}` : `duration: ${record.durationMs ?? 0} ms`}
+        {record.kind === 'REPS'
+          ? `${t('records.repsLabel')}: ${record.repsAmount ?? 0}`
+          : `${t('records.durationLabel')}: ${record.durationMs ?? 0} ms`}
       </Typography>
       {!!record.exercise?.muscles?.length && (
         <Typography variant="caption" color="text.secondary" display="block">
-          muscles: {record.exercise.muscles.join(', ')}
+          {t('records.musclesLabel')}: {record.exercise.muscles.join(', ')}
         </Typography>
       )}
       <Typography variant="caption" display="block">

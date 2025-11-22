@@ -9,6 +9,7 @@ import { MusclesMap } from '../components/MusclesMap';
 import { Muscles } from '../../../docs/Shared.model';
 import { AddFab } from '../components/AddFab';
 import { Link as RouterLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useModalBackClose } from '../hooks/useModalBackClose';
 
 type Exercise = { _id: string; name: string; type: 'REPS' | 'TIME' };
@@ -27,6 +28,7 @@ type ExerciseRecord = {
 export default function Home() {
   const range = useDateRangeStore((s) => s.range);
   const setRange = useDateRangeStore((s) => s.setRange);
+  const { t } = useTranslation();
   const [records, setRecords] = useState<ExerciseRecord[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [open, setOpen] = useState(false);
@@ -121,13 +123,13 @@ export default function Home() {
         {!records.length && (
           exercises.length === 0 ? (
             <Typography variant="body2" color="text.secondary">
-              You don't have any exercises yet.{' '}
-              <RouterLink to="/exercises?createNew=true">Create your first one</RouterLink>{' '}
-              to start tracking.
+              {t('home.noExercisesPrefix')}{' '}
+              <RouterLink to="/exercises?createNew=true">{t('home.createFirstOne')}</RouterLink>{' '}
+              {t('home.noExercisesSuffix')}
             </Typography>
           ) : (
             <Typography variant="body2" color="text.secondary">
-              You haven't tracked any records for the chosen period
+              {t('home.noRecordsForPeriod')}
             </Typography>
           )
         )}
@@ -138,23 +140,23 @@ export default function Home() {
             )
         }
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth>
-        <DialogTitle>Add Exercise Record</DialogTitle>
+        <DialogTitle>{t('records.addTitle')}</DialogTitle>
         <DialogContent>
           <ExerciseRecordForm exercises={exercises} form={form} onChange={setForm} />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={submit}>Save</Button>
+          <Button onClick={() => setOpen(false)}>{t('actions.cancel')}</Button>
+          <Button variant="contained" onClick={submit}>{t('actions.save')}</Button>
         </DialogActions>
       </Dialog>
 
       <Dialog open={editOpen} onClose={() => setEditOpen(false)} fullWidth>
-        <DialogTitle>Edit Exercise Record</DialogTitle>
+        <DialogTitle>{t('records.editTitle')}</DialogTitle>
         <DialogContent>
           <ExerciseRecordForm exercises={exercises} form={form} onChange={setForm} />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEditOpen(false)}>Cancel</Button>
+          <Button onClick={() => setEditOpen(false)}>{t('actions.cancel')}</Button>
           <Button
             variant="contained"
             onClick={async () => {
@@ -176,7 +178,7 @@ export default function Home() {
               setRecords(resp.data.list);
             }}
           >
-            Save
+            {t('actions.save')}
           </Button>
         </DialogActions>
       </Dialog>

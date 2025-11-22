@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import { isMobile } from 'react-device-detect';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { useTranslation } from 'react-i18next';
 
 export type DateRangeValue = {
   from: string;
@@ -14,6 +15,7 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
   const from = dayjs(value.from);
   const to = dayjs(value.to);
   const today = dayjs();
+  const { t } = useTranslation();
   const periodDays = Math.max(1, to.startOf('day').diff(from.startOf('day'), 'day') + 1);
   const nextFrom = from.add(periodDays, 'day').startOf('day');
   const rightDisabled = nextFrom.isAfter(today.startOf('day'));
@@ -54,7 +56,7 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
         ) : (
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
-              label="From"
+              label={t('dateRange.from')}
               value={from}
               onChange={(d) => {
                 if (d) onChange({ from: d.startOf('day').toISOString(), to: to.toISOString() });
@@ -64,7 +66,7 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
               slotProps={{ textField: { size: 'small', fullWidth: true } }}
             />
             <DatePicker
-              label="To"
+              label={t('dateRange.to')}
               value={to}
               onChange={(d) => {
                 if (d) onChange({ from: from.toISOString(), to: d.endOf('day').toISOString() });
@@ -84,28 +86,28 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
           variant="outlined"
           onClick={() => onChange({ from: today.startOf('day').toISOString(), to: today.endOf('day').toISOString() })}
         >
-          Today
+          {t('dateRange.today')}
         </Button>
         <Button
           size="small"
           variant="outlined"
           onClick={() => onChange({ from: dayjs().subtract(7, 'day').startOf('day').toISOString(), to: today.endOf('day').toISOString() })}
         >
-          Last week
+          {t('dateRange.lastWeek')}
         </Button>
         <Button
           size="small"
           variant="outlined"
           onClick={() => onChange({ from: dayjs().subtract(30, 'day').startOf('day').toISOString(), to: today.endOf('day').toISOString() })}
         >
-          Last month
+          {t('dateRange.lastMonth')}
         </Button>
         <Button
           size="small"
           variant="outlined"
           onClick={() => onChange({ from: dayjs().subtract(365, 'day').startOf('day').toISOString(), to: today.endOf('day').toISOString() })}
         >
-          Last year
+          {t('dateRange.lastYear')}
         </Button>
       </Stack>
     </Stack>

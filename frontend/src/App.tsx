@@ -11,6 +11,7 @@ import Settings from './pages/Settings';
 import { useAuthStore } from './store/auth';
 import MenuIcon from '@mui/icons-material/Menu';
 import { storage } from './utils/storage';
+import { useTranslation } from 'react-i18next';
 
 function Protected({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.token);
@@ -26,6 +27,7 @@ export default function App() {
   const location = useLocation();
   const isDesktop = useMediaQuery(theme.breakpoints.up('sm'));
   const [open, setOpen] = React.useState(false);
+  const { t } = useTranslation();
 
   return (
     <ThemeProvider theme={theme}>
@@ -33,16 +35,16 @@ export default function App() {
       <AppBar position="sticky">
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            Sports
+            {t('appName')}
           </Typography>
           {token && isDesktop && (
             <Stack direction="row" spacing={1} alignItems="center">
-              <Button color={location.pathname === '/' ? 'secondary' : 'inherit'} component={RouterLink} to="/">Home</Button>
-              <Button color={location.pathname.startsWith('/exercises') ? 'secondary' : 'inherit'} component={RouterLink} to="/exercises">Exercises</Button>
-              <Button color={location.pathname.startsWith('/statistics') ? 'secondary' : 'inherit'} component={RouterLink} to="/statistics">Statistics</Button>
-              <Button color={location.pathname.startsWith('/settings') ? 'secondary' : 'inherit'} component={RouterLink} to="/settings">Settings</Button>
+              <Button color={location.pathname === '/' ? 'secondary' : 'inherit'} component={RouterLink} to="/">{t('nav.home')}</Button>
+              <Button color={location.pathname.startsWith('/exercises') ? 'secondary' : 'inherit'} component={RouterLink} to="/exercises">{t('nav.exercises')}</Button>
+              <Button color={location.pathname.startsWith('/statistics') ? 'secondary' : 'inherit'} component={RouterLink} to="/statistics">{t('nav.statistics')}</Button>
+              <Button color={location.pathname.startsWith('/settings') ? 'secondary' : 'inherit'} component={RouterLink} to="/settings">{t('nav.settings')}</Button>
               <Button color="inherit" onClick={() => { signOut(); navigate('/login'); }}>
-                Logout
+                {t('nav.logout')}
               </Button>
             </Stack>
           )}
@@ -54,19 +56,19 @@ export default function App() {
               <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
                 <List sx={{ width: 240 }}>
                   <ListItemButton component={RouterLink} to="/" onClick={() => setOpen(false)} selected={location.pathname === '/'}>
-                    <ListItemText primary="Home" />
+                    <ListItemText primary={t('nav.home')} />
                   </ListItemButton>
                   <ListItemButton component={RouterLink} to="/exercises" onClick={() => setOpen(false)} selected={location.pathname.startsWith('/exercises')}>
-                    <ListItemText primary="Exercises" />
+                    <ListItemText primary={t('nav.exercises')} />
                   </ListItemButton>
                   <ListItemButton component={RouterLink} to="/statistics" onClick={() => setOpen(false)} selected={location.pathname.startsWith('/statistics')}>
-                    <ListItemText primary="Statistics" />
+                    <ListItemText primary={t('nav.statistics')} />
                   </ListItemButton>
                   <ListItemButton component={RouterLink} to="/settings" onClick={() => setOpen(false)} selected={location.pathname.startsWith('/settings')}>
-                    <ListItemText primary="Settings" />
+                    <ListItemText primary={t('nav.settings')} />
                   </ListItemButton>
                   <ListItemButton onClick={() => { setOpen(false); signOut(); navigate('/login'); }}>
-                    <ListItemText primary="Logout" />
+                    <ListItemText primary={t('nav.logout')} />
                   </ListItemButton>
                 </List>
               </Drawer>
