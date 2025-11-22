@@ -8,6 +8,7 @@ import { ExerciseRecordForm, ExerciseRecordFormValue } from '../components/Exerc
 import { MusclesMap } from '../components/MusclesMap';
 import { Muscles } from '../../../docs/Shared.model';
 import { AddFab } from '../components/AddFab';
+import { Link as RouterLink } from 'react-router-dom';
 import { useModalBackClose } from '../hooks/useModalBackClose';
 
 type Exercise = { _id: string; name: string; type: 'REPS' | 'TIME' };
@@ -89,9 +90,11 @@ export default function Home() {
     <Box>
       <PageHeader title="Home" range={range} onChange={setRange} />
 
-      <Box sx={{ my: 2, height: { xs: 260, sm: 320 } }}>
-        <MusclesMap muscles={highlightedMuscles} onMuscleClicked={() => {}} />
-      </Box>
+      {!!records.length && (
+        <Box sx={{ my: 2, height: { xs: 260, sm: 320 } }}>
+          <MusclesMap muscles={highlightedMuscles} onMuscleClicked={() => {}} />
+        </Box>
+      )}
 
       <Stack spacing={1}>
         {records.map((r) => (
@@ -116,12 +119,24 @@ export default function Home() {
           />
         ))}
         {!records.length && (
-          <Typography variant="body2" color="text.secondary">No data for chosen period.</Typography>
+          exercises.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">
+              You don't have any exercises yet.{' '}
+              <RouterLink to="/exercises?createNew=true">Create your first one</RouterLink>{' '}
+              to start tracking.
+            </Typography>
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              You haven't tracked any records for the chosen period
+            </Typography>
+          )
         )}
       </Stack>
-
-      <AddFab onClick={() => { setForm({ exerciseId: '', kind: 'REPS', date: range.from }); setOpen(true); }} />
-
+        {
+            !!exercises.length && (
+                <AddFab onClick={() => { setForm({ exerciseId: '', kind: 'REPS', date: range.from }); setOpen(true); }} />
+            )
+        }
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth>
         <DialogTitle>Add Exercise Record</DialogTitle>
         <DialogContent>

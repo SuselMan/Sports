@@ -5,6 +5,7 @@ import { ExerciseForm } from '../components/ExerciseForm';
 import { ExerciseCard } from '../components/ExerciseCard';
 import { AddFab } from '../components/AddFab';
 import { useModalBackClose } from '../hooks/useModalBackClose';
+import { useSearchParams } from 'react-router-dom';
 
 type Exercise = { _id: string; name: string; type: 'REPS' | 'TIME'; muscles: string[] };
 
@@ -23,6 +24,7 @@ export default function Exercises() {
     type: 'REPS',
     muscles: [],
   });
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const load = async () => {
     const resp = await api.get('/exercises', { params: { page: 1, pageSize: 200, sortBy: 'name', sortOrder: 'asc' } });
@@ -33,9 +35,27 @@ export default function Exercises() {
     load();
   }, []);
 
+  // Auto-open create dialog if ?createNew=true is present
+  useEffect(() => {
+    if (searchParams.get('createNew') === 'true') {
+      setOpen(true);
+    }
+    // run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const closeCreateDialog = () => {
+    setOpen(false);
+    if (searchParams.get('createNew') === 'true') {
+      const params = new URLSearchParams(searchParams);
+      params.delete('createNew');
+      setSearchParams(params, { replace: true });
+    }
+  };
+
   const submit = async () => {
     await api.post('/exercises', { name: form.name, type: form.type, muscles: form.muscles });
-    setOpen(false);
+    closeCreateDialog();
     setForm({ name: '', type: 'REPS', muscles: [] });
     await load();
   };
@@ -69,13 +89,13 @@ export default function Exercises() {
         {!list.length && <Typography variant="body2" color="text.secondary">No data for chosen period.</Typography>}
       </Stack>
 
-      <Dialog open={open} onClose={() => setOpen(false)} fullWidth>
+      <Dialog open={open} onClose={closeCreateDialog} fullWidth>
         <DialogTitle>Add Exercise</DialogTitle>
         <DialogContent>
           <ExerciseForm form={form} onChange={setForm} />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
+          <Button onClick={closeCreateDialog}>Cancel</Button>
           <Button variant="contained" onClick={submit} disabled={!form.name.trim()}>Save</Button>
         </DialogActions>
       </Dialog>
