@@ -6,6 +6,24 @@ import { api } from '../api/client';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 import type { ExerciseRecordResponse } from '../../../shared/Exercise.model';
+import durationPlugin from 'dayjs/plugin/duration';
+
+dayjs.extend(durationPlugin);
+
+function formatDuration(ms: number): string {
+  if (!Number.isFinite(ms) || ms <= 0) return `0sec`;
+  const d = dayjs.duration(ms, 'milliseconds');
+  const hours = Math.floor(d.asHours());
+  const minutes = d.minutes();
+  const seconds = d.seconds();
+  if (hours > 0) {
+    return `${hours}h ${minutes}m ${seconds}sec`;
+  }
+  if (minutes > 0) {
+    return `${minutes}m ${seconds}sec`;
+  }
+  return `${seconds}sec`;
+}
 
 export function ExerciseRecordCard({
   record,
@@ -73,7 +91,7 @@ export function ExerciseRecordCard({
       <Typography variant="body2">
         {record.kind === 'REPS'
           ? `${t('records.repsLabel')}: ${record.repsAmount ?? 0}`
-          : `${t('records.durationLabel')}: ${record.durationMs ?? 0} ms`}
+          : `${t('records.durationLabel')}: ${formatDuration(record.durationMs ?? 0)}`}
       </Typography>
       {showMuscles && !!record.exercise?.muscles?.length && (
         <Typography variant="caption" color="text.secondary" display="block">

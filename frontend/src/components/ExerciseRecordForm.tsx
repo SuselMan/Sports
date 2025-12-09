@@ -79,10 +79,20 @@ export function ExerciseRecordForm({
         />
       ) : (
         <TextField
-          label={t('records.durationMs')}
+          label={t('records.durationMin')}
           type="number"
-          value={form.durationMs || ''}
-          onChange={(e) => onChange({ ...form, durationMs: e.target.value })}
+          value={form.durationMs ? String(Math.round(Number(form.durationMs) / 60000)) : ''}
+          onChange={(e) => {
+            const minutesStr = e.target.value;
+            if (minutesStr === '') {
+              onChange({ ...form, durationMs: undefined });
+              return;
+            }
+            const minutes = Number(minutesStr);
+            if (Number.isFinite(minutes) && minutes >= 0) {
+              onChange({ ...form, durationMs: String(Math.round(minutes * 60000)) });
+            }
+          }}
         />
       )}
       <TextField
