@@ -1,29 +1,18 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from '@mui/material';
-import { PageHeader } from '../components/PageHeader';
-import { api } from '../api/client';
-import { useDateRangeStore } from '../store/filters';
-import { ExerciseRecordCard } from '../components/ExerciseRecordCard';
-import { ExerciseRecordForm, ExerciseRecordFormValue } from '../components/ExerciseRecordForm';
-import { MusclesMap } from '../components/MusclesMap';
-import { Muscles } from '../../../docs/Shared.model';
-import { AddFab } from '../components/AddFab';
+import { PageHeader } from '../../components/PageHeader';
+import { api } from '../../api/client';
+import { useDateRangeStore } from '../../store/filters';
+import { ExerciseRecordCard } from '../../components/ExerciseRecordCard';
+import { ExerciseGroupCard } from '../../components/ExerciseGroupCard';
+import { ExerciseRecordForm, ExerciseRecordFormValue } from '../../components/ExerciseRecordForm';
+import { MusclesMap } from '../../components/MusclesMap';
+import { Muscles } from '../../../../docs/Shared.model';
+import { AddFab } from '../../components/AddFab';
 import { Link as RouterLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useModalBackClose } from '../hooks/useModalBackClose';
-
-type Exercise = { _id: string; name: string; type: 'REPS' | 'TIME' };
-type ExerciseRecord = {
-  _id: string;
-  kind: 'REPS' | 'TIME';
-  exerciseId: string;
-  exercise?: { _id: string; name: string; type: 'REPS' | 'TIME'; muscles: string[] };
-  repsAmount?: number;
-  durationMs?: number;
-  date: string;
-  note?: string;
-  weight?: number;
-};
+import { useModalBackClose } from '../../hooks/useModalBackClose';
+import type { Exercise, ExerciseRecord, RecordGroup } from './model';
 
 export default function Home() {
   const range = useDateRangeStore((s) => s.range);
@@ -55,6 +44,21 @@ export default function Home() {
       setRecords(resp.data.list);
     })();
   }, [range]);
+
+  const groups = useMemo<RecordGroup[]>(() => {
+    const order: string[] = [];
+    const map = new Map<string, RecordGroup>();
+    records.forEach((r) => {
+      const key = r.exerciseId;
+      if (!map.has(key)) {
+        order.push(key);
+        map.set(key, { exercise: r.exercise, records: [r] });
+      } else {
+        map.get(key)!.records.push(r);
+      }
+    });
+    return order.map((k) => map.get(k)!);
+  }, [records]);
 
   const highlightedMuscles = useMemo(
     () =>
@@ -99,27 +103,50 @@ export default function Home() {
       )}
 
       <Stack spacing={1}>
-        {records.map((r) => (
-          <ExerciseRecordCard
-            key={r._id}
-            record={r}
-            onDeleted={(id) => setRecords((prev) => prev.filter((x) => x._id !== id))}
-            onRepeated={(rec) => setRecords((prev) => [rec, ...prev])}
-            onOpen={(rec) => {
-              setEditId(rec._id);
-              setForm({
-                exerciseId: rec.exerciseId,
-                kind: rec.kind,
-                repsAmount: rec.kind === 'REPS' ? String(rec.repsAmount ?? '') : undefined,
-                durationMs: rec.kind === 'TIME' ? String(rec.durationMs ?? '') : undefined,
-                weight: rec.weight != null ? String(rec.weight) : undefined,
-                note: rec.note,
-                date: rec.date,
-              });
-              setEditOpen(true);
-            }}
-          />
-        ))}
+        {groups.map((g) =>
+          g.records.length === 1 ? (
+            <ExerciseRecordCard
+              key={g.records[0]._id}
+              record={g.records[0]}
+              onDeleted={(id) => setRecords((prev) => prev.filter((x) => x._id !== id))}
+              onRepeated={(rec) => setRecords((prev) => [rec, ...prev])}
+              onOpen={(rec) => {
+                setEditId(rec._id);
+                setForm({
+                  exerciseId: rec.exerciseId,
+                  kind: rec.kind,
+                  repsAmount: rec.kind === 'REPS' ? String(rec.repsAmount ?? '') : undefined,
+                  durationMs: rec.kind === 'TIME' ? String(rec.durationMs ?? '') : undefined,
+                  weight: rec.weight != null ? String(rec.weight) : undefined,
+                  note: rec.note,
+                  date: rec.date,
+                });
+                setEditOpen(true);
+              }}
+            />
+          ) : (
+            <ExerciseGroupCard
+              key={g.exercise?._id || g.records[0]._id}
+              exercise={g.exercise}
+              records={g.records}
+              onDeleted={(id) => setRecords((prev) => prev.filter((x) => x._id !== id))}
+              onRepeated={(rec) => setRecords((prev) => [rec, ...prev])}
+              onOpen={(rec) => {
+                setEditId(rec._id);
+                setForm({
+                  exerciseId: rec.exerciseId,
+                  kind: rec.kind,
+                  repsAmount: rec.kind === 'REPS' ? String(rec.repsAmount ?? '') : undefined,
+                  durationMs: rec.kind === 'TIME' ? String(rec.durationMs ?? '') : undefined,
+                  weight: rec.weight != null ? String(rec.weight) : undefined,
+                  note: rec.note,
+                  date: rec.date,
+                });
+                setEditOpen(true);
+              }}
+            />
+          )
+        )}
         {!records.length && (
           exercises.length === 0 ? (
             <Typography variant="body2" color="text.secondary">

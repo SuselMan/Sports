@@ -77,6 +77,11 @@ const resources = {
         type: 'Type',
         muscles: 'Muscles',
       },
+      group: {
+        total: 'total',
+        min: 'min',
+        h: 'h',
+      },
     },
   },
   ru: {
@@ -152,6 +157,11 @@ const resources = {
         type: 'Тип',
         muscles: 'Мышцы',
       },
+      group: {
+        total: 'итого',
+        min: 'мин',
+        h: 'ч',
+      },
     },
   },
   es: { common: { appName: 'Deportes', nav: { home: 'Inicio', exercises: 'Ejercicios', statistics: 'Estadísticas', settings: 'Ajustes', logout: 'Salir' }, settings: { title: 'Ajustes', theme: 'Tema', light: 'Claro', dark: 'Oscuro', language: 'Idioma' }, home: { noExercisesPrefix: 'Aún no tienes ejercicios.', createFirstOne: 'Crea el primero', noExercisesSuffix: 'para empezar a registrar.', noRecordsForPeriod: 'No has registrado datos para el período elegido' }, dateRange: { from: 'Desde', to: 'Hasta', today: 'Hoy', lastWeek: 'Última semana', lastMonth: 'Último mes', lastYear: 'Último año' }, exercises: { title: 'Ejercicios', addTitle: 'Agregar ejercicio', editTitle: 'Editar ejercicio', name: 'Nombre', type: 'Tipo', muscles: 'Músculos', kindReps: 'REPS', kindTime: 'TIME', delete: 'Eliminar' }, records: { addTitle: 'Agregar registro', editTitle: 'Editar registro', exercise: 'Ejercicio', date: 'Fecha', reps: 'Repeticiones', durationMs: 'Duración (ms)', weightKg: 'Peso (kg)', note: 'Nota', repsLabel: 'reps', durationLabel: 'duración', musclesLabel: 'músculos', fallbackExerciseName: 'Ejercicio' }, actions: { cancel: 'Cancelar', save: 'Guardar' }, statistics: { title: 'Estadísticas', exerciseLabel: 'Ejercicio', chartRepsPerSet: 'Ejercicio: Repeticiones por serie', chartWeight: 'Ejercicio: Peso', chartSetsPerDay: 'Ejercicio: Series por día', chartOverallRepsPerDay: 'Total: Repeticiones por día' }, commonTexts: { noDataForPeriod: 'No hay datos para el período elegido.', type: 'Tipo', muscles: 'Músculos' } } },
@@ -186,5 +196,7 @@ if (storedLang) {
 }
 
 export default i18n;
+
+
 
 
