@@ -4,6 +4,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ReplayIcon from '@mui/icons-material/Replay';
 import { api } from '../api/client';
 import { useTranslation } from 'react-i18next';
+import dayjs from 'dayjs';
 
 export type ExerciseRecord = {
   _id: string;
@@ -24,11 +25,15 @@ export function ExerciseRecordCard({
   onDeleted,
   onRepeated,
   onOpen,
+  showMuscles = true,
+  showName = true,
 }: {
   record: ExerciseRecord;
   onDeleted?: (id: string) => void;
   onRepeated?: (rec: ExerciseRecord) => void;
   onOpen?: (rec: ExerciseRecord) => void;
+  showMuscles?: boolean;
+  showName?: boolean;
 }) {
   const { t } = useTranslation();
   const handleDelete = async (e: React.MouseEvent) => {
@@ -75,21 +80,23 @@ export function ExerciseRecordCard({
       >
         <ReplayIcon fontSize="small" />
       </IconButton>
-      <Typography variant="subtitle2">
-        {record.exercise?.name || t('records.fallbackExerciseName')}
-      </Typography>
+      {showName && (
+        <Typography variant="subtitle2">
+          {record.exercise?.name || t('records.fallbackExerciseName')}
+        </Typography>
+      )}
       <Typography variant="body2">
         {record.kind === 'REPS'
           ? `${t('records.repsLabel')}: ${record.repsAmount ?? 0}`
           : `${t('records.durationLabel')}: ${record.durationMs ?? 0} ms`}
       </Typography>
-      {!!record.exercise?.muscles?.length && (
+      {showMuscles && !!record.exercise?.muscles?.length && (
         <Typography variant="caption" color="text.secondary" display="block">
           {t('records.musclesLabel')}: {record.exercise.muscles.join(', ')}
         </Typography>
       )}
       <Typography variant="caption" display="block">
-        {new Date(record.date).toLocaleString()}
+        {dayjs(record.date).format('L LT')}
       </Typography>
     </Box>
   );

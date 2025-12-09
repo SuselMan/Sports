@@ -3,6 +3,7 @@ import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuIte
 import { PageHeader } from '../components/PageHeader';
 import { api } from '../api/client';
 import { useDateRangeStore } from '../store/filters';
+import dayjs from 'dayjs';
 
 type Metric = { _id: string; name: string; unit: string };
 type MetricRecord = { _id: string; metricId: string; value: number; date: string; note?: string };
@@ -15,7 +16,7 @@ export default function Metrics() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<{ metricId: string; value?: string; date: string; note?: string }>({
     metricId: '',
-    date: new Date().toISOString(),
+    date: dayjs().toISOString(),
   });
 
   useEffect(() => {
@@ -42,7 +43,7 @@ export default function Metrics() {
       note: form.note || undefined,
     });
     setOpen(false);
-    setForm({ metricId: '', date: new Date().toISOString() });
+    setForm({ metricId: '', date: dayjs().toISOString() });
     const resp = await api.get('/metrics/records', {
       params: { page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to },
     });
@@ -62,7 +63,7 @@ export default function Metrics() {
         {records.map((r) => (
           <Box key={r._id} sx={{ p: { xs: 1, sm: 1.5 }, border: '1px solid #eee', borderRadius: 1 }}>
             <Typography variant="body2">{r.value}</Typography>
-            <Typography variant="caption">{new Date(r.date).toLocaleString()}</Typography>
+            <Typography variant="caption">{dayjs(r.date).format('L LT')}</Typography>
           </Box>
         ))}
       </Stack>

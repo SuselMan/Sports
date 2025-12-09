@@ -45,14 +45,14 @@ export default function Statistics() {
     () =>
       exerciseRecords
         .filter((r) => r.exerciseId === exerciseId && r.kind === 'REPS' && typeof r.repsAmount === 'number')
-        .map((r) => ({ x: new Date(r.date).toLocaleDateString(), y: r.repsAmount as number })),
+        .map((r) => ({ x: dayjs(r.date).format('L'), y: r.repsAmount as number })),
     [exerciseRecords, exerciseId],
   );
   const weightSeries = useMemo(
     () =>
       exerciseRecords
         .filter((r) => r.exerciseId === exerciseId && typeof r.weight === 'number')
-        .map((r) => ({ x: new Date(r.date).toLocaleDateString(), y: r.weight as number })),
+        .map((r) => ({ x: dayjs(r.date).format('L'), y: r.weight as number })),
     [exerciseRecords, exerciseId],
   );
   const setsPerDay = useMemo(() => {
@@ -60,7 +60,7 @@ export default function Statistics() {
     exerciseRecords
       .filter((r) => r.exerciseId === exerciseId)
       .forEach((r) => {
-        const key = new Date(r.date).toLocaleDateString();
+        const key = dayjs(r.date).format('L');
         map.set(key, (map.get(key) || 0) + 1);
       });
     return Array.from(map.entries()).map(([x, y]) => ({ x, y }));
@@ -70,7 +70,7 @@ export default function Statistics() {
     exerciseRecords
       .filter((r) => r.kind === 'REPS' && typeof r.repsAmount === 'number')
       .forEach((r) => {
-        const key = new Date(r.date).toLocaleDateString();
+        const key = dayjs(r.date).format('L');
         map.set(key, (map.get(key) || 0) + (r.repsAmount as number));
       });
     return Array.from(map.entries()).map(([x, y]) => ({ x, y }));

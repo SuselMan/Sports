@@ -24,11 +24,15 @@ export function ExerciseGroupCard({
 
   const isReps = records[0]?.kind === 'REPS';
   const summary = React.useMemo(() => {
+    const tooMany = records.length > 5;
     if (isReps) {
       const parts = records
         .map((r) => (typeof r.repsAmount === 'number' ? r.repsAmount : 0))
         .filter((v) => typeof v === 'number');
       const total = parts.reduce((a, b) => a + b, 0);
+      if (tooMany) {
+        return `${total} ${t('group.total')}`;
+      }
       return `${parts.join(' + ')} (${total} ${t('group.total')})`;
     } else {
       const minutes = records
@@ -41,6 +45,9 @@ export function ExerciseGroupCard({
         totalHours > 0
           ? `${totalHours}${t('group.h')} ${remMin > 0 ? `${remMin}${t('group.min')} ` : ''}${t('group.total')}`
           : `${totalMin}${t('group.min')} ${t('group.total')}`;
+      if (tooMany) {
+        return totalStr;
+      }
       return `${minutes.map((m) => `${m}${t('group.min')}`).join(' + ')} (${totalStr})`;
     }
   }, [isReps, records, t]);
@@ -65,7 +72,7 @@ export function ExerciseGroupCard({
         <Box sx={{ mt: 1, pl: 2 }}>
           <Stack spacing={1}>
             {records.map((r) => (
-              <ExerciseRecordCard key={r._id} record={r} onDeleted={onDeleted} onRepeated={onRepeated} onOpen={onOpen} />
+              <ExerciseRecordCard key={r._id} record={r} onDeleted={onDeleted} onRepeated={onRepeated} onOpen={onOpen} showMuscles={false} showName={false} />
             ))}
           </Stack>
         </Box>
