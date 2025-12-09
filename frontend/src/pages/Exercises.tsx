@@ -7,20 +7,20 @@ import { AddFab } from '../components/AddFab';
 import { useModalBackClose } from '../hooks/useModalBackClose';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-
-type Exercise = { _id: string; name: string; type: 'REPS' | 'TIME'; muscles: string[] };
+import { Exercise, ExerciseType } from "../../../shared/Exercise.model";
+import type { Muscles } from "../../../shared/Shared.model";
 
 export default function Exercises() {
   const [list, setList] = useState<Exercise[]>([]);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<{ name: string; type: 'REPS' | 'TIME'; muscles: string[] }>({
+  const [form, setForm] = useState<{ name: string; type: ExerciseType; muscles: Muscles[] }>({
     name: '',
     type: 'REPS',
     muscles: [],
   });
   const [editOpen, setEditOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<{ name: string; type: 'REPS' | 'TIME'; muscles: string[] }>({
+  const [editForm, setEditForm] = useState<{ name: string; type: ExerciseType; muscles: Muscles[] }>({
     name: '',
     type: 'REPS',
     muscles: [],

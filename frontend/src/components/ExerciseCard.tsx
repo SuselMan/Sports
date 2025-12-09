@@ -2,8 +2,7 @@ import React from 'react';
 import { Box, IconButton, Stack, Typography, Tooltip } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/DeleteOutline';
 import { useTranslation } from 'react-i18next';
-
-export type Exercise = { _id: string; name: string; type: 'REPS' | 'TIME'; muscles: string[] };
+import type { Exercise } from '../../../shared/Exercise.model';
 
 export function ExerciseCard({
   exercise,

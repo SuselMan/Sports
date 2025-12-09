@@ -1,15 +1,4 @@
-export type PaginationRequestData = {
-  pageSize: number;
-  page: number; // 1-based
-  sortBy?: 'date' | 'name';
-  sortOrder?: 'asc' | 'desc';
-};
-
-export type PaginationResponseData = {
-  pageSize: number;
-  page: number;
-  total: number;
-};
+import type { PaginationRequestData } from '../../../shared/Shared.model';
 
 export function getPagination(req: any): PaginationRequestData {
   const page = Math.max(1, Number(req.query.page || 1));

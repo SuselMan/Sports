@@ -3,7 +3,7 @@ import { Box, Stack, Typography, IconButton } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { ExerciseRecordCard } from './ExerciseRecordCard';
-import type { Exercise, ExerciseRecord } from '../pages/Home/model';
+import type { Exercise, ExerciseRecordResponse } from '../../../shared/Exercise.model';
 import { useTranslation } from 'react-i18next';
 
 export function ExerciseGroupCard({
@@ -14,10 +14,10 @@ export function ExerciseGroupCard({
   onOpen,
 }: {
   exercise?: Exercise;
-  records: ExerciseRecord[];
+  records: ExerciseRecordResponse[];
   onDeleted?: (id: string) => void;
-  onRepeated?: (rec: ExerciseRecord) => void;
-  onOpen?: (rec: ExerciseRecord) => void;
+  onRepeated?: (rec: ExerciseRecordResponse) => void;
+  onOpen?: (rec: ExerciseRecordResponse) => void;
 }) {
   const [isOpen, setIsOpen] = React.useState(false);
   const { t } = useTranslation();

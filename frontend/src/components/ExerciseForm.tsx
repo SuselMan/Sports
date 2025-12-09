@@ -1,14 +1,14 @@
 import React from 'react';
 import { Autocomplete, Stack, TextField, MenuItem, Box } from '@mui/material';
 import { MUSCLES_OPTIONS } from '../constants/muscles';
-import { Muscles } from '../../../docs/Shared.model';
+import { Muscles } from '../../../shared/Shared.model';
 import { MusclesMap } from './MusclesMap';
 import { useTranslation } from 'react-i18next';
 
 export type ExerciseFormValue = {
   name: string;
   type: 'REPS' | 'TIME';
-  muscles: string[];
+  muscles: Muscles[];
 };
 
 export function ExerciseForm({
@@ -55,7 +55,7 @@ export function ExerciseForm({
 
       <Box sx={{ height: { xs: 260, sm: 320 }, border: '1px solid #eee', borderRadius: 1 }}>
         <MusclesMap
-          muscles={form.muscles as unknown as Muscles[]}
+          muscles={form.muscles}
           onMuscleClicked={(m: Muscles) => toggleMuscle(m)}
         />
       </Box>

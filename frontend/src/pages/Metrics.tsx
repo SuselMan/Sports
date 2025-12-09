@@ -4,14 +4,13 @@ import { PageHeader } from '../components/PageHeader';
 import { api } from '../api/client';
 import { useDateRangeStore } from '../store/filters';
 import dayjs from 'dayjs';
-
-type Metric = { _id: string; name: string; unit: string };
-type MetricRecord = { _id: string; metricId: string; value: number; date: string; note?: string };
+import type { Metric, MetricRecordResponse, MetricListResponse, MetricRecordListResponse } from '../../../shared/Metrics.model';
+import type { AxiosResponse } from 'axios';
 
 export default function Metrics() {
   const range = useDateRangeStore((s) => s.range);
   const setRange = useDateRangeStore((s) => s.setRange);
-  const [records, setRecords] = useState<MetricRecord[]>([]);
+  const [records, setRecords] = useState<MetricRecordResponse[]>([]);
   const [metrics, setMetrics] = useState<Metric[]>([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<{ metricId: string; value?: string; date: string; note?: string }>({
@@ -21,14 +20,14 @@ export default function Metrics() {
 
   useEffect(() => {
     (async () => {
-      const met = await api.get('/metrics', { params: { page: 1, pageSize: 100, sortBy: 'name', sortOrder: 'asc' } });
+      const met: AxiosResponse<MetricListResponse> = await api.get('/metrics', { params: { page: 1, pageSize: 100, sortBy: 'name', sortOrder: 'asc' } });
       setMetrics(met.data.list);
     })();
   }, []);
 
   useEffect(() => {
     (async () => {
-      const resp = await api.get('/metrics/records', {
+      const resp: AxiosResponse<MetricRecordListResponse> = await api.get('/metrics/records', {
         params: { page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to },
       });
       setRecords(resp.data.list);

@@ -6,16 +6,14 @@ import { api } from '../api/client';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
-
-type Exercise = { _id: string; name: string };
-type ExerciseRecord = { exerciseId: string; kind: 'REPS'|'TIME'; repsAmount?: number; durationMs?: number; weight?: number; date: string };
+import type { Exercise, ExerciseRecordResponse } from '../../../shared/Exercise.model';
 
 export default function Statistics() {
   const range = useDateRangeStore((s) => s.range);
   const setRange = useDateRangeStore((s) => s.setRange);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [exerciseId, setExerciseId] = useState<string>('');
-  const [exerciseRecords, setExerciseRecords] = useState<ExerciseRecord[]>([]);
+  const [exerciseRecords, setExerciseRecords] = useState<ExerciseRecordResponse[]>([]);
   const { t } = useTranslation();
 
   useEffect(() => {

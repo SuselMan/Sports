@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 import { ExerciseModel, ExerciseRecordModel } from '../models/Exercise';
 import { AuthedRequest } from '../auth';
 import { buildSort, getPagination } from '../utils/pagination';
+import type { ExerciseType } from '../../../shared/Exercise.model';
+import type { Muscles } from '../../../shared/Shared.model';
 
 export const exercisesRouter = Router();
 
@@ -10,7 +12,7 @@ export const exercisesRouter = Router();
 exercisesRouter.post('/', async (req: AuthedRequest, res) => {
   try {
     const userId = req.userId!;
-    const { name, type, muscles } = req.body as { name: string; type: 'REPS' | 'TIME'; muscles: string[] };
+    const { name, type, muscles } = req.body as { name: string; type: ExerciseType; muscles: Muscles[] };
     const created = await ExerciseModel.create({ userId, name, type, muscles });
     res.json(created);
   } catch (e: any) {
@@ -37,7 +39,7 @@ exercisesRouter.put('/:exerciseId', async (req: AuthedRequest, res) => {
     const userId = new mongoose.Types.ObjectId(req.userId!);
     const { exerciseId } = req.params;
     const _id = new mongoose.Types.ObjectId(exerciseId);
-    const { name, type, muscles } = req.body as { name?: string; type?: 'REPS' | 'TIME'; muscles?: string[] };
+    const { name, type, muscles } = req.body as { name?: string; type?: ExerciseType; muscles?: Muscles[] };
     const update: any = {};
     if (name != null) update.name = name;
     if (type != null) update.type = type;

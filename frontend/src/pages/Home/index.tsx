@@ -7,18 +7,24 @@ import { ExerciseRecordCard } from '../../components/ExerciseRecordCard';
 import { ExerciseGroupCard } from '../../components/ExerciseGroupCard';
 import { ExerciseRecordForm, ExerciseRecordFormValue } from '../../components/ExerciseRecordForm';
 import { MusclesMap } from '../../components/MusclesMap';
-import { Muscles } from '../../../../docs/Shared.model';
+import { Muscles } from '../../../../shared/Shared.model';
 import { AddFab } from '../../components/AddFab';
 import { Link as RouterLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useModalBackClose } from '../../hooks/useModalBackClose';
-import type { Exercise, ExerciseRecord, RecordGroup } from './model';
+import {
+    Exercise,
+    ExerciseRecordResponse,
+    ExerciseRecordsListResponse,
+    ExerciseListResponse,
+} from '../../../../shared/Exercise.model';
+import {AxiosResponse} from "axios";
 
 export default function Home() {
   const range = useDateRangeStore((s) => s.range);
   const setRange = useDateRangeStore((s) => s.setRange);
   const { t } = useTranslation();
-  const [records, setRecords] = useState<ExerciseRecord[]>([]);
+  const [records, setRecords] = useState<ExerciseRecordResponse[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -31,23 +37,23 @@ export default function Home() {
 
   useEffect(() => {
     (async () => {
-      const ex = await api.get('/exercises', { params: { page: 1, pageSize: 100, sortBy: 'name', sortOrder: 'asc' } });
+      const ex: AxiosResponse<ExerciseListResponse> = await api.get('/exercises', { params: { page: 1, pageSize: 100, sortBy: 'name', sortOrder: 'asc' } });
       setExercises(ex.data.list);
     })();
   }, []);
 
   useEffect(() => {
     (async () => {
-      const resp = await api.get('/exercises/records', {
+      const resp: AxiosResponse<ExerciseRecordsListResponse> = await api.get('/exercises/records', {
         params: { page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to },
       });
       setRecords(resp.data.list);
     })();
   }, [range]);
 
-  const groups = useMemo<RecordGroup[]>(() => {
+  const groups = useMemo<{ exercise: Exercise; records: ExerciseRecordResponse[] }[]>(() => {
     const order: string[] = [];
-    const map = new Map<string, RecordGroup>();
+    const map = new Map<string, { exercise: Exercise; records: ExerciseRecordResponse[] }>();
     records.forEach((r) => {
       const key = r.exerciseId;
       if (!map.has(key)) {

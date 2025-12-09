@@ -5,20 +5,7 @@ import ReplayIcon from '@mui/icons-material/Replay';
 import { api } from '../api/client';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
-
-export type ExerciseRecord = {
-  _id: string;
-  kind: 'REPS' | 'TIME';
-  exerciseId: string;
-  exercise?: { _id: string; name: string; type: 'REPS' | 'TIME'; muscles: string[] };
-  repsAmount?: number;
-  durationMs?: number;
-  date: string;
-  note?: string;
-  weight?: number;
-  rpe?: number;
-  restSec?: number;
-};
+import type { ExerciseRecordResponse } from '../../../shared/Exercise.model';
 
 export function ExerciseRecordCard({
   record,
@@ -28,10 +15,10 @@ export function ExerciseRecordCard({
   showMuscles = true,
   showName = true,
 }: {
-  record: ExerciseRecord;
+  record: ExerciseRecordResponse;
   onDeleted?: (id: string) => void;
-  onRepeated?: (rec: ExerciseRecord) => void;
-  onOpen?: (rec: ExerciseRecord) => void;
+  onRepeated?: (rec: ExerciseRecordResponse) => void;
+  onOpen?: (rec: ExerciseRecordResponse) => void;
   showMuscles?: boolean;
   showName?: boolean;
 }) {
@@ -51,11 +38,9 @@ export function ExerciseRecordCard({
       date: record.date,
       note: record.note,
       weight: record.weight,
-      rpe: record.rpe,
-      restSec: record.restSec,
     });
-    const created = resp.data as ExerciseRecord;
-    const withExercise: ExerciseRecord = { ...created, exercise: record.exercise };
+    const created = resp.data as ExerciseRecordResponse;
+    const withExercise: ExerciseRecordResponse = { ...created, exercise: record.exercise! };
     onRepeated?.(withExercise);
   };
 

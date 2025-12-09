@@ -3,13 +3,14 @@ import mongoose from 'mongoose';
 import { MetricModel, MetricRecordModel } from '../models/Metric';
 import { AuthedRequest } from '../auth';
 import { buildSort, getPagination } from '../utils/pagination';
+import type { Unit } from '../../../shared/Metrics.model';
 
 export const metricsRouter = Router();
 
 metricsRouter.post('/', async (req: AuthedRequest, res) => {
   try {
     const userId = req.userId!;
-    const { name, unit } = req.body as { name: string; unit: string };
+    const { name, unit } = req.body as { name: string; unit: Unit };
     const created = await MetricModel.create({ userId, name, unit });
     res.json(created);
   } catch (e: any) {

@@ -1,7 +1,5 @@
 import mongoose from 'mongoose';
 
-export type ExerciseType = 'REPS' | 'TIME';
-
 const exerciseSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
