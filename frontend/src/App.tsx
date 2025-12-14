@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { CssBaseline, ThemeProvider, createTheme, Container, AppBar, Toolbar, Typography, Button, Stack, IconButton, Drawer, List, ListItemButton, ListItemText, useMediaQuery } from '@mui/material';
+import { CssBaseline, ThemeProvider, createTheme, Container, AppBar, Toolbar, Typography, Stack, IconButton, Drawer, List, ListItemButton, ListItemText, useMediaQuery } from '@mui/material';
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import Login from './pages/Login';
 import Home from './pages/Home';
@@ -12,6 +12,7 @@ import { useAuthStore } from './store/auth';
 import MenuIcon from '@mui/icons-material/Menu';
 import { storage } from './utils/storage';
 import { useTranslation } from 'react-i18next';
+import Button from '@uikit/components/Button/Button';
 
 function Protected({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.token);
@@ -39,11 +40,11 @@ export default function App() {
           </Typography>
           {token && isDesktop && (
             <Stack direction="row" spacing={1} alignItems="center">
-              <Button color={location.pathname === '/' ? 'secondary' : 'inherit'} component={RouterLink} to="/">{t('nav.home')}</Button>
-              <Button color={location.pathname.startsWith('/exercises') ? 'secondary' : 'inherit'} component={RouterLink} to="/exercises">{t('nav.exercises')}</Button>
-              <Button color={location.pathname.startsWith('/statistics') ? 'secondary' : 'inherit'} component={RouterLink} to="/statistics">{t('nav.statistics')}</Button>
-              <Button color={location.pathname.startsWith('/settings') ? 'secondary' : 'inherit'} component={RouterLink} to="/settings">{t('nav.settings')}</Button>
-              <Button color="inherit" onClick={() => { signOut(); navigate('/login'); }}>
+              <Button onClick={() => navigate('/')}>{t('nav.home')}</Button>
+              <Button onClick={() => navigate('/exercises')}>{t('nav.exercises')}</Button>
+              <Button onClick={() => navigate('/statistics')}>{t('nav.statistics')}</Button>
+              <Button onClick={() => navigate('/settings')}>{t('nav.settings')}</Button>
+              <Button onClick={() => { signOut(); navigate('/login'); }}>
                 {t('nav.logout')}
               </Button>
             </Stack>

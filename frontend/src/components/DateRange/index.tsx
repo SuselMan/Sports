@@ -1,5 +1,6 @@
 import React from 'react';
-import { Stack, TextField, IconButton, Button } from '@mui/material';
+import { Stack, TextField, IconButton } from '@mui/material';
+import Button from '@uikit/components/Button/Button';
 import dayjs from 'dayjs';
 import { isMobile } from 'react-device-detect';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
@@ -83,29 +84,21 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
       </Stack>
       <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
         <Button
-          size="small"
-          variant="outlined"
           onClick={() => onChange({ from: today.startOf('day').toISOString(), to: today.endOf('day').toISOString() })}
         >
           {t('dateRange.today')}
         </Button>
         <Button
-          size="small"
-          variant="outlined"
           onClick={() => onChange({ from: dayjs().subtract(7, 'day').startOf('day').toISOString(), to: today.endOf('day').toISOString() })}
         >
           {t('dateRange.lastWeek')}
         </Button>
         <Button
-          size="small"
-          variant="outlined"
           onClick={() => onChange({ from: dayjs().subtract(30, 'day').startOf('day').toISOString(), to: today.endOf('day').toISOString() })}
         >
           {t('dateRange.lastMonth')}
         </Button>
         <Button
-          size="small"
-          variant="outlined"
           onClick={() => onChange({ from: dayjs().subtract(365, 'day').startOf('day').toISOString(), to: today.endOf('day').toISOString() })}
         >
           {t('dateRange.lastYear')}

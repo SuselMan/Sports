@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from '@mui/material';
+import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from '@mui/material';
+import Button from '@uikit/components/Button/Button';
 import { api } from '../api/client';
 import { ExerciseForm } from '../components/ExerciseForm';
 import { ExerciseCard } from '../components/ExerciseCard';
@@ -98,7 +99,7 @@ export default function Exercises() {
         </DialogContent>
         <DialogActions>
           <Button onClick={closeCreateDialog}>{t('actions.cancel')}</Button>
-          <Button variant="contained" onClick={submit} disabled={!form.name.trim()}>{t('actions.save')}</Button>
+          <Button onClick={submit} disabled={!form.name.trim()}>{t('actions.save')}</Button>
         </DialogActions>
       </Dialog>
 
@@ -108,9 +109,7 @@ export default function Exercises() {
           <ExerciseForm form={editForm} onChange={setEditForm} />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEditOpen(false)}>{t('actions.cancel')}</Button>
           <Button
-            variant="contained"
             onClick={async () => {
               if (!editId) return;
               const updated = await api.put(`/exercises/${editId}`, {

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Stack, TextField, Typography } from '@mui/material';
+import { Box, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Stack, TextField, Typography } from '@mui/material';
+import Button from '@uikit/components/Button/Button';
 import { PageHeader } from '../components/PageHeader';
 import { api } from '../api/client';
 import { useDateRangeStore } from '../store/filters';
@@ -55,7 +56,7 @@ export default function Metrics() {
         title="Metrics"
         range={range}
         onChange={setRange}
-        right={<Button variant="contained" onClick={() => setOpen(true)}>Add</Button>}
+        right={<Button onClick={() => setOpen(true)}>Add</Button>}
       />
 
       <Stack spacing={1}>
@@ -87,7 +88,7 @@ export default function Metrics() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={submit}>Save</Button>
+          <Button onClick={submit}>Save</Button>
         </DialogActions>
       </Dialog>
     </Box>

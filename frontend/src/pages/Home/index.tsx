@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from '@mui/material';
+import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from '@mui/material';
+import Button from '@uikit/components/Button/Button';
 import { PageHeader } from '../../components/PageHeader';
 import { api } from '../../api/client';
 import { useDateRangeStore } from '../../store/filters';
@@ -179,7 +180,7 @@ export default function Home() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)}>{t('actions.cancel')}</Button>
-          <Button variant="contained" onClick={submit}>{t('actions.save')}</Button>
+          <Button onClick={submit}>{t('actions.save')}</Button>
         </DialogActions>
       </Dialog>
 
@@ -189,9 +190,7 @@ export default function Home() {
           <ExerciseRecordForm exercises={exercises} form={form} onChange={setForm} />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEditOpen(false)}>{t('actions.cancel')}</Button>
           <Button
-            variant="contained"
             onClick={async () => {
               if (!editId) return;
               await api.put(`/exercises/records/${editId}`, {

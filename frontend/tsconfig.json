@@ -9,7 +9,8 @@
     "rootDirs": ["src", "../shared"],
     "baseUrl": ".",
     "paths": {
-      "@shared/*": ["../shared/*"]
+      "@shared/*": ["../shared/*"],
+      "@uikit/*": ["UiKit/*"]
     },
     "resolveJsonModule": true,
     "isolatedModules": true,

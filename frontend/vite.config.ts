@@ -32,6 +32,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@shared': path.resolve(__dirname, '../shared'),
+      '@uikit': path.resolve(__dirname, './UiKit'),
     },
   },
   server: {
