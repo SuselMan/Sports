@@ -2,11 +2,12 @@ import React from 'react';
 import { Box, IconButton, Typography } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ReplayIcon from '@mui/icons-material/Replay';
-import { api } from '../api/client';
+import { api } from '../../api/client';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 import type { ExerciseRecordResponse } from '../../../shared/Exercise.model';
 import durationPlugin from 'dayjs/plugin/duration';
+import styles from './styles.module.css';
 
 dayjs.extend(durationPlugin);
 
@@ -64,6 +65,7 @@ export function ExerciseRecordCard({
 
   return (
     <Box
+      className={`${styles.root} ${styles.relative} ${onOpen ? styles.clickable : ''}`}
       sx={{ p: { xs: 1, sm: 1.5 }, border: '1px solid #eee', borderRadius: 1, position: 'relative', cursor: onOpen ? 'pointer' : 'default' }}
       onClick={() => onOpen?.(record)}
     >

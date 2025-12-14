@@ -6,6 +6,7 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { useTranslation } from 'react-i18next';
 import type { Exercise } from '../../../shared/Exercise.model';
+import styles from './styles.module.css';
 
 export type ExerciseRecordFormValue = {
   exerciseId: string;
@@ -31,7 +32,7 @@ export function ExerciseRecordForm({
   const { t } = useTranslation();
 
   return (
-    <Stack spacing={2} sx={{ mt: 1 }}>
+    <Stack className={styles.root} spacing={2} sx={{ mt: 1 }}>
       <TextField
         select
         label={t('records.exercise')}

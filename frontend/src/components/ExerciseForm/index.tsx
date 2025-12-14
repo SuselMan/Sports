@@ -1,9 +1,10 @@
 import React from 'react';
 import { Autocomplete, Stack, TextField, MenuItem, Box } from '@mui/material';
-import { MUSCLES_OPTIONS } from '../constants/muscles';
+import { MUSCLES_OPTIONS } from '../../constants/muscles';
 import { Muscles } from '../../../shared/Shared.model';
-import { MusclesMap } from './MusclesMap';
+import { MusclesMap } from '../MusclesMap';
 import { useTranslation } from 'react-i18next';
+import styles from './styles.module.css';
 
 export type ExerciseFormValue = {
   name: string;
@@ -26,7 +27,7 @@ export function ExerciseForm({
   };
 
   return (
-    <Stack spacing={2} sx={{ mt: 1 }}>
+    <Stack className={styles.root} spacing={2} sx={{ mt: 1 }}>
       <TextField
         label={t('exercises.name')}
         value={form.name}

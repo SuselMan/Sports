@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Stack, Typography } from '@mui/material';
-import { DateRange, DateRangeValue } from './DateRange';
+import { DateRange, DateRangeValue } from '../DateRange';
+import styles from './styles.module.css';
 
 type Props = {
   title: string;
@@ -12,6 +13,7 @@ type Props = {
 export function PageHeader({ title, range, onChange, right }: Props) {
   return (
     <Stack
+      className={styles.root}
       direction={{ xs: 'column', sm: 'row' }}
       alignItems={{ xs: 'stretch', sm: 'center' }}
       justifyContent="space-between"

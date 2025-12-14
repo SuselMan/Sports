@@ -2,9 +2,10 @@ import React from 'react';
 import { Box, Stack, Typography, IconButton } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { ExerciseRecordCard } from './ExerciseRecordCard';
+import { ExerciseRecordCard } from '../ExerciseRecordCard';
 import type { Exercise, ExerciseRecordResponse } from '../../../shared/Exercise.model';
 import { useTranslation } from 'react-i18next';
+import styles from './styles.module.css';
 
 export function ExerciseGroupCard({
   exercise,
@@ -53,7 +54,7 @@ export function ExerciseGroupCard({
   }, [isReps, records, t]);
 
   return (
-    <Box sx={{ p: { xs: 1, sm: 1.5 }, border: '1px solid #eee', borderRadius: 1 }}>
+    <Box className={styles.root} sx={{ p: { xs: 1, sm: 1.5 }, border: '1px solid #eee', borderRadius: 1 }}>
       <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1} onClick={() => setIsOpen((v) => !v)} sx={{ cursor: 'pointer' }}>
         <Box sx={{ pr: 1, flex: 1 }}>
           <Typography variant="subtitle2">{exercise?.name}</Typography>

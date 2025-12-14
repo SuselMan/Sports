@@ -3,6 +3,7 @@ import { Box, IconButton, Stack, Typography, Tooltip } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/DeleteOutline';
 import { useTranslation } from 'react-i18next';
 import type { Exercise } from '../../../shared/Exercise.model';
+import styles from './styles.module.css';
 
 export function ExerciseCard({
   exercise,
@@ -16,6 +17,7 @@ export function ExerciseCard({
   const { t } = useTranslation();
   return (
     <Box
+      className={styles.root}
       sx={{ p: { xs: 1, sm: 1.5 }, border: '1px solid #eee', borderRadius: 1, cursor: 'pointer' }}
       onClick={() => onOpen?.(exercise)}
     >

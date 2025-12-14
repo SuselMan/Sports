@@ -5,6 +5,7 @@ import { isMobile } from 'react-device-detect';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { useTranslation } from 'react-i18next';
+import styles from './styles.module.css';
 
 export type DateRangeValue = {
   from: string;
@@ -31,7 +32,7 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
   };
 
   return (
-    <Stack spacing={1} sx={{ width: { xs: '100%', sm: 'auto' } }}>
+    <Stack className={styles.root} spacing={1} sx={{ width: { xs: '100%', sm: 'auto' } }}>
       <Stack direction={{ xs: 'row', sm: 'row' }} spacing={1} alignItems={{ xs: 'stretch', sm: 'center' }}>
         <IconButton onClick={() => shift(-1)} sx={{ alignSelf: { xs: 'flex-start', sm: 'center' } }}>{'←'}</IconButton>
         {isMobile ? (
