@@ -4,7 +4,7 @@ import { PageHeader } from '../components/PageHeader';
 import { api } from '../api/client';
 import { useDateRangeStore } from '../store/filters';
 import dayjs from 'dayjs';
-import type { Metric, MetricRecordResponse, MetricListResponse, MetricRecordListResponse } from '../../../shared/Metrics.model';
+import type { Metric, MetricRecordResponse, MetricListResponse, MetricRecordListResponse } from '@shared/Metrics.model';
 import type { AxiosResponse } from 'axios';
 
 export default function Metrics() {

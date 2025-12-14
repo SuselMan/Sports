@@ -1,7 +1,7 @@
 import React from 'react';
 import { Autocomplete, Stack, TextField, MenuItem, Box } from '@mui/material';
 import { MUSCLES_OPTIONS } from '../../constants/muscles';
-import { Muscles } from '../../../shared/Shared.model';
+import { Muscles } from '@shared/Shared.model';
 import { MusclesMap } from '../MusclesMap';
 import { useTranslation } from 'react-i18next';
 import styles from './styles.module.css';

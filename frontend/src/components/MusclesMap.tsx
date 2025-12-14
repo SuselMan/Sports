@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef } from 'react';
-import { Muscles, muscleIdMap } from "../../../shared/Shared.model";
+import { Muscles, muscleIdMap } from "@shared/Shared.model";
 
 
 export function MusclesMap({muscles, onMuscleClicked = () => {}}: {muscles: Array<Muscles>, onMuscleClicked: Function}) {

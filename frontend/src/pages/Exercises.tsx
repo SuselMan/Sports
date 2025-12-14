@@ -7,8 +7,8 @@ import { AddFab } from '../components/AddFab';
 import { useModalBackClose } from '../hooks/useModalBackClose';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Exercise, ExerciseType } from "../../../shared/Exercise.model";
-import type { Muscles } from "../../../shared/Shared.model";
+import { Exercise, ExerciseType } from "@shared/Exercise.model";
+import type { Muscles } from "@shared/Shared.model";
 
 export default function Exercises() {
   const [list, setList] = useState<Exercise[]>([]);

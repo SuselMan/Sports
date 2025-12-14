@@ -5,7 +5,7 @@ import { isMobile } from 'react-device-detect';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { useTranslation } from 'react-i18next';
-import type { Exercise } from '../../../shared/Exercise.model';
+import type { Exercise } from '@shared/Exercise.model';
 import styles from './styles.module.css';
 
 export type ExerciseRecordFormValue = {

@@ -6,7 +6,7 @@ import { api } from '../api/client';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
-import type { Exercise, ExerciseRecordResponse } from '../../../shared/Exercise.model';
+import type { Exercise, ExerciseRecordResponse } from '@shared/Exercise.model';
 
 export default function Statistics() {
   const range = useDateRangeStore((s) => s.range);

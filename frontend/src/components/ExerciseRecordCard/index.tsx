@@ -5,7 +5,7 @@ import ReplayIcon from '@mui/icons-material/Replay';
 import { api } from '../../api/client';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
-import type { ExerciseRecordResponse } from '../../../shared/Exercise.model';
+import type { ExerciseRecordResponse } from '@shared/Exercise.model';
 import durationPlugin from 'dayjs/plugin/duration';
 import styles from './styles.module.css';
 

@@ -3,7 +3,7 @@ import { Box, Stack, Typography, IconButton } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { ExerciseRecordCard } from '../ExerciseRecordCard';
-import type { Exercise, ExerciseRecordResponse } from '../../../shared/Exercise.model';
+import type { Exercise, ExerciseRecordResponse } from '@shared/Exercise.model';
 import { useTranslation } from 'react-i18next';
 import styles from './styles.module.css';
 

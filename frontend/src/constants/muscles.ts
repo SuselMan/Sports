@@ -1,4 +1,4 @@
-import { Muscles } from '../../../shared/Shared.model';
+import { Muscles } from '@shared/Shared.model';
 
 export const MUSCLES_OPTIONS: Muscles[] = [
     Muscles.Neck,

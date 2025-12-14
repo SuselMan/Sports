@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, IconButton, Stack, Typography, Tooltip } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/DeleteOutline';
 import { useTranslation } from 'react-i18next';
-import type { Exercise } from '../../../shared/Exercise.model';
+import type { Exercise } from '@shared/Exercise.model';
 import styles from './styles.module.css';
 
 export function ExerciseCard({

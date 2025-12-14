@@ -8,6 +8,9 @@
     "moduleResolution": "Bundler",
     "rootDirs": ["src", "../shared"],
     "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["../shared/*"]
+    },
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
