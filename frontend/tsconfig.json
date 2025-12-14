@@ -6,12 +6,14 @@
     "module": "ESNext",
     "skipLibCheck": true,
     "moduleResolution": "Bundler",
+    "rootDirs": ["src", "../shared"],
+    "baseUrl": ".",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
     "strict": true
   },
-  "include": ["src"]
+  "include": ["src", "../shared"]
 }
 
