@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { registerSW } from 'virtual:pwa-register'
 import './i18n'
-import '@uikit/styles/colors.module.css'
+import './styles/uikit-colors.css'
 
 registerSW({
   immediate: true,
