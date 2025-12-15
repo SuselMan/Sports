@@ -1,0 +1,11 @@
+/* Force SVG strokes to use the theme border color */
+.root svg path,
+.root svg line,
+.root svg polyline,
+.root svg polygon,
+.root svg circle,
+.root svg ellipse {
+	stroke: var(--border-color) !important;
+}
+
+

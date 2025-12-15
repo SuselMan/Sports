@@ -1,6 +1,11 @@
 .root {
   padding: var(--spacing-md);
-  background-color: var(--second-bg);
+  background-color: var(--main-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.root:hover {
+    background-color: var(--second-bg);
 }
 
 .header {
@@ -18,9 +23,9 @@
   min-width: 0;
 }
 
-.summary {
-    font-weight: 400;
-}
+/*.summary {*/
+/*    font-weight: 400;*/
+/*}*/
 
 .muscles {
   font-size: var(--font-size-sm);

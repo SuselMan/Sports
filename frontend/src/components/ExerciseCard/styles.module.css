@@ -1,8 +1,13 @@
 .root {
   padding: var(--spacing-md);
-  background-color: var(--second-bg);
+  background-color: var(--main-bg);
   cursor: pointer;
 }
+
+.root:hover {
+    background-color: var(--second-bg);
+}
+
 
 .row {
   display: flex;
