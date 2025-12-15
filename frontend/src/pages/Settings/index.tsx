@@ -1,10 +1,10 @@
 import React from 'react';
-import { Box, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import i18n from '../i18n';
-import { storage } from '../utils/storage';
+import i18n from '../../i18n';
+import { storage } from '../../utils/storage';
 import Dropdown from '@uikit/components/Dropdown/Dropdown';
 import Button from '@uikit/components/Button/Button';
+import styles from './styles.module.css';
 
 export default function Settings({ mode, setMode }: { mode: 'light' | 'dark'; setMode: (m: 'light' | 'dark') => void }) {
   const { t } = useTranslation();
@@ -17,17 +17,17 @@ export default function Settings({ mode, setMode }: { mode: 'light' | 'dark'; se
   };
 
   return (
-    <Box>
-      <Typography variant="h6" sx={{ mb: 2 }}>{t('settings.title')}</Typography>
-      <Stack spacing={2}>
-        <Dropdown
-          header={`${t('settings.theme')}: ${mode === 'light' ? t('settings.light') : t('settings.dark')}`}
-        >
-          <Stack spacing={1} style={{ padding: 8 }}>
+    <div className={styles.root}>
+      <div className={styles.title}>{t('settings.title')}</div>
+      <div className={styles.section}>
+        <Dropdown header={`${t('settings.theme')}: ${mode === 'light' ? t('settings.light') : t('settings.dark')}`}>
+          <div className={styles.menuCol}>
             <Button onClick={() => setMode('light')}>{t('settings.light')}</Button>
             <Button onClick={() => setMode('dark')}>{t('settings.dark')}</Button>
-          </Stack>
+          </div>
         </Dropdown>
+      </div>
+      <div className={styles.section}>
         <Dropdown
           header={`${t('settings.language')}: ${
             {
@@ -36,7 +36,7 @@ export default function Settings({ mode, setMode }: { mode: 'light' | 'dark'; se
             }[lang] || lang
           }`}
         >
-          <Stack spacing={1} style={{ padding: 8, maxHeight: 240, overflow: 'auto' }}>
+          <div className={styles.menuCol}>
             <Button onClick={() => changeLanguage('en')}>English</Button>
             <Button onClick={() => changeLanguage('ru')}>Русский</Button>
             <Button onClick={() => changeLanguage('es')}>Español</Button>
@@ -46,10 +46,10 @@ export default function Settings({ mode, setMode }: { mode: 'light' | 'dark'; se
             <Button onClick={() => changeLanguage('hi')}>हिन्दी</Button>
             <Button onClick={() => changeLanguage('ar')}>العربية</Button>
             <Button onClick={() => changeLanguage('bn')}>বাংলা</Button>
-          </Stack>
+          </div>
         </Dropdown>
-      </Stack>
-    </Box>
+      </div>
+    </div>
   );
 }
 

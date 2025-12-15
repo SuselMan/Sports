@@ -1,14 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Typography, TextField, Stack } from '@mui/material';
-import { DateRange } from '../components/DateRange';
+import { DateRange } from '../../components/DateRange';
 import Dropdown from '@uikit/components/Dropdown/Dropdown';
 import Button from '@uikit/components/Button/Button';
-import { useDateRangeStore } from '../store/filters';
-import { api } from '../api/client';
+import { useDateRangeStore } from '../../store/filters';
+import { api } from '../../api/client';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
 import type { Exercise, ExerciseRecordResponse } from '@shared/Exercise.model';
+import styles from './styles.module.css';
 
 export default function Statistics() {
   const range = useDateRangeStore((s) => s.range);
@@ -77,10 +77,10 @@ export default function Statistics() {
   }, [exerciseRecords]);
 
   return (
-    <Box>
-      <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'stretch', sm: 'center' }} justifyContent="space-between" spacing={1.5} sx={{ mb: 2 }}>
+    <div className={styles.root}>
+      <div className={styles.headerRow}>
         <DateRange value={range} onChange={setRange} />
-        <Box sx={{ display: 'flex', gap: 1, flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'stretch', sm: 'center' } }}>
+        <div className={styles.headerActions}>
           <Dropdown
             header={
               exerciseId
@@ -88,18 +88,19 @@ export default function Statistics() {
                 : t('statistics.exerciseLabel')
             }
           >
-            <Stack spacing={1} style={{ padding: 8, maxHeight: 240, overflow: 'auto' }}>
+            <div className={styles.menuCol}>
               {exercises.map((ex) => (
                 <Button key={ex._id} onClick={() => setExerciseId(ex._id)}>
                   {ex.name}
                 </Button>
               ))}
-            </Stack>
+            </div>
           </Dropdown>
-        </Box>
-      </Stack>
-      <Typography variant="subtitle1" sx={{ mb: 1 }}>{t('statistics.chartRepsPerSet')}</Typography>
-      <Box sx={{ height: { xs: 200, sm: 240 } }}>
+        </div>
+      </div>
+
+      <div className={styles.blockTitle}>{t('statistics.chartRepsPerSet')}</div>
+      <div className={styles.chartBox}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={repsSeries}>
             <CartesianGrid stroke="#eee" />
@@ -109,9 +110,10 @@ export default function Statistics() {
             <Line type="monotone" dataKey="y" stroke="#ef6c00" />
           </LineChart>
         </ResponsiveContainer>
-      </Box>
-      <Typography variant="subtitle1" sx={{ my: 1 }}>{t('statistics.chartWeight')}</Typography>
-      <Box sx={{ height: { xs: 200, sm: 240 } }}>
+      </div>
+
+      <div className={styles.blockTitle}>{t('statistics.chartWeight')}</div>
+      <div className={styles.chartBox}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={weightSeries}>
             <CartesianGrid stroke="#eee" />
@@ -121,9 +123,10 @@ export default function Statistics() {
             <Line type="monotone" dataKey="y" stroke="#2e7d32" />
           </LineChart>
         </ResponsiveContainer>
-      </Box>
-      <Typography variant="subtitle1" sx={{ my: 1 }}>{t('statistics.chartSetsPerDay')}</Typography>
-      <Box sx={{ height: { xs: 200, sm: 240 } }}>
+      </div>
+
+      <div className={styles.blockTitle}>{t('statistics.chartSetsPerDay')}</div>
+      <div className={styles.chartBox}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={setsPerDay}>
             <CartesianGrid stroke="#eee" />
@@ -133,9 +136,10 @@ export default function Statistics() {
             <Line type="monotone" dataKey="y" stroke="#6a1b9a" />
           </LineChart>
         </ResponsiveContainer>
-      </Box>
-      <Typography variant="subtitle1" sx={{ my: 1 }}>{t('statistics.chartOverallRepsPerDay')}</Typography>
-      <Box sx={{ height: { xs: 200, sm: 240 } }}>
+      </div>
+
+      <div className={styles.blockTitle}>{t('statistics.chartOverallRepsPerDay')}</div>
+      <div className={styles.chartBox}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={overallRepsPerDay}>
             <CartesianGrid stroke="#eee" />
@@ -145,8 +149,8 @@ export default function Statistics() {
             <Line type="monotone" dataKey="y" stroke="#d32f2f" />
           </LineChart>
         </ResponsiveContainer>
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }
 

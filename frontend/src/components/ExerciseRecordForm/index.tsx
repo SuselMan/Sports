@@ -1,15 +1,13 @@
 import React from 'react';
-import { Stack } from '@mui/material';
 import dayjs from 'dayjs';
 import { isMobile } from 'react-device-detect';
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { useTranslation } from 'react-i18next';
 import type { Exercise } from '@shared/Exercise.model';
 import styles from './styles.module.css';
 import Input from '@uikit/components/Input/Input';
 import Dropdown from '@uikit/components/Dropdown/Dropdown';
 import Button from '@uikit/components/Button/Button';
+import DatePicker from '@uikit/components/DatePicker/DatePicker';
 
 export type ExerciseRecordFormValue = {
   exerciseId: string;
@@ -35,7 +33,7 @@ export function ExerciseRecordForm({
   const { t } = useTranslation();
 
   return (
-    <Stack className={styles.root} spacing={2} sx={{ mt: 1 }}>
+    <div className={styles.root}>
       <Dropdown
         header={
           form.exerciseId
@@ -43,7 +41,7 @@ export function ExerciseRecordForm({
             : t('records.exercise')
         }
       >
-        <Stack spacing={1} style={{ padding: 8, maxHeight: 240, overflow: 'auto' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: 8, maxHeight: 240, overflow: 'auto' }}>
           {exercises.map((e) => (
             <Button
               key={e._id}
@@ -52,7 +50,7 @@ export function ExerciseRecordForm({
               {e.name}
             </Button>
           ))}
-        </Stack>
+        </div>
       </Dropdown>
       {isMobile ? (
         <Input
@@ -66,18 +64,14 @@ export function ExerciseRecordForm({
           max={today.format('YYYY-MM-DD')}
         />
       ) : (
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DatePicker
-            label={t('records.date')}
-            value={dateValue}
-            onChange={(d) => {
-              if (d) onChange({ ...form, date: d.startOf('day').toISOString() });
-            }}
-            disableFuture
-            maxDate={today}
-            slotProps={{ textField: { size: 'small', fullWidth: true } }}
-          />
-        </LocalizationProvider>
+        <DatePicker
+          label={t('records.date')}
+          value={dateValue.toISOString()}
+          onChange={(iso) => {
+            if (iso) onChange({ ...form, date: dayjs(iso).startOf('day').toISOString() });
+          }}
+          maxDate={today}
+        />
       )}
       {form.kind === 'REPS' ? (
         <Input
@@ -115,7 +109,7 @@ export function ExerciseRecordForm({
         value={form.note || ''}
         onChange={(e) => onChange({ ...form, note: (e.target as HTMLInputElement).value })}
       />
-    </Stack>
+    </div>
   );
 }
 

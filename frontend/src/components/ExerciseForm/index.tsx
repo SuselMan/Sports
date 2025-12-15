@@ -1,5 +1,4 @@
 import React from 'react';
-import { Stack, TextField as MuiTextField, Box } from '@mui/material';
 import { MUSCLES_OPTIONS } from '../../constants/muscles';
 import { Muscles } from '@shared/Shared.model';
 import { MusclesMap } from '../MusclesMap';
@@ -35,7 +34,7 @@ export function ExerciseForm({
   }
 
   return (
-    <Stack className={styles.root} spacing={2} sx={{ mt: 1 }}>
+    <div className={styles.root}>
       <Input
         label={t('exercises.name')}
         value={form.name}
@@ -44,7 +43,7 @@ export function ExerciseForm({
       <Dropdown
         header={`${t('exercises.type')}: ${form.type === 'REPS' ? t('exercises.kindReps') : t('exercises.kindTime')}`}
       >
-        <Stack spacing={1} style={{ padding: 8 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 8 }}>
           <Button
             onClick={() => onChange({ ...form, type: 'REPS' })}
           >
@@ -55,7 +54,7 @@ export function ExerciseForm({
           >
             {t('exercises.kindTime')}
           </Button>
-        </Stack>
+        </div>
       </Dropdown>
 
       <SearchSelect
@@ -69,13 +68,13 @@ export function ExerciseForm({
         onClear={onClear}
       />
 
-      <Box sx={{ height: { xs: 260, sm: 320 }, border: '1px solid #eee', borderRadius: 1 }}>
+      <div style={{ height: '260px', border: '1px solid #eee', borderRadius: 4 }}>
         <MusclesMap
           muscles={form.muscles}
           onMuscleClicked={(m: Muscles) => toggleMuscle(m)}
         />
-      </Box>
-    </Stack>
+      </div>
+    </div>
   );
 }
 

@@ -1,6 +1,5 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Container } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Login from './pages/Login';
 import Home from './pages/Home';
@@ -9,11 +8,10 @@ import Statistics from './pages/Statistics';
 import Exercises from './pages/Exercises';
 import Settings from './pages/Settings';
 import { useAuthStore } from './store/auth';
-import MenuIcon from '@mui/icons-material/Menu';
 import { storage } from './utils/storage';
 import { useTranslation } from 'react-i18next';
-import Button from '@uikit/components/Button/Button';
 import { AppTopBar } from './components/AppTopBar';
+import styles from './App.module.css';
 
 function Protected({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.token);
@@ -40,7 +38,7 @@ export default function App() {
   return (
     <>
       <AppTopBar />
-      <Container maxWidth="sm" sx={{ mt: { xs: 2, sm: 3 }, mb: { xs: 3, sm: 4 }, px: { xs: 2, sm: 0 } }}>
+      <div className={styles.container}>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Protected><Home /></Protected>} />
@@ -50,7 +48,7 @@ export default function App() {
           <Route path="/settings" element={<Protected><Settings mode={mode} setMode={(m) => { storage.set('themeMode', m); setMode(m); }} /></Protected>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </Container>
+      </div>
     </>
   );
 }

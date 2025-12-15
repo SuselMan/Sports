@@ -1,9 +1,10 @@
 .root {
+    width: 100%;
 }
 
 .row {
   display: flex;
-  gap: 8px;
+  gap: var(--spacing-sm);
   align-items: center;
   flex-wrap: nowrap;
   width: 100%;
@@ -11,17 +12,18 @@
 
 .quick {
   display: flex;
-  justify-content: space-around;
   gap: 8px;
   flex-wrap: wrap;
   margin-top: 8px;
+  justify-content: space-around;
 }
 
 .dateInputWrapper {
   position: relative;
   display: inline-flex;
+  flex: 1 1 0;
+  min-width: 0;
   width: 100%;
-  max-width: 220px;
 }
 
 .mobileCalendarButton {
@@ -41,6 +43,29 @@
 
 .inputWithIcon {
   padding-right: 36px;
+  width: calc(100% - 55px);
+}
+
+.input {
+    width: 100%;
+}
+
+/* Hide native date icon, keep our custom icon button */
+.dateInputWrapper input[type="date"] {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+}
+
+.dateInputWrapper input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  display: none;
+}
+
+/* Desktop DatePicker fields should expand/shrink */
+.field {
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 

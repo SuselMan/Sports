@@ -1,0 +1,38 @@
+ .root {
+   display: flex;
+   flex-direction: column;
+   gap: var(--spacing-md);
+ }
+ 
+ .headerRow {
+   display: flex;
+   flex-direction: row;
+   align-items: center;
+   justify-content: space-between;
+   gap: var(--spacing-sm);
+ }
+ 
+ .headerActions {
+   display: flex;
+   gap: var(--spacing-sm);
+ }
+ 
+ .menuCol {
+   display: flex;
+   flex-direction: column;
+   gap: var(--spacing-sm);
+   padding: 8px;
+   max-height: 240px;
+   overflow: auto;
+ }
+ 
+ .blockTitle {
+   font-size: var(--font-size-md);
+   color: var(--main-text-color);
+ }
+ 
+ .chartBox {
+   height: 240px;
+ }
+ 
+

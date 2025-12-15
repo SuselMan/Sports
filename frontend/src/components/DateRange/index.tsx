@@ -42,6 +42,7 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
           <>
             <div className={styles.dateInputWrapper}>
               <Input
+                className={styles.input}
                 id="date-from"
                 type="date"
                 value={from.format('YYYY-MM-DD')}
@@ -67,6 +68,7 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
             </div>
             <div className={styles.dateInputWrapper}>
               <Input
+                className={styles.input}
                 id="date-to"
                 type="date"
                 value={to.format('YYYY-MM-DD')}
@@ -94,21 +96,23 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
           </>
         ) : (
           <>
-            <DatePicker
-              value={from.toISOString()}
-              onChange={(iso) => {
-                if (iso) onChange({ from: iso, to: to.toISOString() });
-              }}
-              maxDate={maxFromDate}
-            />
-            <DatePicker
-              value={to.toISOString()}
-              onChange={(iso) => {
-                if (iso) onChange({ from: from.toISOString(), to: dayjs(iso).endOf('day').toISOString() });
-              }}
-              minDate={from}
-              maxDate={today}
-            />
+              <DatePicker
+                  value={from.toISOString()}
+                  onChange={(iso) => {
+                      if (iso) onChange({ from: iso, to: to.toISOString() });
+                  }}
+                  maxDate={maxFromDate}
+                  inputClassName={styles.fieldInput}
+              />
+              <DatePicker
+                  value={to.toISOString()}
+                  onChange={(iso) => {
+                      if (iso) onChange({ from: from.toISOString(), to: dayjs(iso).endOf('day').toISOString() });
+                  }}
+                  minDate={from}
+                  maxDate={today}
+                  inputClassName={styles.fieldInput}
+              />
           </>
         )}
         <Button onClick={() => shift(1)} disabled={rightDisabled}><ChevronRightIcon /></Button>

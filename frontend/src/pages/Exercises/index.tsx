@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Stack, Typography } from '@mui/material';
 import Button from '@uikit/components/Button/Button';
 import Modal from '@uikit/components/Modal/Modal';
-import { api } from '../api/client';
-import { ExerciseForm } from '../components/ExerciseForm';
-import { ExerciseCard } from '../components/ExerciseCard';
-import { AddFab } from '../components/AddFab';
-import { useModalBackClose } from '../hooks/useModalBackClose';
+import { api } from '../../api/client';
+import { ExerciseForm } from '../../components/ExerciseForm';
+import { ExerciseCard } from '../../components/ExerciseCard';
+import { AddFab } from '../../components/AddFab';
+import { useModalBackClose } from '../../hooks/useModalBackClose';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Exercise, ExerciseType } from "@shared/Exercise.model";
 import type { Muscles } from "@shared/Shared.model";
+import styles from './styles.module.css';
 
 export default function Exercises() {
   const [list, setList] = useState<Exercise[]>([]);
@@ -69,12 +69,12 @@ export default function Exercises() {
   useModalBackClose(editOpen, () => setEditOpen(false));
 
   return (
-    <Box>
-      <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'stretch', sm: 'center' }} justifyContent="space-between" spacing={1.5} sx={{ mb: 2 }}>
-        <Typography variant="h6">{t('exercises.title')}</Typography>
-      </Stack>
+    <div className={styles.root}>
+      <div className={styles.headerRow}>
+        <div className={styles.title}>{t('exercises.title')}</div>
+      </div>
 
-      <Stack spacing={1}>
+      <div className={styles.list}>
         {list.map((e) => (
           <ExerciseCard
             key={e._id}
@@ -90,26 +90,26 @@ export default function Exercises() {
             }}
           />
         ))}
-        {!list.length && <Typography variant="body2" color="text.secondary">No data for chosen period.</Typography>}
-      </Stack>
+        {!list.length && <div className={styles.empty}>No data for chosen period.</div>}
+      </div>
 
       {open && (
         <Modal title={t('exercises.addTitle')} close={closeCreateDialog}>
-          <Stack spacing={2}>
+          <div className={styles.modalCol}>
             <ExerciseForm form={form} onChange={setForm} />
-            <Stack direction="row" spacing={1} style={{ justifyContent: 'flex-end' }}>
+            <div className={styles.modalActions}>
               <Button onClick={closeCreateDialog}>{t('actions.cancel')}</Button>
               <Button onClick={submit} disabled={!form.name.trim()}>{t('actions.save')}</Button>
-            </Stack>
-          </Stack>
+            </div>
+          </div>
         </Modal>
       )}
 
       {editOpen && (
         <Modal title={t('exercises.editTitle')} close={() => setEditOpen(false)}>
-          <Stack spacing={2}>
+          <div className={styles.modalCol}>
             <ExerciseForm form={editForm} onChange={setEditForm} />
-            <Stack direction="row" spacing={1} style={{ justifyContent: 'flex-end' }}>
+            <div className={styles.modalActions}>
               <Button
                 onClick={async () => {
                   if (!editId) return;
@@ -125,13 +125,13 @@ export default function Exercises() {
               >
                 {t('actions.save')}
               </Button>
-            </Stack>
-          </Stack>
+            </div>
+          </div>
         </Modal>
       )}
 
       <AddFab onClick={() => setOpen(true)} />
-    </Box>
+    </div>
   );
 }
 

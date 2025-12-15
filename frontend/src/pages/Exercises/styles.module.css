@@ -1,0 +1,44 @@
+ .root {
+   display: flex;
+   flex-direction: column;
+   gap: var(--spacing-md);
+ }
+ 
+ .headerRow {
+   display: flex;
+   flex-direction: row;
+   align-items: center;
+   justify-content: space-between;
+   gap: var(--spacing-sm);
+ }
+ 
+ .title {
+   font-size: var(--font-size-lg);
+   color: var(--main-text-color);
+ }
+ 
+ .list {
+   display: flex;
+   flex-direction: column;
+   gap: var(--spacing-sm);
+ }
+ 
+ .empty {
+   font-size: var(--font-size-sm);
+   color: var(--disabled-text-color);
+ }
+ 
+ .modalCol {
+   display: flex;
+   flex-direction: column;
+   gap: var(--spacing-sm);
+ }
+ 
+ .modalActions {
+   display: flex;
+   flex-direction: row;
+   justify-content: flex-end;
+   gap: var(--spacing-sm);
+ }
+ 
+

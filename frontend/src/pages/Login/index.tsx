@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import { Box, Button, Paper, Stack, Typography } from '@mui/material';
-import { exchangeGoogleIdToken, useAuthStore } from '../store/auth';
+import { exchangeGoogleIdToken, useAuthStore } from '../../store/auth';
 import { useNavigate } from 'react-router-dom';
+import styles from './styles.module.css';
 
 declare global {
   interface Window {
@@ -42,13 +42,13 @@ export default function Login() {
   }, [token]);
 
   return (
-    <Box display="flex" minHeight="60vh" alignItems="center" justifyContent="center">
-      <Paper sx={{ p: 4 }}>
-        <Stack spacing={2} alignItems="center">
-          <Typography variant="h5">Login</Typography>
-          <div ref={btnRef} />
-        </Stack>
-      </Paper>
-    </Box>
+    <div className={styles.center}>
+      <div className={styles.card}>
+        <div className={styles.title}>Login</div>
+        <div ref={btnRef} />
+      </div>
+    </div>
   );
 }
+
+

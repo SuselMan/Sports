@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Stack, TextField, Typography } from '@mui/material';
 import Button from '@uikit/components/Button/Button';
-import { DateRange } from '../components/DateRange';
+import { DateRange } from '../../components/DateRange';
 import Modal from '@uikit/components/Modal/Modal';
 import Dropdown from '@uikit/components/Dropdown/Dropdown';
-import { api } from '../api/client';
-import { useDateRangeStore } from '../store/filters';
+import Input from '@uikit/components/Input/Input';
+import { api } from '../../api/client';
+import { useDateRangeStore } from '../../store/filters';
 import dayjs from 'dayjs';
 import type { Metric, MetricRecordResponse, MetricListResponse, MetricRecordListResponse } from '@shared/Metrics.model';
 import type { AxiosResponse } from 'axios';
+import styles from './styles.module.css';
 
 export default function Metrics() {
   const range = useDateRangeStore((s) => s.range);
@@ -53,26 +54,26 @@ export default function Metrics() {
   };
 
   return (
-    <Box>
-      <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'stretch', sm: 'center' }} justifyContent="space-between" spacing={1.5} sx={{ mb: 2 }}>
+    <div className={styles.root}>
+      <div className={styles.headerRow}>
         <DateRange value={range} onChange={setRange} />
-        <Box sx={{ display: 'flex', gap: 1, flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'stretch', sm: 'center' } }}>
+        <div className={styles.headerActions}>
           <Button onClick={() => setOpen(true)}>Add</Button>
-        </Box>
-      </Stack>
+        </div>
+      </div>
 
-      <Stack spacing={1}>
+      <div className={styles.list}>
         {records.map((r) => (
-          <Box key={r._id} sx={{ p: { xs: 1, sm: 1.5 }, border: '1px solid #eee', borderRadius: 1 }}>
-            <Typography variant="body2">{r.value}</Typography>
-            <Typography variant="caption">{dayjs(r.date).format('L LT')}</Typography>
-          </Box>
+          <div key={r._id} className={styles.card}>
+            <div className={styles.value}>{r.value}</div>
+            <div className={styles.caption}>{dayjs(r.date).format('L LT')}</div>
+          </div>
         ))}
-      </Stack>
+      </div>
 
       {open && (
         <Modal title="Add Metric Record" close={() => setOpen(false)}>
-          <Stack spacing={2} style={{ marginTop: 4 }}>
+          <div className={styles.modalCol}>
             <Dropdown
               header={
                 form.metricId
@@ -80,24 +81,24 @@ export default function Metrics() {
                   : 'Metric'
               }
             >
-              <Stack spacing={1} style={{ padding: 8, maxHeight: 240, overflow: 'auto' }}>
+              <div className={styles.menuCol}>
                 {metrics.map((m) => (
                   <Button key={m._id} onClick={() => setForm((f) => ({ ...f, metricId: m._id }))}>
                     {m.name}
                   </Button>
                 ))}
-              </Stack>
+              </div>
             </Dropdown>
-            <TextField label="Value" type="number" value={form.value || ''} onChange={(e) => setForm((f) => ({ ...f, value: e.target.value }))} />
-            <TextField label="Note" value={form.note || ''} onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))} multiline />
-            <Stack direction="row" spacing={1} style={{ justifyContent: 'flex-end' }}>
+            <Input label="Value" type="number" value={form.value || ''} onChange={(e) => setForm((f) => ({ ...f, value: (e.target as HTMLInputElement).value }))} />
+            <Input label="Note" value={form.note || ''} onChange={(e) => setForm((f) => ({ ...f, note: (e.target as HTMLInputElement).value }))} />
+            <div className={styles.modalActions}>
               <Button onClick={() => setOpen(false)}>Cancel</Button>
               <Button onClick={submit}>Save</Button>
-            </Stack>
-          </Stack>
+            </div>
+          </div>
         </Modal>
       )}
-    </Box>
+    </div>
   );
 }
 

@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Stack, Typography } from '@mui/material';
 import Button from '@uikit/components/Button/Button';
 import { DateRange } from '../../components/DateRange';
 import Modal from '@uikit/components/Modal/Modal';
@@ -21,6 +20,7 @@ import {
     ExerciseListResponse,
 } from '../../../../shared/Exercise.model';
 import {AxiosResponse} from "axios";
+import styles from './styles.module.css';
 
 export default function Home() {
   const range = useDateRangeStore((s) => s.range);
@@ -101,18 +101,16 @@ export default function Home() {
   useModalBackClose(editOpen, () => setEditOpen(false));
 
   return (
-    <Box>
-      <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'stretch', sm: 'center' }} justifyContent="space-between" spacing={1.5} sx={{ mb: 2 }}>
-        <DateRange value={range} onChange={setRange} />
-      </Stack>
+    <div className={styles.root}>
+       <DateRange value={range} onChange={setRange} />
 
       {!!records.length && (
-        <Box sx={{ my: 2, height: { xs: 260, sm: 320 } }}>
+        <div className={styles.musclesBox}>
           <MusclesMap muscles={highlightedMuscles} onMuscleClicked={() => {}} />
-        </Box>
+        </div>
       )}
 
-      <Stack spacing={1}>
+      <div className={styles.list}>
         {groups.map((g) =>
           g.records.length === 1 ? (
             <ExerciseRecordCard
@@ -159,18 +157,18 @@ export default function Home() {
         )}
         {!records.length && (
           exercises.length === 0 ? (
-            <Typography variant="body2" color="text.secondary">
+            <div className={styles.emptyText}>
               {t('home.noExercisesPrefix')}{' '}
               <RouterLink to="/exercises?createNew=true">{t('home.createFirstOne')}</RouterLink>{' '}
               {t('home.noExercisesSuffix')}
-            </Typography>
+            </div>
           ) : (
-            <Typography variant="body2" color="text.secondary">
+            <div className={styles.emptyText}>
               {t('home.noRecordsForPeriod')}
-            </Typography>
+            </div>
           )
         )}
-      </Stack>
+      </div>
         {
             !!exercises.length && (
                 <AddFab onClick={() => { setForm({ exerciseId: '', kind: 'REPS', date: range.from }); setOpen(true); }} />
@@ -178,21 +176,21 @@ export default function Home() {
         }
       {open && (
         <Modal title={t('records.addTitle')} close={() => setOpen(false)}>
-          <Stack spacing={2}>
+          <div className={styles.modalCol}>
             <ExerciseRecordForm exercises={exercises} form={form} onChange={setForm} />
-            <Stack direction="row" spacing={1} style={{ justifyContent: 'flex-end' }}>
+            <div className={styles.modalActions}>
               <Button onClick={() => setOpen(false)}>{t('actions.cancel')}</Button>
               <Button onClick={submit}>{t('actions.save')}</Button>
-            </Stack>
-          </Stack>
+            </div>
+          </div>
         </Modal>
       )}
 
       {editOpen && (
         <Modal title={t('records.editTitle')} close={() => setEditOpen(false)}>
-          <Stack spacing={2}>
+          <div className={styles.modalCol}>
             <ExerciseRecordForm exercises={exercises} form={form} onChange={setForm} />
-            <Stack direction="row" spacing={1} style={{ justifyContent: 'flex-end' }}>
+            <div className={styles.modalActions}>
               <Button
                 onClick={async () => {
                   if (!editId) return;
@@ -215,11 +213,11 @@ export default function Home() {
               >
                 {t('actions.save')}
               </Button>
-            </Stack>
-          </Stack>
+            </div>
+          </div>
         </Modal>
       )}
-    </Box>
+    </div>
   );
 }
 
