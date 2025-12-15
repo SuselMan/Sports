@@ -19,7 +19,7 @@ export default defineConfig({
         name: 'Sports',
         short_name: 'Sports',
         description: 'Track exercises and statistics',
-        theme_color: '#1976d2',
+        theme_color: '#000000',
         background_color: '#121212',
         display: 'standalone',
         scope: '/',
