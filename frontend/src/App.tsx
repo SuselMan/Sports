@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { CssBaseline, ThemeProvider, createTheme, Container, AppBar, Toolbar, Typography, Stack, IconButton, Drawer, List, ListItemButton, ListItemText, useMediaQuery } from '@mui/material';
-import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
+import { Container } from '@mui/material';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Login from './pages/Login';
 import Home from './pages/Home';
 import Metrics from './pages/Metrics';
@@ -13,6 +13,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { storage } from './utils/storage';
 import { useTranslation } from 'react-i18next';
 import Button from '@uikit/components/Button/Button';
+import { AppTopBar } from './components/AppTopBar';
 
 function Protected({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.token);
@@ -22,61 +23,23 @@ function Protected({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const [mode, setMode] = React.useState<'light' | 'dark'>(() => storage.get<'light' | 'dark'>('themeMode', 'light'));
-  const theme = React.useMemo(() => createTheme({ palette: { mode } }), [mode]);
   const { token, signOut } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
-  const isDesktop = useMediaQuery(theme.breakpoints.up('sm'));
   const [open, setOpen] = React.useState(false);
   const { t } = useTranslation();
 
+  React.useEffect(() => {
+    if (mode === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+  }, [mode]);
+
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <AppBar position="sticky">
-        <Toolbar>
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            {t('appName')}
-          </Typography>
-          {token && isDesktop && (
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Button onClick={() => navigate('/')}>{t('nav.home')}</Button>
-              <Button onClick={() => navigate('/exercises')}>{t('nav.exercises')}</Button>
-              <Button onClick={() => navigate('/statistics')}>{t('nav.statistics')}</Button>
-              <Button onClick={() => navigate('/settings')}>{t('nav.settings')}</Button>
-              <Button onClick={() => { signOut(); navigate('/login'); }}>
-                {t('nav.logout')}
-              </Button>
-            </Stack>
-          )}
-          {token && !isDesktop && (
-            <>
-              <IconButton color="inherit" onClick={() => setOpen(true)} aria-label="menu">
-                <MenuIcon />
-              </IconButton>
-              <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
-                <List sx={{ width: 240 }}>
-                  <ListItemButton component={RouterLink} to="/" onClick={() => setOpen(false)} selected={location.pathname === '/'}>
-                    <ListItemText primary={t('nav.home')} />
-                  </ListItemButton>
-                  <ListItemButton component={RouterLink} to="/exercises" onClick={() => setOpen(false)} selected={location.pathname.startsWith('/exercises')}>
-                    <ListItemText primary={t('nav.exercises')} />
-                  </ListItemButton>
-                  <ListItemButton component={RouterLink} to="/statistics" onClick={() => setOpen(false)} selected={location.pathname.startsWith('/statistics')}>
-                    <ListItemText primary={t('nav.statistics')} />
-                  </ListItemButton>
-                  <ListItemButton component={RouterLink} to="/settings" onClick={() => setOpen(false)} selected={location.pathname.startsWith('/settings')}>
-                    <ListItemText primary={t('nav.settings')} />
-                  </ListItemButton>
-                  <ListItemButton onClick={() => { setOpen(false); signOut(); navigate('/login'); }}>
-                    <ListItemText primary={t('nav.logout')} />
-                  </ListItemButton>
-                </List>
-              </Drawer>
-            </>
-          )}
-        </Toolbar>
-      </AppBar>
+    <>
+      <AppTopBar />
       <Container maxWidth="sm" sx={{ mt: { xs: 2, sm: 3 }, mb: { xs: 3, sm: 4 }, px: { xs: 2, sm: 0 } }}>
         <Routes>
           <Route path="/login" element={<Login />} />
@@ -88,7 +51,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Container>
-    </ThemeProvider>
+    </>
   );
 }
 

@@ -1,8 +1,10 @@
 import React from 'react';
-import { Box, Stack, Typography, TextField, MenuItem } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n';
 import { storage } from '../utils/storage';
+import Dropdown from '@uikit/components/Dropdown/Dropdown';
+import Button from '@uikit/components/Button/Button';
 
 export default function Settings({ mode, setMode }: { mode: 'light' | 'dark'; setMode: (m: 'light' | 'dark') => void }) {
   const { t } = useTranslation();
@@ -18,35 +20,34 @@ export default function Settings({ mode, setMode }: { mode: 'light' | 'dark'; se
     <Box>
       <Typography variant="h6" sx={{ mb: 2 }}>{t('settings.title')}</Typography>
       <Stack spacing={2}>
-        <TextField
-          select
-          label={t('settings.theme')}
-          value={mode}
-          onChange={(e) => setMode((e.target.value as 'light' | 'dark'))}
-          fullWidth
-          size="small"
+        <Dropdown
+          header={`${t('settings.theme')}: ${mode === 'light' ? t('settings.light') : t('settings.dark')}`}
         >
-          <MenuItem value="light">{t('settings.light')}</MenuItem>
-          <MenuItem value="dark">{t('settings.dark')}</MenuItem>
-        </TextField>
-        <TextField
-          select
-          label={t('settings.language')}
-          value={lang}
-          onChange={(e) => changeLanguage(e.target.value)}
-          fullWidth
-          size="small"
+          <Stack spacing={1} style={{ padding: 8 }}>
+            <Button onClick={() => setMode('light')}>{t('settings.light')}</Button>
+            <Button onClick={() => setMode('dark')}>{t('settings.dark')}</Button>
+          </Stack>
+        </Dropdown>
+        <Dropdown
+          header={`${t('settings.language')}: ${
+            {
+              en: 'English', ru: 'Русский', es: 'Español', fr: 'Français',
+              pt: 'Português', zh: '中文', hi: 'हिन्दी', ar: 'العربية', bn: 'বাংলা'
+            }[lang] || lang
+          }`}
         >
-          <MenuItem value="en">English</MenuItem>
-          <MenuItem value="ru">Русский</MenuItem>
-          <MenuItem value="es">Español</MenuItem>
-          <MenuItem value="fr">Français</MenuItem>
-          <MenuItem value="pt">Português</MenuItem>
-          <MenuItem value="zh">中文</MenuItem>
-          <MenuItem value="hi">हिन्दी</MenuItem>
-          <MenuItem value="ar">العربية</MenuItem>
-          <MenuItem value="bn">বাংলা</MenuItem>
-        </TextField>
+          <Stack spacing={1} style={{ padding: 8, maxHeight: 240, overflow: 'auto' }}>
+            <Button onClick={() => changeLanguage('en')}>English</Button>
+            <Button onClick={() => changeLanguage('ru')}>Русский</Button>
+            <Button onClick={() => changeLanguage('es')}>Español</Button>
+            <Button onClick={() => changeLanguage('fr')}>Français</Button>
+            <Button onClick={() => changeLanguage('pt')}>Português</Button>
+            <Button onClick={() => changeLanguage('zh')}>中文</Button>
+            <Button onClick={() => changeLanguage('hi')}>हिन्दी</Button>
+            <Button onClick={() => changeLanguage('ar')}>العربية</Button>
+            <Button onClick={() => changeLanguage('bn')}>বাংলা</Button>
+          </Stack>
+        </Dropdown>
       </Stack>
     </Box>
   );

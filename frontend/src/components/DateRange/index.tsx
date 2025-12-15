@@ -1,6 +1,7 @@
 import React from 'react';
-import { Stack, TextField, IconButton } from '@mui/material';
+import { Stack, IconButton } from '@mui/material';
 import Button from '@uikit/components/Button/Button';
+import Input from '@uikit/components/Input/Input';
 import dayjs from 'dayjs';
 import { isMobile } from 'react-device-detect';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
@@ -38,21 +39,18 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
         <IconButton onClick={() => shift(-1)} sx={{ alignSelf: { xs: 'flex-start', sm: 'center' } }}>{'←'}</IconButton>
         {isMobile ? (
           <>
-            <TextField
+            <Input
               type="date"
               value={from.format('YYYY-MM-DD')}
-              onChange={(e) => onChange({ from: dayjs(e.target.value).startOf('day').toISOString(), to: to.toISOString() })}
-              size="small"
-              fullWidth
-              inputProps={{ max: fromMaxMobile }}
+              onChange={(e) => onChange({ from: dayjs((e.target as HTMLInputElement).value).startOf('day').toISOString(), to: to.toISOString() })}
+              max={fromMaxMobile}
             />
-            <TextField
+            <Input
               type="date"
               value={to.format('YYYY-MM-DD')}
-              onChange={(e) => onChange({ from: from.toISOString(), to: dayjs(e.target.value).endOf('day').toISOString() })}
-              size="small"
-              fullWidth
-              inputProps={{ min: toMinMobile, max: today.format('YYYY-MM-DD') }}
+              onChange={(e) => onChange({ from: from.toISOString(), to: dayjs((e.target as HTMLInputElement).value).endOf('day').toISOString() })}
+              min={toMinMobile}
+              max={today.format('YYYY-MM-DD')}
             />
           </>
         ) : (

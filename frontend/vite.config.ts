@@ -1,10 +1,17 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import svgr from 'vite-plugin-svgr';
 import path from 'path';
 
 export default defineConfig({
   plugins: [
+    svgr({
+      svgrOptions: {
+        // Treat SVGs as icons (scales to 1em)
+        icon: true,
+      },
+    }),
     react(),
     VitePWA({
       registerType: 'autoUpdate',

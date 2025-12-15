@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import Button from '@uikit/components/Button/Button';
-import { PageHeader } from '../../components/PageHeader';
+import { DateRange } from '../../components/DateRange';
+import Modal from '@uikit/components/Modal/Modal';
 import { api } from '../../api/client';
 import { useDateRangeStore } from '../../store/filters';
 import { ExerciseRecordCard } from '../../components/ExerciseRecordCard';
@@ -101,7 +102,9 @@ export default function Home() {
 
   return (
     <Box>
-      <PageHeader title="Home" range={range} onChange={setRange} />
+      <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'stretch', sm: 'center' }} justifyContent="space-between" spacing={1.5} sx={{ mb: 2 }}>
+        <DateRange value={range} onChange={setRange} />
+      </Stack>
 
       {!!records.length && (
         <Box sx={{ my: 2, height: { xs: 260, sm: 320 } }}>
@@ -173,47 +176,49 @@ export default function Home() {
                 <AddFab onClick={() => { setForm({ exerciseId: '', kind: 'REPS', date: range.from }); setOpen(true); }} />
             )
         }
-      <Dialog open={open} onClose={() => setOpen(false)} fullWidth>
-        <DialogTitle>{t('records.addTitle')}</DialogTitle>
-        <DialogContent>
-          <ExerciseRecordForm exercises={exercises} form={form} onChange={setForm} />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpen(false)}>{t('actions.cancel')}</Button>
-          <Button onClick={submit}>{t('actions.save')}</Button>
-        </DialogActions>
-      </Dialog>
+      {open && (
+        <Modal title={t('records.addTitle')} close={() => setOpen(false)}>
+          <Stack spacing={2}>
+            <ExerciseRecordForm exercises={exercises} form={form} onChange={setForm} />
+            <Stack direction="row" spacing={1} style={{ justifyContent: 'flex-end' }}>
+              <Button onClick={() => setOpen(false)}>{t('actions.cancel')}</Button>
+              <Button onClick={submit}>{t('actions.save')}</Button>
+            </Stack>
+          </Stack>
+        </Modal>
+      )}
 
-      <Dialog open={editOpen} onClose={() => setEditOpen(false)} fullWidth>
-        <DialogTitle>{t('records.editTitle')}</DialogTitle>
-        <DialogContent>
-          <ExerciseRecordForm exercises={exercises} form={form} onChange={setForm} />
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={async () => {
-              if (!editId) return;
-              await api.put(`/exercises/records/${editId}`, {
-                exerciseId: form.exerciseId,
-                kind: form.kind,
-                repsAmount: form.kind === 'REPS' ? Number(form.repsAmount) : undefined,
-                durationMs: form.kind === 'TIME' ? Number(form.durationMs) : undefined,
-                date: form.date,
-                weight: form.weight ? Number(form.weight) : undefined,
-                note: form.note || undefined,
-              });
-              setEditOpen(false);
-              // Refresh list
-              const resp = await api.get('/exercises/records', {
-                params: { page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to },
-              });
-              setRecords(resp.data.list);
-            }}
-          >
-            {t('actions.save')}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {editOpen && (
+        <Modal title={t('records.editTitle')} close={() => setEditOpen(false)}>
+          <Stack spacing={2}>
+            <ExerciseRecordForm exercises={exercises} form={form} onChange={setForm} />
+            <Stack direction="row" spacing={1} style={{ justifyContent: 'flex-end' }}>
+              <Button
+                onClick={async () => {
+                  if (!editId) return;
+                  await api.put(`/exercises/records/${editId}`, {
+                    exerciseId: form.exerciseId,
+                    kind: form.kind,
+                    repsAmount: form.kind === 'REPS' ? Number(form.repsAmount) : undefined,
+                    durationMs: form.kind === 'TIME' ? Number(form.durationMs) : undefined,
+                    date: form.date,
+                    weight: form.weight ? Number(form.weight) : undefined,
+                    note: form.note || undefined,
+                  });
+                  setEditOpen(false);
+                  // Refresh list
+                  const resp = await api.get('/exercises/records', {
+                    params: { page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to },
+                  });
+                  setRecords(resp.data.list);
+                }}
+              >
+                {t('actions.save')}
+              </Button>
+            </Stack>
+          </Stack>
+        </Modal>
+      )}
     </Box>
   );
 }

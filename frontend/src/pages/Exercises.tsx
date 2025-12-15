@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import Button from '@uikit/components/Button/Button';
+import Modal from '@uikit/components/Modal/Modal';
 import { api } from '../api/client';
 import { ExerciseForm } from '../components/ExerciseForm';
 import { ExerciseCard } from '../components/ExerciseCard';
@@ -92,40 +93,42 @@ export default function Exercises() {
         {!list.length && <Typography variant="body2" color="text.secondary">No data for chosen period.</Typography>}
       </Stack>
 
-      <Dialog open={open} onClose={closeCreateDialog} fullWidth>
-        <DialogTitle>{t('exercises.addTitle')}</DialogTitle>
-        <DialogContent>
-          <ExerciseForm form={form} onChange={setForm} />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={closeCreateDialog}>{t('actions.cancel')}</Button>
-          <Button onClick={submit} disabled={!form.name.trim()}>{t('actions.save')}</Button>
-        </DialogActions>
-      </Dialog>
+      {open && (
+        <Modal title={t('exercises.addTitle')} close={closeCreateDialog}>
+          <Stack spacing={2}>
+            <ExerciseForm form={form} onChange={setForm} />
+            <Stack direction="row" spacing={1} style={{ justifyContent: 'flex-end' }}>
+              <Button onClick={closeCreateDialog}>{t('actions.cancel')}</Button>
+              <Button onClick={submit} disabled={!form.name.trim()}>{t('actions.save')}</Button>
+            </Stack>
+          </Stack>
+        </Modal>
+      )}
 
-      <Dialog open={editOpen} onClose={() => setEditOpen(false)} fullWidth>
-        <DialogTitle>{t('exercises.editTitle')}</DialogTitle>
-        <DialogContent>
-          <ExerciseForm form={editForm} onChange={setEditForm} />
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={async () => {
-              if (!editId) return;
-              const updated = await api.put(`/exercises/${editId}`, {
-                name: editForm.name,
-                type: editForm.type,
-                muscles: editForm.muscles,
-              });
-              setEditOpen(false);
-              setList((prev) => prev.map((x) => (x._id === editId ? updated.data : x)));
-            }}
-            disabled={!editForm.name.trim()}
-          >
-            {t('actions.save')}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {editOpen && (
+        <Modal title={t('exercises.editTitle')} close={() => setEditOpen(false)}>
+          <Stack spacing={2}>
+            <ExerciseForm form={editForm} onChange={setEditForm} />
+            <Stack direction="row" spacing={1} style={{ justifyContent: 'flex-end' }}>
+              <Button
+                onClick={async () => {
+                  if (!editId) return;
+                  const updated = await api.put(`/exercises/${editId}`, {
+                    name: editForm.name,
+                    type: editForm.type,
+                    muscles: editForm.muscles,
+                  });
+                  setEditOpen(false);
+                  setList((prev) => prev.map((x) => (x._id === editId ? updated.data : x)));
+                }}
+                disabled={!editForm.name.trim()}
+              >
+                {t('actions.save')}
+              </Button>
+            </Stack>
+          </Stack>
+        </Modal>
+      )}
 
       <AddFab onClick={() => setOpen(true)} />
     </Box>

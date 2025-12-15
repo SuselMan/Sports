@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Stack, TextField, Typography } from '@mui/material';
+import { Box, Stack, TextField, Typography } from '@mui/material';
 import Button from '@uikit/components/Button/Button';
-import { PageHeader } from '../components/PageHeader';
+import { DateRange } from '../components/DateRange';
+import Modal from '@uikit/components/Modal/Modal';
+import Dropdown from '@uikit/components/Dropdown/Dropdown';
 import { api } from '../api/client';
 import { useDateRangeStore } from '../store/filters';
 import dayjs from 'dayjs';
@@ -52,12 +54,12 @@ export default function Metrics() {
 
   return (
     <Box>
-      <PageHeader
-        title="Metrics"
-        range={range}
-        onChange={setRange}
-        right={<Button onClick={() => setOpen(true)}>Add</Button>}
-      />
+      <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'stretch', sm: 'center' }} justifyContent="space-between" spacing={1.5} sx={{ mb: 2 }}>
+        <DateRange value={range} onChange={setRange} />
+        <Box sx={{ display: 'flex', gap: 1, flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'stretch', sm: 'center' } }}>
+          <Button onClick={() => setOpen(true)}>Add</Button>
+        </Box>
+      </Stack>
 
       <Stack spacing={1}>
         {records.map((r) => (
@@ -68,29 +70,33 @@ export default function Metrics() {
         ))}
       </Stack>
 
-      <Dialog open={open} onClose={() => setOpen(false)} fullWidth>
-        <DialogTitle>Add Metric Record</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <TextField
-              select
-              label="Metric"
-              value={form.metricId}
-              onChange={(e) => setForm((f) => ({ ...f, metricId: e.target.value }))}
+      {open && (
+        <Modal title="Add Metric Record" close={() => setOpen(false)}>
+          <Stack spacing={2} style={{ marginTop: 4 }}>
+            <Dropdown
+              header={
+                form.metricId
+                  ? (metrics.find((x) => x._id === form.metricId)?.name || 'Metric')
+                  : 'Metric'
+              }
             >
-              {metrics.map((m) => (
-                <MenuItem key={m._id} value={m._id}>{m.name}</MenuItem>
-              ))}
-            </TextField>
+              <Stack spacing={1} style={{ padding: 8, maxHeight: 240, overflow: 'auto' }}>
+                {metrics.map((m) => (
+                  <Button key={m._id} onClick={() => setForm((f) => ({ ...f, metricId: m._id }))}>
+                    {m.name}
+                  </Button>
+                ))}
+              </Stack>
+            </Dropdown>
             <TextField label="Value" type="number" value={form.value || ''} onChange={(e) => setForm((f) => ({ ...f, value: e.target.value }))} />
             <TextField label="Note" value={form.note || ''} onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))} multiline />
+            <Stack direction="row" spacing={1} style={{ justifyContent: 'flex-end' }}>
+              <Button onClick={() => setOpen(false)}>Cancel</Button>
+              <Button onClick={submit}>Save</Button>
+            </Stack>
           </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button onClick={submit}>Save</Button>
-        </DialogActions>
-      </Dialog>
+        </Modal>
+      )}
     </Box>
   );
 }

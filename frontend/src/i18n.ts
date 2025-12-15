@@ -6,7 +6,7 @@ import { storage } from './utils/storage';
 const resources = {
   en: {
     common: {
-      appName: 'Sports',
+      appName: 'kek',
       nav: {
         home: 'Home',
         exercises: 'Exercises',

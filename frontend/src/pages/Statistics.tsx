@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Typography, TextField, MenuItem } from '@mui/material';
-import { PageHeader } from '../components/PageHeader';
+import { Box, Typography, TextField, Stack } from '@mui/material';
+import { DateRange } from '../components/DateRange';
+import Dropdown from '@uikit/components/Dropdown/Dropdown';
+import Button from '@uikit/components/Button/Button';
 import { useDateRangeStore } from '../store/filters';
 import { api } from '../api/client';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
@@ -76,18 +78,26 @@ export default function Statistics() {
 
   return (
     <Box>
-      <PageHeader
-        title={t('statistics.title')}
-        range={range}
-        onChange={setRange}
-        right={
-          <TextField fullWidth select size="small" label={t('statistics.exerciseLabel')} value={exerciseId} onChange={(e) => setExerciseId(e.target.value)}>
-            {exercises.map((ex) => (
-              <MenuItem key={ex._id} value={ex._id}>{ex.name}</MenuItem>
-            ))}
-          </TextField>
-        }
-      />
+      <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'stretch', sm: 'center' }} justifyContent="space-between" spacing={1.5} sx={{ mb: 2 }}>
+        <DateRange value={range} onChange={setRange} />
+        <Box sx={{ display: 'flex', gap: 1, flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'stretch', sm: 'center' } }}>
+          <Dropdown
+            header={
+              exerciseId
+                ? (exercises.find((x) => x._id === exerciseId)?.name || t('statistics.exerciseLabel'))
+                : t('statistics.exerciseLabel')
+            }
+          >
+            <Stack spacing={1} style={{ padding: 8, maxHeight: 240, overflow: 'auto' }}>
+              {exercises.map((ex) => (
+                <Button key={ex._id} onClick={() => setExerciseId(ex._id)}>
+                  {ex.name}
+                </Button>
+              ))}
+            </Stack>
+          </Dropdown>
+        </Box>
+      </Stack>
       <Typography variant="subtitle1" sx={{ mb: 1 }}>{t('statistics.chartRepsPerSet')}</Typography>
       <Box sx={{ height: { xs: 200, sm: 240 } }}>
         <ResponsiveContainer width="100%" height="100%">
