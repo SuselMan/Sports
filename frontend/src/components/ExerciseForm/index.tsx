@@ -62,7 +62,8 @@ export function ExerciseForm({
         options={MUSCLES_OPTIONS}
         selected={form.muscles}
         onChange={(opt, add) => {
-          const next = add ? [...form.muscles, opt] : form.muscles.filter((m) => m !== opt);
+          const muscle = opt as Muscles;
+          const next = add ? [...form.muscles, muscle] : form.muscles.filter((m) => m !== muscle);
           onChange({ ...form, muscles: next });
         }}
         onClear={onClear}
