@@ -1,4 +1,36 @@
 .root {
+  padding: var(--spacing-md);
+  background-color: var(--second-bg);
+  cursor: pointer;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.title {
+  font-size: var(--font-size-md);
+  color: var(--main-text-color);
+}
+
+.caption {
+  font-size: var(--font-size-sm);
+  color: var(--disabled-text-color);
+}
+
+.actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
 

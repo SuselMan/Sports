@@ -1,9 +1,9 @@
 import React from 'react';
-import { Box, IconButton, Stack, Typography, Tooltip } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/DeleteOutline';
 import { useTranslation } from 'react-i18next';
 import type { Exercise } from '@shared/Exercise.model';
 import styles from './styles.module.css';
+import Button from '@uikit/components/Button/Button';
+import TrashIcon from '@uikit/icons/trash.svg?react';
 
 export function ExerciseCard({
   exercise,
@@ -16,31 +16,28 @@ export function ExerciseCard({
 }) {
   const { t } = useTranslation();
   return (
-    <Box
-      className={styles.root}
-      sx={{ p: { xs: 1, sm: 1.5 }, border: '1px solid #eee', borderRadius: 1, cursor: 'pointer' }}
-      onClick={() => onOpen?.(exercise)}
-    >
-      <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
-        <Box>
-          <Typography variant="subtitle2">{exercise.name}</Typography>
-          <Typography variant="caption" display="block">{t('commonTexts.type')}: {exercise.type}</Typography>
-          <Typography variant="caption" display="block">{t('commonTexts.muscles')}: {exercise.muscles.join(', ')}</Typography>
-        </Box>
-        <Tooltip title={t('exercises.delete')}>
-          <IconButton
-            edge="end"
+    <div className={styles.root} onClick={() => onOpen?.(exercise)} role="button">
+      <div className={styles.row}>
+        <div className={styles.info}>
+          <h3 className={styles.title}>{exercise.name}</h3>
+          <div className={styles.caption}>{t('commonTexts.type')}: {exercise.type}</div>
+          <div className={styles.caption}>{t('commonTexts.muscles')}: {exercise.muscles.join(', ')}</div>
+        </div>
+        <div className={styles.actions}>
+          <Button
+            type="ghost"
+            size="md"
+            aria-label={t('exercises.delete')}
             onClick={(e) => {
               e.stopPropagation();
               onDelete?.(exercise._id);
             }}
-            aria-label="delete"
           >
-            <DeleteIcon />
-          </IconButton>
-        </Tooltip>
-      </Stack>
-    </Box>
+            <TrashIcon />
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
 

@@ -1,13 +1,13 @@
 import React from 'react';
-import { Box, IconButton, Typography } from '@mui/material';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import ReplayIcon from '@mui/icons-material/Replay';
 import { api } from '../../api/client';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 import type { ExerciseRecordResponse } from '@shared/Exercise.model';
 import durationPlugin from 'dayjs/plugin/duration';
 import styles from './styles.module.css';
+import Button from '@uikit/components/Button/Button';
+import TrashIcon from '@uikit/icons/trash.svg?react';
+import RetryIcon from '@uikit/icons/arrow-path.svg?react';
 
 dayjs.extend(durationPlugin);
 
@@ -33,6 +33,7 @@ export function ExerciseRecordCard({
   onOpen,
   showMuscles = true,
   showName = true,
+  showReps = true,
 }: {
   record: ExerciseRecordResponse;
   onDeleted?: (id: string) => void;
@@ -40,6 +41,7 @@ export function ExerciseRecordCard({
   onOpen?: (rec: ExerciseRecordResponse) => void;
   showMuscles?: boolean;
   showName?: boolean;
+  showReps?: boolean;
 }) {
   const { t } = useTranslation();
   const handleDelete = async (e: React.MouseEvent) => {
@@ -64,46 +66,58 @@ export function ExerciseRecordCard({
   };
 
   return (
-    <Box
+    <div
       className={`${styles.root} ${styles.relative} ${onOpen ? styles.clickable : ''}`}
-      sx={{ p: { xs: 1, sm: 1.5 }, border: '1px solid #eee', borderRadius: 1, position: 'relative', cursor: onOpen ? 'pointer' : 'default' }}
       onClick={() => onOpen?.(record)}
     >
-      <IconButton
+      <Button
+        type="ghost"
+        size="md"
         aria-label="delete"
+        className={styles.iconDelete}
         onClick={handleDelete}
-        size="small"
-        sx={{ position: 'absolute', top: 4, right: 4 }}
       >
-        <DeleteOutlineIcon fontSize="small" />
-      </IconButton>
-      <IconButton
+        <TrashIcon />
+      </Button>
+      <Button
+        type="ghost"
+        size="md"
         aria-label="repeat"
+        className={styles.iconRepeat}
         onClick={handleRepeat}
-        size="small"
-        sx={{ position: 'absolute', top: 4, right: 36 }}
       >
-        <ReplayIcon fontSize="small" />
-      </IconButton>
+        <RetryIcon/>
+      </Button>
       {showName && (
-        <Typography variant="subtitle2">
+        <h3>
           {record.exercise?.name || t('records.fallbackExerciseName')}
-        </Typography>
+            {!showReps && (
+                <span className={styles.reps}>
+            {record.kind === 'REPS'
+                ? ` ${record.repsAmount ?? 0}`
+                : ` ${formatDuration(record.durationMs ?? 0)}`}
+            </span>
+            )}
+        </h3>
       )}
-      <Typography variant="body2">
-        {record.kind === 'REPS'
-          ? `${t('records.repsLabel')}: ${record.repsAmount ?? 0}`
-          : `${t('records.durationLabel')}: ${formatDuration(record.durationMs ?? 0)}`}
-      </Typography>
+        {
+            showReps && (
+                <div className={styles.body}>
+                    {record.kind === 'REPS'
+                        ? `${t('records.repsLabel')} : ${record.repsAmount ?? 0}`
+                        : `${formatDuration(record.durationMs ?? 0)}`}
+                </div>
+            )
+        }
       {showMuscles && !!record.exercise?.muscles?.length && (
-        <Typography variant="caption" color="text.secondary" display="block">
+        <div className={styles.caption}>
           {t('records.musclesLabel')}: {record.exercise.muscles.join(', ')}
-        </Typography>
+        </div>
       )}
-      <Typography variant="caption" display="block">
-        {dayjs(record.date).format('L LT')}
-      </Typography>
-    </Box>
+      <div className={styles.caption}>
+        {dayjs(record.date).format('DD/MM/YYYY')}
+      </div>
+    </div>
   );
 }
 

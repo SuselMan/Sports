@@ -1,11 +1,10 @@
 import React from 'react';
-import { Box, Stack, Typography, IconButton } from '@mui/material';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { ExerciseRecordCard } from '../ExerciseRecordCard';
 import type { Exercise, ExerciseRecordResponse } from '@shared/Exercise.model';
 import { useTranslation } from 'react-i18next';
 import styles from './styles.module.css';
+import Button from '@uikit/components/Button/Button';
+import ChevronDownIcon from '@uikit/icons/chevron-down.svg?react';
 
 export function ExerciseGroupCard({
   exercise,
@@ -32,9 +31,9 @@ export function ExerciseGroupCard({
         .filter((v) => typeof v === 'number');
       const total = parts.reduce((a, b) => a + b, 0);
       if (tooMany) {
-        return `${total} ${t('group.total')}`;
+        return total;
       }
-      return `${parts.join(' + ')} (${total} ${t('group.total')})`;
+      return `${parts.join('+')} (${total})`;
     } else {
       const minutes = records
         .map((r) => (typeof r.durationMs === 'number' ? Math.round((r.durationMs as number) / 60000) : 0))
@@ -54,31 +53,28 @@ export function ExerciseGroupCard({
   }, [isReps, records, t]);
 
   return (
-    <Box className={styles.root} sx={{ p: { xs: 1, sm: 1.5 }, border: '1px solid #eee', borderRadius: 1 }}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1} onClick={() => setIsOpen((v) => !v)} sx={{ cursor: 'pointer' }}>
-        <Box sx={{ pr: 1, flex: 1 }}>
-          <Typography variant="subtitle2">{exercise?.name}</Typography>
-          <Typography variant="body2">{summary}</Typography>
+    <div className={styles.root}>
+      <div className={styles.header} onClick={() => setIsOpen((v) => !v)} role="button">
+        <div className={styles.info}>
+            <h3 className={styles.title}>{exercise?.name} <span className={styles.summary}>{summary}</span></h3>
           {!!exercise?.muscles?.length && (
-            <Typography variant="caption" color="text.secondary" display="block">
-              {t('commonTexts.muscles')}: {exercise.muscles.join(', ')}
-            </Typography>
+            <div className={styles.muscles}>
+              {exercise.muscles.join(', ')}
+            </div>
           )}
-        </Box>
-        <IconButton aria-label="toggle" size="small">
-          {isOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-        </IconButton>
-      </Stack>
+        </div>
+        <Button type="ghost" size="sm" aria-label="toggle" className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`}>
+          <ChevronDownIcon />
+        </Button>
+      </div>
       {isOpen && (
-        <Box sx={{ mt: 1, pl: 2 }}>
-          <Stack spacing={1}>
-            {records.map((r) => (
-              <ExerciseRecordCard key={r._id} record={r} onDeleted={onDeleted} onRepeated={onRepeated} onOpen={onOpen} showMuscles={false} showName={false} />
-            ))}
-          </Stack>
-        </Box>
+        <div className={styles.children}>
+          {records.map((r) => (
+            <ExerciseRecordCard key={r._id} record={r} onDeleted={onDeleted} onRepeated={onRepeated} onOpen={onOpen} showMuscles={false} showName={false} />
+          ))}
+        </div>
       )}
-    </Box>
+    </div>
   );
 }
 

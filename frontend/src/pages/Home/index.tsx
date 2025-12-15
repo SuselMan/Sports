@@ -116,6 +116,7 @@ export default function Home() {
             <ExerciseRecordCard
               key={g.records[0]._id}
               record={g.records[0]}
+              showReps={false}
               onDeleted={(id) => setRecords((prev) => prev.filter((x) => x._id !== id))}
               onRepeated={(rec) => setRecords((prev) => [rec, ...prev])}
               onOpen={(rec) => {

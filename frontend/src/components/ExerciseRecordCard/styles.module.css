@@ -1,10 +1,38 @@
 .root {
+  padding: var(--spacing-md);
+  background-color: var(--second-bg);
 }
 .clickable {
   cursor: pointer;
 }
 .relative {
   position: relative;
+}
+
+.iconDelete {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+}
+
+.iconRepeat {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: calc(var(--spacing-sm) + 28px);
+}
+
+.body {
+  font-size: var(--font-size-sm);
+  color: var(--main-text-color);
+}
+
+.caption {
+  font-size: var(--font-size-sm);
+  color: var(--disabled-text-color);
+}
+
+.reps {
+    font-weight: 400
 }
 
 
