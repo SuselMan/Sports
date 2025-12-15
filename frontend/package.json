@@ -19,10 +19,12 @@
     "dayjs": "^1.11.13",
     "i18next": "^23.11.5",
     "i18next-browser-languagedetector": "^7.2.0",
+    "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-device-detect": "^2.2.3",
     "react-dom": "^18.2.0",
     "react-i18next": "^15.0.2",
+    "react-imask": "^7.6.1",
     "react-router-dom": "^6.28.0",
     "recharts": "^2.12.7",
     "zustand": "^4.5.2"

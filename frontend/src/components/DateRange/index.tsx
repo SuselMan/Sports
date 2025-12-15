@@ -1,13 +1,14 @@
 import React from 'react';
-import { Stack, IconButton } from '@mui/material';
 import Button from '@uikit/components/Button/Button';
 import Input from '@uikit/components/Input/Input';
+import DatePicker from '@uikit/components/DatePicker/DatePicker';
 import dayjs from 'dayjs';
 import { isMobile } from 'react-device-detect';
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { useTranslation } from 'react-i18next';
 import styles from './styles.module.css';
+import CalendarIcon from '@uikit/icons/calendar.svg?react';
+import ChevronLeftIcon from '@uikit/icons/chevron-left.svg?react';
+import ChevronRightIcon from '@uikit/icons/chevron-right.svg?react';
 
 export type DateRangeValue = {
   from: string;
@@ -34,75 +35,111 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
   };
 
   return (
-    <Stack className={styles.root} spacing={1} sx={{ width: { xs: '100%', sm: 'auto' } }}>
-      <Stack direction={{ xs: 'row', sm: 'row' }} spacing={1} alignItems={{ xs: 'stretch', sm: 'center' }}>
-        <IconButton onClick={() => shift(-1)} sx={{ alignSelf: { xs: 'flex-start', sm: 'center' } }}>{'←'}</IconButton>
+    <div className={styles.root}>
+      <div className={styles.row}>
+        <Button onClick={() => shift(-1)}><ChevronLeftIcon /></Button>
         {isMobile ? (
           <>
-            <Input
-              type="date"
-              value={from.format('YYYY-MM-DD')}
-              onChange={(e) => onChange({ from: dayjs((e.target as HTMLInputElement).value).startOf('day').toISOString(), to: to.toISOString() })}
-              max={fromMaxMobile}
-            />
-            <Input
-              type="date"
-              value={to.format('YYYY-MM-DD')}
-              onChange={(e) => onChange({ from: from.toISOString(), to: dayjs((e.target as HTMLInputElement).value).endOf('day').toISOString() })}
-              min={toMinMobile}
-              max={today.format('YYYY-MM-DD')}
-            />
+            <div className={styles.dateInputWrapper}>
+              <Input
+                id="date-from"
+                type="date"
+                value={from.format('YYYY-MM-DD')}
+                onChange={(e) => onChange({ from: dayjs((e.target as HTMLInputElement).value).startOf('day').toISOString(), to: to.toISOString() })}
+                max={fromMaxMobile}
+                inputClasses={styles.inputWithIcon}
+              />
+              <button
+                type="button"
+                className={styles.mobileCalendarButton}
+                onClick={() => {
+                  const el = document.getElementById('date-from') as HTMLInputElement | null;
+                  if (el && typeof (el as any).showPicker === 'function') {
+                    (el as any).showPicker();
+                  } else {
+                    el?.focus();
+                  }
+                }}
+                aria-label="Open calendar"
+              >
+                <CalendarIcon />
+              </button>
+            </div>
+            <div className={styles.dateInputWrapper}>
+              <Input
+                id="date-to"
+                type="date"
+                value={to.format('YYYY-MM-DD')}
+                onChange={(e) => onChange({ from: from.toISOString(), to: dayjs((e.target as HTMLInputElement).value).endOf('day').toISOString() })}
+                min={toMinMobile}
+                max={today.format('YYYY-MM-DD')}
+                inputClasses={styles.inputWithIcon}
+              />
+              <button
+                type="button"
+                className={styles.mobileCalendarButton}
+                onClick={() => {
+                  const el = document.getElementById('date-to') as HTMLInputElement | null;
+                  if (el && typeof (el as any).showPicker === 'function') {
+                    (el as any).showPicker();
+                  } else {
+                    el?.focus();
+                  }
+                }}
+                aria-label="Open calendar"
+              >
+                <CalendarIcon />
+              </button>
+            </div>
           </>
         ) : (
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <>
             <DatePicker
-              label={t('dateRange.from')}
-              value={from}
-              onChange={(d) => {
-                if (d) onChange({ from: d.startOf('day').toISOString(), to: to.toISOString() });
+              value={from.toISOString()}
+              onChange={(iso) => {
+                if (iso) onChange({ from: iso, to: to.toISOString() });
               }}
-              disableFuture
               maxDate={maxFromDate}
-              slotProps={{ textField: { size: 'small', fullWidth: true } }}
             />
             <DatePicker
-              label={t('dateRange.to')}
-              value={to}
-              onChange={(d) => {
-                if (d) onChange({ from: from.toISOString(), to: d.endOf('day').toISOString() });
+              value={to.toISOString()}
+              onChange={(iso) => {
+                if (iso) onChange({ from: from.toISOString(), to: dayjs(iso).endOf('day').toISOString() });
               }}
-              disableFuture
               minDate={from}
               maxDate={today}
-              slotProps={{ textField: { size: 'small', fullWidth: true } }}
             />
-          </LocalizationProvider>
+          </>
         )}
-        <IconButton onClick={() => shift(1)} sx={{ alignSelf: { xs: 'flex-start', sm: 'center' } }} disabled={rightDisabled}>{'→'}</IconButton>
-      </Stack>
-      <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+        <Button onClick={() => shift(1)} disabled={rightDisabled}><ChevronRightIcon /></Button>
+      </div>
+      <div className={styles.quick}>
         <Button
+          size="md"
           onClick={() => onChange({ from: today.startOf('day').toISOString(), to: today.endOf('day').toISOString() })}
         >
           {t('dateRange.today')}
         </Button>
         <Button
+            size="md"
           onClick={() => onChange({ from: dayjs().subtract(7, 'day').startOf('day').toISOString(), to: today.endOf('day').toISOString() })}
         >
           {t('dateRange.lastWeek')}
         </Button>
         <Button
+            size="md"
           onClick={() => onChange({ from: dayjs().subtract(30, 'day').startOf('day').toISOString(), to: today.endOf('day').toISOString() })}
         >
           {t('dateRange.lastMonth')}
         </Button>
         <Button
+            size="md"
           onClick={() => onChange({ from: dayjs().subtract(365, 'day').startOf('day').toISOString(), to: today.endOf('day').toISOString() })}
         >
           {t('dateRange.lastYear')}
         </Button>
-      </Stack>
-    </Stack>
+      </div>
+    </div>
   );
 }
 

@@ -1,4 +1,46 @@
 .root {
 }
 
+.row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+.quick {
+  display: flex;
+  justify-content: space-around;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.dateInputWrapper {
+  position: relative;
+  display: inline-flex;
+  width: 100%;
+  max-width: 220px;
+}
+
+.mobileCalendarButton {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--main-text-color);
+}
+
+.inputWithIcon {
+  padding-right: 36px;
+}
+
 
