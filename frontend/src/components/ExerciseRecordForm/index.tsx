@@ -104,11 +104,11 @@ export function ExerciseRecordForm({
         value={form.weight || ''}
         onChange={(e) => onChange({ ...form, weight: (e.target as HTMLInputElement).value })}
       />
-      <Input
-        label={t('records.note')}
-        value={form.note || ''}
-        onChange={(e) => onChange({ ...form, note: (e.target as HTMLInputElement).value })}
-      />
+      {/*<Input*/}
+      {/*  label={t('records.note')}*/}
+      {/*  value={form.note || ''}*/}
+      {/*  onChange={(e) => onChange({ ...form, note: (e.target as HTMLInputElement).value })}*/}
+      {/*/>*/}
     </div>
   );
 }
