@@ -42,8 +42,9 @@
 }
 
 .inputWithIcon {
-  padding-right: 36px;
-  width: calc(100% - 55px);
+    width: 100%;
+    padding: var(--spacing-md);
+    font-size: var(--font-size-sm);
 }
 
 .input {

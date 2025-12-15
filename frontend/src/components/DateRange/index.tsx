@@ -37,7 +37,7 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
   return (
     <div className={styles.root}>
       <div className={styles.row}>
-        <Button onClick={() => shift(-1)}><ChevronLeftIcon /></Button>
+        <Button size="md" onClick={() => shift(-1)}><ChevronLeftIcon /></Button>
         {isMobile ? (
           <>
             <div className={styles.dateInputWrapper}>
@@ -49,22 +49,15 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
                 onChange={(e) => onChange({ from: dayjs((e.target as HTMLInputElement).value).startOf('day').toISOString(), to: to.toISOString() })}
                 max={fromMaxMobile}
                 inputClasses={styles.inputWithIcon}
-              />
-              <button
-                type="button"
-                className={styles.mobileCalendarButton}
                 onClick={() => {
-                  const el = document.getElementById('date-from') as HTMLInputElement | null;
-                  if (el && typeof (el as any).showPicker === 'function') {
-                    (el as any).showPicker();
-                  } else {
-                    el?.focus();
-                  }
+                    const el = document.getElementById('date-from') as HTMLInputElement | null;
+                    if (el && typeof (el as any).showPicker === 'function') {
+                        (el as any).showPicker();
+                    } else {
+                        el?.focus();
+                    }
                 }}
-                aria-label="Open calendar"
-              >
-                <CalendarIcon />
-              </button>
+              />
             </div>
             <div className={styles.dateInputWrapper}>
               <Input
@@ -76,22 +69,15 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
                 min={toMinMobile}
                 max={today.format('YYYY-MM-DD')}
                 inputClasses={styles.inputWithIcon}
-              />
-              <button
-                type="button"
-                className={styles.mobileCalendarButton}
                 onClick={() => {
-                  const el = document.getElementById('date-to') as HTMLInputElement | null;
-                  if (el && typeof (el as any).showPicker === 'function') {
-                    (el as any).showPicker();
-                  } else {
-                    el?.focus();
-                  }
+                    const el = document.getElementById('date-to') as HTMLInputElement | null;
+                    if (el && typeof (el as any).showPicker === 'function') {
+                        (el as any).showPicker();
+                    } else {
+                        el?.focus();
+                    }
                 }}
-                aria-label="Open calendar"
-              >
-                <CalendarIcon />
-              </button>
+              />
             </div>
           </>
         ) : (
@@ -115,7 +101,7 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
               />
           </>
         )}
-        <Button onClick={() => shift(1)} disabled={rightDisabled}><ChevronRightIcon /></Button>
+        <Button size="md" onClick={() => shift(1)} disabled={rightDisabled}><ChevronRightIcon /></Button>
       </div>
       <div className={styles.quick}>
         <Button
