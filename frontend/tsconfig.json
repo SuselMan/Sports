@@ -12,12 +12,13 @@
       "@shared/*": ["../shared/*"],
       "@uikit/*": ["UiKit/*"]
     },
+    "typeRoots": ["./node_modules/@types", "../backend/node_modules/@types"],
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
     "strict": true
   },
-  "include": ["src", "../shared"]
+  "include": ["src", "../shared", "vite.config.ts"]
 }
 

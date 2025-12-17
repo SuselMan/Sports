@@ -2,7 +2,8 @@
   "extends": "./tsconfig.json",
   "include": ["src", "UiKit", "../shared", "vite.config.ts"],
   "compilerOptions": {
-    "noEmit": true
+    "noEmit": true,
+    "typeRoots": ["./node_modules/@types", "../backend/node_modules/@types"]
   }
 }
 
