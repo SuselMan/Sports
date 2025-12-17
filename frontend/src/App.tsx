@@ -19,6 +19,13 @@ function Protected({ children }: { children: React.ReactElement }) {
   return children;
 }
 
+function syncThemeColorToCssVar(): void {
+  const meta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null;
+  if (!meta) return;
+  const bg = getComputedStyle(document.documentElement).getPropertyValue('--main-bg').trim();
+  meta.content = bg || '#000000';
+}
+
 export default function App() {
   const [mode, setMode] = React.useState<'light' | 'dark'>(() => storage.get<'light' | 'dark'>('themeMode', 'light'));
 
@@ -28,6 +35,7 @@ export default function App() {
     } else {
       document.documentElement.removeAttribute('data-theme');
     }
+    syncThemeColorToCssVar();
   }, [mode]);
 
   return (
