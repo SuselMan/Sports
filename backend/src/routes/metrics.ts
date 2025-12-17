@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import mongoose from 'mongoose';
+import type { Unit } from '../../../shared/Metrics.model';
 import { MetricModel, MetricRecordModel } from '../models/Metric';
 import { AuthedRequest } from '../auth';
 import { buildSort, getPagination } from '../utils/pagination';
-import type { Unit } from '../../../shared/Metrics.model';
 
 export const metricsRouter = Router();
 
@@ -20,7 +20,9 @@ metricsRouter.post('/', async (req: AuthedRequest, res) => {
 
 metricsRouter.get('/', async (req: AuthedRequest, res) => {
   const userId = req.userId!;
-  const { page, pageSize, sortBy, sortOrder } = getPagination(req);
+  const {
+    page, pageSize, sortBy, sortOrder,
+  } = getPagination(req);
   const q: any = { userId };
   const total = await MetricModel.countDocuments(q);
   const list = await MetricModel.find(q)
@@ -35,7 +37,9 @@ metricsRouter.post('/:metricId/records', async (req: AuthedRequest, res) => {
     const userId = req.userId!;
     const { metricId } = req.params;
     const { value, date, note } = req.body as { value: number; date: string; note?: string };
-    const created = await MetricRecordModel.create({ userId, metricId, value, date, note });
+    const created = await MetricRecordModel.create({
+      userId, metricId, value, date, note,
+    });
     res.json(created);
   } catch (e: any) {
     res.status(400).json({ error: e.message });
@@ -45,7 +49,9 @@ metricsRouter.post('/:metricId/records', async (req: AuthedRequest, res) => {
 metricsRouter.get('/records', async (req: AuthedRequest, res) => {
   const userId = req.userId!;
   const userObjectId = new mongoose.Types.ObjectId(userId);
-  const { page, pageSize, sortBy, sortOrder } = getPagination(req);
+  const {
+    page, pageSize, sortBy, sortOrder,
+  } = getPagination(req);
   const { dateFrom, dateTo } = req.query as any;
   const q: any = { userId: userObjectId };
   if (dateFrom || dateTo) {
@@ -55,7 +61,11 @@ metricsRouter.get('/records', async (req: AuthedRequest, res) => {
   }
   const pipeline: any[] = [
     { $match: q },
-    { $lookup: { from: 'metrics', localField: 'metricId', foreignField: '_id', as: 'metric' } },
+    {
+      $lookup: {
+        from: 'metrics', localField: 'metricId', foreignField: '_id', as: 'metric',
+      },
+    },
     { $unwind: '$metric' },
   ];
   const sortSpec = sortBy === 'name' ? { 'metric.name': sortOrder === 'asc' ? 1 : -1 } : { date: sortOrder === 'asc' ? 1 : -1 };
@@ -84,5 +94,3 @@ metricsRouter.get('/records', async (req: AuthedRequest, res) => {
   ]);
   res.json({ list, pagination: { total, page, pageSize } });
 });
-
-

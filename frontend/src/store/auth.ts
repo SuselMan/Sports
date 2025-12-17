@@ -24,5 +24,3 @@ export async function exchangeGoogleIdToken(idToken: string) {
   const resp = await api.post('/auth/google', { idToken });
   return resp.data?.token as string;
 }
-
-

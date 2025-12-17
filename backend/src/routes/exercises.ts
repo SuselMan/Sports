@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import mongoose from 'mongoose';
+import type { ExerciseType } from '../../../shared/Exercise.model';
+import type { Muscles } from '../../../shared/Shared.model';
 import { ExerciseModel, ExerciseRecordModel } from '../models/Exercise';
 import { AuthedRequest } from '../auth';
 import { buildSort, getPagination } from '../utils/pagination';
-import type { ExerciseType } from '../../../shared/Exercise.model';
-import type { Muscles } from '../../../shared/Shared.model';
 
 export const exercisesRouter = Router();
 
@@ -13,7 +13,9 @@ exercisesRouter.post('/', async (req: AuthedRequest, res) => {
   try {
     const userId = req.userId!;
     const { name, type, muscles } = req.body as { name: string; type: ExerciseType; muscles: Muscles[] };
-    const created = await ExerciseModel.create({ userId, name, type, muscles });
+    const created = await ExerciseModel.create({
+      userId, name, type, muscles,
+    });
     res.json(created);
   } catch (e: any) {
     res.status(400).json({ error: e.message });
@@ -23,7 +25,9 @@ exercisesRouter.post('/', async (req: AuthedRequest, res) => {
 // List exercises
 exercisesRouter.get('/', async (req: AuthedRequest, res) => {
   const userId = req.userId!;
-  const { page, pageSize, sortBy, sortOrder } = getPagination(req);
+  const {
+    page, pageSize, sortBy, sortOrder,
+  } = getPagination(req);
   const q: any = { userId, archived: { $ne: true } };
   const total = await ExerciseModel.countDocuments(q);
   const list = await ExerciseModel.find(q)
@@ -61,7 +65,7 @@ exercisesRouter.delete('/:exerciseId', async (req: AuthedRequest, res) => {
     const updated = await ExerciseModel.findOneAndUpdate(
       { _id, userId },
       { archived: true },
-      { new: true }
+      { new: true },
     );
     if (!updated) return res.status(404).json({ error: 'Exercise not found' });
     return res.json({ ok: true });
@@ -103,7 +107,9 @@ exercisesRouter.put('/records/:recordId', async (req: AuthedRequest, res) => {
       rpe,
       restSec,
     } = req.body as any;
-    const update: any = { kind, date, note, weight, rpe, restSec };
+    const update: any = {
+      kind, date, note, weight, rpe, restSec,
+    };
     if (exerciseId) update.exerciseId = new mongoose.Types.ObjectId(exerciseId);
     if (kind === 'REPS') {
       update.repsAmount = repsAmount;
@@ -125,7 +131,9 @@ exercisesRouter.post('/:exerciseId/records', async (req: AuthedRequest, res) => 
   try {
     const userId = req.userId!;
     const { exerciseId } = req.params;
-    const { kind, repsAmount, durationMs, date, note, weight, rpe, restSec } = req.body as any;
+    const {
+      kind, repsAmount, durationMs, date, note, weight, rpe, restSec,
+    } = req.body as any;
     const created = await ExerciseRecordModel.create({
       userId,
       exerciseId,
@@ -148,8 +156,12 @@ exercisesRouter.post('/:exerciseId/records', async (req: AuthedRequest, res) => 
 exercisesRouter.get('/records', async (req: AuthedRequest, res) => {
   const userId = req.userId!;
   const userObjectId = new mongoose.Types.ObjectId(userId);
-  const { page, pageSize, sortBy, sortOrder } = getPagination(req);
-  const { dateFrom, dateTo, timeFrom, timeTo, muscles, exerciseIds } = req.query as any;
+  const {
+    page, pageSize, sortBy, sortOrder,
+  } = getPagination(req);
+  const {
+    dateFrom, dateTo, timeFrom, timeTo, muscles, exerciseIds,
+  } = req.query as any;
   const q: any = { userId: userObjectId };
   if (exerciseIds) {
     const ids = String(exerciseIds)
@@ -172,7 +184,11 @@ exercisesRouter.get('/records', async (req: AuthedRequest, res) => {
   // always join exercise to return Exercise in response and allow muscles filter
   const pipeline: any[] = [
     { $match: q },
-    { $lookup: { from: 'exercises', localField: 'exerciseId', foreignField: '_id', as: 'exercise' } },
+    {
+      $lookup: {
+        from: 'exercises', localField: 'exerciseId', foreignField: '_id', as: 'exercise',
+      },
+    },
     { $unwind: '$exercise' },
   ];
   if (muscles) {
@@ -214,5 +230,3 @@ exercisesRouter.get('/records', async (req: AuthedRequest, res) => {
   ]);
   res.json({ list, pagination: { total, page, pageSize } });
 });
-
-

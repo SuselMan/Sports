@@ -5,7 +5,9 @@ export function getPagination(req: any): PaginationRequestData {
   const pageSize = Math.min(100, Math.max(1, Number(req.query.pageSize || 20)));
   const sortBy = (req.query.sortBy as 'date' | 'name') || 'date';
   const sortOrder = (req.query.sortOrder as 'asc' | 'desc') || 'desc';
-  return { page, pageSize, sortBy, sortOrder };
+  return {
+    page, pageSize, sortBy, sortOrder,
+  };
 }
 
 export function buildSort(sortBy: 'date' | 'name', sortOrder: 'asc' | 'desc') {
@@ -15,5 +17,3 @@ export function buildSort(sortBy: 'date' | 'name', sortOrder: 'asc' | 'desc') {
   // default 'date'
   return { date: sortOrder === 'asc' ? 1 : -1 };
 }
-
-

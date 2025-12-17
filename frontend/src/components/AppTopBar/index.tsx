@@ -2,10 +2,10 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Button from '@uikit/components/Button/Button';
 import Sidebar from '@uikit/components/Sidebar/Sidebar';
-import { useAuthStore } from '../../store/auth';
 import { useTranslation } from 'react-i18next';
-import styles from './styles.module.css';
 import BarIcon from '@uikit/icons/bars-3.svg?react';
+import { useAuthStore } from '../../store/auth';
+import styles from './styles.module.css';
 
 export function AppTopBar() {
   const { token, signOut } = useAuthStore();
@@ -68,5 +68,3 @@ export function AppTopBar() {
     </div>
   );
 }
-
-

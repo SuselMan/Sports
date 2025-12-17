@@ -3,11 +3,11 @@ import dayjs from 'dayjs';
 import { isMobile } from 'react-device-detect';
 import { useTranslation } from 'react-i18next';
 import type { Exercise } from '@shared/Exercise.model';
-import styles from './styles.module.css';
 import Input from '@uikit/components/Input/Input';
 import Dropdown from '@uikit/components/Dropdown/Dropdown';
 import Button from '@uikit/components/Button/Button';
 import DatePicker from '@uikit/components/DatePicker/DatePicker';
+import styles from './styles.module.css';
 
 export type ExerciseRecordFormValue = {
   exerciseId: string;
@@ -41,7 +41,10 @@ export function ExerciseRecordForm({
             : t('records.exercise')
         }
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: 8, maxHeight: 240, overflow: 'auto' }}>
+        <div style={{
+          display: 'flex', flexDirection: 'column', gap: '8px', padding: 8, maxHeight: 240, overflow: 'auto',
+        }}
+        >
           {exercises.map((e) => (
             <Button
               key={e._id}
@@ -104,13 +107,11 @@ export function ExerciseRecordForm({
         value={form.weight || ''}
         onChange={(e) => onChange({ ...form, weight: (e.target as HTMLInputElement).value })}
       />
-      {/*<Input*/}
-      {/*  label={t('records.note')}*/}
-      {/*  value={form.note || ''}*/}
-      {/*  onChange={(e) => onChange({ ...form, note: (e.target as HTMLInputElement).value })}*/}
-      {/*/>*/}
+      {/* <Input */}
+      {/*  label={t('records.note')} */}
+      {/*  value={form.note || ''} */}
+      {/*  onChange={(e) => onChange({ ...form, note: (e.target as HTMLInputElement).value })} */}
+      {/* /> */}
     </div>
   );
 }
-
-

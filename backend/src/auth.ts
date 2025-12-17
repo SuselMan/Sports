@@ -1,8 +1,8 @@
 import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken';
+import { Request, Response, NextFunction } from 'express';
 import { env } from './env';
 import { UserModel } from './models/User';
-import { Request, Response, NextFunction } from 'express';
 
 const googleClient = new OAuth2Client(env.GOOGLE_CLIENT_ID);
 
@@ -40,9 +40,9 @@ export async function googleAuthHandler(req: Request, res: Response) {
       });
     }
     const token = signJwt(String(user._id));
-    res.json({ token });
+    return res.json({ token });
   } catch (e: any) {
-    res.status(401).json({ error: e.message || 'Unauthorized' });
+    return res.status(401).json({ error: e.message || 'Unauthorized' });
   }
 }
 
@@ -63,5 +63,3 @@ export function authMiddleware(req: AuthedRequest, res: Response, next: NextFunc
     return res.status(401).json({ error: 'Invalid token' });
   }
 }
-
-

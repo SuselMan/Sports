@@ -1,11 +1,14 @@
 export class AppStorage {
   private readonly prefix: string;
+
   constructor(prefix = 'sports_') {
     this.prefix = prefix;
   }
+
   private key(k: string) {
     return `${this.prefix}${k}`;
   }
+
   get<T>(key: string, fallback: T): T {
     try {
       const raw = localStorage.getItem(this.key(key));
@@ -15,6 +18,7 @@ export class AppStorage {
       return fallback;
     }
   }
+
   set<T>(key: string, value: T): void {
     try {
       localStorage.setItem(this.key(key), JSON.stringify(value));
@@ -22,6 +26,7 @@ export class AppStorage {
       // ignore storage errors
     }
   }
+
   remove(key: string): void {
     try {
       localStorage.removeItem(this.key(key));
@@ -32,5 +37,3 @@ export class AppStorage {
 }
 
 export const storage = new AppStorage();
-
-

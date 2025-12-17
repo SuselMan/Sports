@@ -11,7 +11,7 @@ export function usePopstate(callback: () => void, enabled: boolean = true) {
   }, [callback]);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) return () => {};
     const handler = () => {
       callbackRef.current();
     };
@@ -21,5 +21,3 @@ export function usePopstate(callback: () => void, enabled: boolean = true) {
     };
   }, [enabled]);
 }
-
-

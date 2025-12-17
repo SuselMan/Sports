@@ -1,9 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import i18n from '../../i18n';
-import { storage } from '../../utils/storage';
 import Dropdown from '@uikit/components/Dropdown/Dropdown';
 import Button from '@uikit/components/Button/Button';
+import i18n from '../../i18n';
+import { storage } from '../../utils/storage';
 import styles from './styles.module.css';
 
 export default function Settings({ mode, setMode }: { mode: 'light' | 'dark'; setMode: (m: 'light' | 'dark') => void }) {
@@ -31,8 +31,15 @@ export default function Settings({ mode, setMode }: { mode: 'light' | 'dark'; se
         <Dropdown
           header={`${t('settings.language')}: ${
             {
-              en: 'English', ru: 'Русский', es: 'Español', fr: 'Français',
-              pt: 'Português', zh: '中文', hi: 'हिन्दी', ar: 'العربية', bn: 'বাংলা'
+              en: 'English',
+              ru: 'Русский',
+              es: 'Español',
+              fr: 'Français',
+              pt: 'Português',
+              zh: '中文',
+              hi: 'हिन्दी',
+              ar: 'العربية',
+              bn: 'বাংলা',
             }[lang] || lang
           }`}
         >
@@ -52,5 +59,3 @@ export default function Settings({ mode, setMode }: { mode: 'light' | 'dark'; se
     </div>
   );
 }
-
-

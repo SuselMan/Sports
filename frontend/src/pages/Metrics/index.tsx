@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import Button from '@uikit/components/Button/Button';
-import { DateRange } from '../../components/DateRange';
 import Modal from '@uikit/components/Modal/Modal';
 import Dropdown from '@uikit/components/Dropdown/Dropdown';
 import Input from '@uikit/components/Input/Input';
-import { api } from '../../api/client';
-import { useDateRangeStore } from '../../store/filters';
 import dayjs from 'dayjs';
-import type { Metric, MetricRecordResponse, MetricListResponse, MetricRecordListResponse } from '@shared/Metrics.model';
+import type {
+  Metric, MetricRecordResponse, MetricListResponse, MetricRecordListResponse,
+} from '@shared/Metrics.model';
 import type { AxiosResponse } from 'axios';
+import { useDateRangeStore } from '../../store/filters';
+import { api } from '../../api/client';
+import { DateRange } from '../../components/DateRange';
 import styles from './styles.module.css';
 
 export default function Metrics() {
@@ -24,7 +26,11 @@ export default function Metrics() {
 
   useEffect(() => {
     (async () => {
-      const met: AxiosResponse<MetricListResponse> = await api.get('/metrics', { params: { page: 1, pageSize: 100, sortBy: 'name', sortOrder: 'asc' } });
+      const met: AxiosResponse<MetricListResponse> = await api.get('/metrics', {
+        params: {
+          page: 1, pageSize: 100, sortBy: 'name', sortOrder: 'asc',
+        },
+      });
       setMetrics(met.data.list);
     })();
   }, []);
@@ -32,7 +38,9 @@ export default function Metrics() {
   useEffect(() => {
     (async () => {
       const resp: AxiosResponse<MetricRecordListResponse> = await api.get('/metrics/records', {
-        params: { page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to },
+        params: {
+          page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to,
+        },
       });
       setRecords(resp.data.list);
     })();
@@ -48,7 +56,9 @@ export default function Metrics() {
     setOpen(false);
     setForm({ metricId: '', date: dayjs().toISOString() });
     const resp = await api.get('/metrics/records', {
-      params: { page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to },
+      params: {
+        page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to,
+      },
     });
     setRecords(resp.data.list);
   };
@@ -101,5 +111,3 @@ export default function Metrics() {
     </div>
   );
 }
-
-

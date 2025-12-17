@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src", "UiKit", "../shared", "vite.config.ts"],
+  "compilerOptions": {
+    "noEmit": true
+  }
+}
+
+

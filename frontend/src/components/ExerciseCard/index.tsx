@@ -1,9 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Exercise } from '@shared/Exercise.model';
-import styles from './styles.module.css';
 import Button from '@uikit/components/Button/Button';
 import TrashIcon from '@uikit/icons/trash.svg?react';
+import styles from './styles.module.css';
 
 export function ExerciseCard({
   exercise,
@@ -15,13 +15,29 @@ export function ExerciseCard({
   onOpen?: (exercise: Exercise) => void;
 }) {
   const { t } = useTranslation();
+  const onKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onOpen?.(exercise);
+    }
+  };
   return (
-    <div className={styles.root} onClick={() => onOpen?.(exercise)} role="button">
+    <div className={styles.root} onClick={() => onOpen?.(exercise)} onKeyDown={onKeyDown} role="button" tabIndex={0}>
       <div className={styles.row}>
         <div className={styles.info}>
           <h3 className={styles.title}>{exercise.name}</h3>
-          <div className={styles.caption}>{t('commonTexts.type')}: {exercise.type}</div>
-          <div className={styles.caption}>{t('commonTexts.muscles')}: {exercise.muscles.join(', ')}</div>
+          <div className={styles.caption}>
+            {t('commonTexts.type')}
+            :
+            {' '}
+            {exercise.type}
+          </div>
+          <div className={styles.caption}>
+            {t('commonTexts.muscles')}
+            :
+            {' '}
+            {exercise.muscles.join(', ')}
+          </div>
         </div>
         <div className={styles.actions}>
           <Button
@@ -40,5 +56,3 @@ export function ExerciseCard({
     </div>
   );
 }
-
-

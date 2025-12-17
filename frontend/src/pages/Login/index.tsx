@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { exchangeGoogleIdToken, useAuthStore } from '../../store/auth';
 import { useNavigate } from 'react-router-dom';
+import { exchangeGoogleIdToken, useAuthStore } from '../../store/auth';
 import styles from './styles.module.css';
 
 declare global {
@@ -33,13 +33,13 @@ export default function Login() {
         size: 'large',
       });
     }
-  }, []);
+  }, [navigate, setToken]);
 
   useEffect(() => {
     if (token) {
       navigate('/', { replace: true });
     }
-  }, [token]);
+  }, [token, navigate]);
 
   return (
     <div className={styles.center}>
@@ -50,5 +50,3 @@ export default function Login() {
     </div>
   );
 }
-
-

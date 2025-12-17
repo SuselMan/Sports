@@ -1,13 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { DateRange } from '../../components/DateRange';
 import Dropdown from '@uikit/components/Dropdown/Dropdown';
 import Button from '@uikit/components/Button/Button';
-import { useDateRangeStore } from '../../store/filters';
-import { api } from '../../api/client';
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer,
+} from 'recharts';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
 import type { Exercise, ExerciseRecordResponse } from '@shared/Exercise.model';
+import { api } from '../../api/client';
+import { useDateRangeStore } from '../../store/filters';
+import { DateRange } from '../../components/DateRange';
 import styles from './styles.module.css';
 
 export default function Statistics() {
@@ -26,7 +28,11 @@ export default function Statistics() {
 
   useEffect(() => {
     (async () => {
-      const ex = await api.get('/exercises', { params: { page: 1, pageSize: 200, sortBy: 'name', sortOrder: 'asc' } });
+      const ex = await api.get('/exercises', {
+        params: {
+          page: 1, pageSize: 200, sortBy: 'name', sortOrder: 'asc',
+        },
+      });
       setExercises(ex.data.list);
       if (ex.data.list?.length) setExerciseId(ex.data.list[0]._id);
     })();
@@ -35,24 +41,24 @@ export default function Statistics() {
   useEffect(() => {
     (async () => {
       const resp = await api.get('/exercises/records', {
-        params: { page: 1, pageSize: 2000, sortBy: 'date', sortOrder: 'asc', dateFrom: range.from, dateTo: range.to },
+        params: {
+          page: 1, pageSize: 2000, sortBy: 'date', sortOrder: 'asc', dateFrom: range.from, dateTo: range.to,
+        },
       });
       setExerciseRecords(resp.data.list);
     })();
   }, [range]);
 
   const repsSeries = useMemo(
-    () =>
-      exerciseRecords
-        .filter((r) => r.exerciseId === exerciseId && r.kind === 'REPS' && typeof r.repsAmount === 'number')
-        .map((r) => ({ x: dayjs(r.date).format('L'), y: r.repsAmount as number })),
+    () => exerciseRecords
+      .filter((r) => r.exerciseId === exerciseId && r.kind === 'REPS' && typeof r.repsAmount === 'number')
+      .map((r) => ({ x: dayjs(r.date).format('L'), y: r.repsAmount as number })),
     [exerciseRecords, exerciseId],
   );
   const weightSeries = useMemo(
-    () =>
-      exerciseRecords
-        .filter((r) => r.exerciseId === exerciseId && typeof r.weight === 'number')
-        .map((r) => ({ x: dayjs(r.date).format('L'), y: r.weight as number })),
+    () => exerciseRecords
+      .filter((r) => r.exerciseId === exerciseId && typeof r.weight === 'number')
+      .map((r) => ({ x: dayjs(r.date).format('L'), y: r.weight as number })),
     [exerciseRecords, exerciseId],
   );
   const setsPerDay = useMemo(() => {
@@ -153,5 +159,3 @@ export default function Statistics() {
     </div>
   );
 }
-
-

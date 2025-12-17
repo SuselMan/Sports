@@ -1,13 +1,13 @@
 import React from 'react';
-import { MUSCLES_OPTIONS } from '../../constants/muscles';
 import { Muscles } from '@shared/Shared.model';
-import { MusclesMap } from '../MusclesMap';
 import { useTranslation } from 'react-i18next';
-import styles from './styles.module.css';
 import Input from '@uikit/components/Input/Input';
 import Dropdown from '@uikit/components/Dropdown/Dropdown';
 import Button from '@uikit/components/Button/Button';
 import SearchSelect from '@uikit/components/SearchSelect/SearchSelect';
+import styles from './styles.module.css';
+import { MusclesMap } from '../MusclesMap';
+import { MUSCLES_OPTIONS } from '../../constants/muscles';
 
 export type ExerciseFormValue = {
   name: string;
@@ -30,8 +30,8 @@ export function ExerciseForm({
   };
 
   const onClear = () => {
-      onChange({ ...form, muscles: [] });
-  }
+    onChange({ ...form, muscles: [] });
+  };
 
   return (
     <div className={styles.root}>
@@ -43,7 +43,10 @@ export function ExerciseForm({
       <Dropdown
         header={`${t('exercises.type')}: ${form.type === 'REPS' ? t('exercises.kindReps') : t('exercises.kindTime')}`}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 8 }}>
+        <div style={{
+          display: 'flex', flexDirection: 'column', gap: 8, padding: 8,
+        }}
+        >
           <Button
             onClick={() => onChange({ ...form, type: 'REPS' })}
           >
@@ -77,5 +80,3 @@ export function ExerciseForm({
     </div>
   );
 }
-
-

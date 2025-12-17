@@ -1,4 +1,1 @@
 export { MusclesMap } from '../MusclesMap';
-
-
-

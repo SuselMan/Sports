@@ -28,5 +28,3 @@ export function AddFab({ onClick, ariaLabel = 'add', disabled }: Props) {
     </Fab>
   );
 }
-
-

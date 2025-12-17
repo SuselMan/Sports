@@ -14,16 +14,16 @@ export function useModalBackClose(open: boolean, onClose: () => void, enabled: b
   const active = enabled && isMobile;
 
   useEffect(() => {
-    if (!active) return;
+    if (!active) return () => {};
     if (open && !pushedRef.current) {
-      history.pushState({ modal: true }, '');
+      window.history.pushState({ modal: true }, '');
       pushedRef.current = true;
       poppedRef.current = false;
     }
     if (!open && pushedRef.current) {
       if (!poppedRef.current) {
         // Closed programmatically; remove our dummy entry
-        history.back();
+        window.history.back();
       }
       pushedRef.current = false;
       poppedRef.current = false;
@@ -32,7 +32,7 @@ export function useModalBackClose(open: boolean, onClose: () => void, enabled: b
     return () => {
       // Cleanup on unmount: if our state is still pushed and not popped, pop it
       if (pushedRef.current && !poppedRef.current) {
-        history.back();
+        window.history.back();
         pushedRef.current = false;
         poppedRef.current = false;
       }
@@ -47,5 +47,3 @@ export function useModalBackClose(open: boolean, onClose: () => void, enabled: b
     }
   }, active);
 }
-
-

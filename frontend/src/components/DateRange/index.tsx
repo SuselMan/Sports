@@ -5,10 +5,9 @@ import DatePicker from '@uikit/components/DatePicker/DatePicker';
 import dayjs from 'dayjs';
 import { isMobile } from 'react-device-detect';
 import { useTranslation } from 'react-i18next';
-import styles from './styles.module.css';
-import CalendarIcon from '@uikit/icons/calendar.svg?react';
 import ChevronLeftIcon from '@uikit/icons/chevron-left.svg?react';
 import ChevronRightIcon from '@uikit/icons/chevron-right.svg?react';
+import styles from './styles.module.css';
 
 export type DateRangeValue = {
   from: string;
@@ -50,12 +49,12 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
                 max={fromMaxMobile}
                 inputClasses={styles.inputWithIcon}
                 onClick={() => {
-                    const el = document.getElementById('date-from') as HTMLInputElement | null;
-                    if (el && typeof (el as any).showPicker === 'function') {
-                        (el as any).showPicker();
-                    } else {
-                        el?.focus();
-                    }
+                  const el = document.getElementById('date-from') as HTMLInputElement | null;
+                  if (el && typeof (el as any).showPicker === 'function') {
+                    (el as any).showPicker();
+                  } else {
+                    el?.focus();
+                  }
                 }}
               />
             </div>
@@ -70,35 +69,35 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
                 max={today.format('YYYY-MM-DD')}
                 inputClasses={styles.inputWithIcon}
                 onClick={() => {
-                    const el = document.getElementById('date-to') as HTMLInputElement | null;
-                    if (el && typeof (el as any).showPicker === 'function') {
-                        (el as any).showPicker();
-                    } else {
-                        el?.focus();
-                    }
+                  const el = document.getElementById('date-to') as HTMLInputElement | null;
+                  if (el && typeof (el as any).showPicker === 'function') {
+                    (el as any).showPicker();
+                  } else {
+                    el?.focus();
+                  }
                 }}
               />
             </div>
           </>
         ) : (
           <>
-              <DatePicker
-                  value={from.toISOString()}
-                  onChange={(iso) => {
-                      if (iso) onChange({ from: iso, to: to.toISOString() });
-                  }}
-                  maxDate={maxFromDate}
-                  inputClassName={styles.fieldInput}
-              />
-              <DatePicker
-                  value={to.toISOString()}
-                  onChange={(iso) => {
-                      if (iso) onChange({ from: from.toISOString(), to: dayjs(iso).endOf('day').toISOString() });
-                  }}
-                  minDate={from}
-                  maxDate={today}
-                  inputClassName={styles.fieldInput}
-              />
+            <DatePicker
+              value={from.toISOString()}
+              onChange={(iso) => {
+                if (iso) onChange({ from: iso, to: to.toISOString() });
+              }}
+              maxDate={maxFromDate}
+              inputClassName={styles.fieldInput}
+            />
+            <DatePicker
+              value={to.toISOString()}
+              onChange={(iso) => {
+                if (iso) onChange({ from: from.toISOString(), to: dayjs(iso).endOf('day').toISOString() });
+              }}
+              minDate={from}
+              maxDate={today}
+              inputClassName={styles.fieldInput}
+            />
           </>
         )}
         <Button size="md" onClick={() => shift(1)} disabled={rightDisabled}><ChevronRightIcon /></Button>
@@ -111,19 +110,19 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
           {t('dateRange.today')}
         </Button>
         <Button
-            size="md"
+          size="md"
           onClick={() => onChange({ from: dayjs().subtract(7, 'day').startOf('day').toISOString(), to: today.endOf('day').toISOString() })}
         >
           {t('dateRange.lastWeek')}
         </Button>
         <Button
-            size="md"
+          size="md"
           onClick={() => onChange({ from: dayjs().subtract(30, 'day').startOf('day').toISOString(), to: today.endOf('day').toISOString() })}
         >
           {t('dateRange.lastMonth')}
         </Button>
         <Button
-            size="md"
+          size="md"
           onClick={() => onChange({ from: dayjs().subtract(365, 'day').startOf('day').toISOString(), to: today.endOf('day').toISOString() })}
         >
           {t('dateRange.lastYear')}
@@ -132,5 +131,3 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
     </div>
   );
 }
-
-

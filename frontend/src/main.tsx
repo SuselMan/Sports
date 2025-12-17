@@ -1,14 +1,14 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import App from './App'
-import { registerSW } from 'virtual:pwa-register'
-import './i18n'
-import './styles/uikit-colors.css'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import { registerSW } from 'virtual:pwa-register';
+import App from './App';
+import './i18n';
+import './styles/uikit-colors.css';
 
 registerSW({
   immediate: true,
-})
+});
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -16,5 +16,4 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <App />
     </BrowserRouter>
   </React.StrictMode>,
-)
-
+);

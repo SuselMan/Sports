@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import Button from '@uikit/components/Button/Button';
 import Modal from '@uikit/components/Modal/Modal';
+import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Exercise, ExerciseType } from '@shared/Exercise.model';
+import type { Muscles } from '@shared/Shared.model';
 import { api } from '../../api/client';
 import { ExerciseForm } from '../../components/ExerciseForm';
 import { ExerciseCard } from '../../components/ExerciseCard';
 import { AddFab } from '../../components/AddFab';
 import { useModalBackClose } from '../../hooks/useModalBackClose';
-import { useSearchParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { Exercise, ExerciseType } from "@shared/Exercise.model";
-import type { Muscles } from "@shared/Shared.model";
 import styles from './styles.module.css';
 
 export default function Exercises() {
@@ -31,7 +31,11 @@ export default function Exercises() {
   const { t } = useTranslation();
 
   const load = async () => {
-    const resp = await api.get('/exercises', { params: { page: 1, pageSize: 200, sortBy: 'name', sortOrder: 'asc' } });
+    const resp = await api.get('/exercises', {
+      params: {
+        page: 1, pageSize: 200, sortBy: 'name', sortOrder: 'asc',
+      },
+    });
     setList(resp.data.list);
   };
 
@@ -134,5 +138,3 @@ export default function Exercises() {
     </div>
   );
 }
-
-

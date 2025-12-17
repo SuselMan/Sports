@@ -18,5 +18,3 @@ export const useDateRangeStore = create<FiltersState>((set) => ({
   },
   setRange: (range) => set({ range }),
 }));
-
-

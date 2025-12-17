@@ -1,27 +1,27 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Button from '@uikit/components/Button/Button';
-import { DateRange } from '../../components/DateRange';
 import Modal from '@uikit/components/Modal/Modal';
+import { Muscles } from '@shared/Shared.model';
+import { Link as RouterLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import Spinner from '@uikit/components/Spinner/Spinner';
+import EmptyView from '@uikit/components/EmptyView/EmptyView';
+import {
+  Exercise,
+  ExerciseRecordResponse,
+  ExerciseRecordsListResponse,
+  ExerciseListResponse,
+} from '@shared/Exercise.model';
+import { AxiosResponse } from 'axios';
+import { DateRange } from '../../components/DateRange';
 import { api } from '../../api/client';
 import { useDateRangeStore } from '../../store/filters';
 import { ExerciseRecordCard } from '../../components/ExerciseRecordCard';
 import { ExerciseGroupCard } from '../../components/ExerciseGroupCard';
 import { ExerciseRecordForm, ExerciseRecordFormValue } from '../../components/ExerciseRecordForm';
 import { MusclesMap } from '../../components/MusclesMap';
-import { Muscles } from '@shared/Shared.model';
 import { AddFab } from '../../components/AddFab';
-import { Link as RouterLink } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { useModalBackClose } from '../../hooks/useModalBackClose';
-import Spinner from '@uikit/components/Spinner/Spinner';
-import EmptyView from '@uikit/components/EmptyView/EmptyView';
-import {
-    Exercise,
-    ExerciseRecordResponse,
-    ExerciseRecordsListResponse,
-    ExerciseListResponse,
-} from '@shared/Exercise.model';
-import {AxiosResponse} from "axios";
 import styles from './styles.module.css';
 
 const Home: React.FC = () => {
@@ -46,12 +46,18 @@ const Home: React.FC = () => {
     (async () => {
       setIsLoadingExercises(true);
       try {
-        const ex: AxiosResponse<ExerciseListResponse> = await api.get('/exercises', { params: { page: 1, pageSize: 100, sortBy: 'name', sortOrder: 'asc' } });
-        if (cancelled) return;
-        setExercises(ex.data.list);
+        const ex: AxiosResponse<ExerciseListResponse> = await api.get('/exercises', {
+          params: {
+            page: 1, pageSize: 100, sortBy: 'name', sortOrder: 'asc',
+          },
+        });
+        if (!cancelled) {
+          setExercises(ex.data.list);
+        }
       } finally {
-        if (cancelled) return;
-        setIsLoadingExercises(false);
+        if (!cancelled) {
+          setIsLoadingExercises(false);
+        }
       }
     })();
     return () => {
@@ -65,13 +71,17 @@ const Home: React.FC = () => {
       setIsLoadingRecords(true);
       try {
         const resp: AxiosResponse<ExerciseRecordsListResponse> = await api.get('/exercises/records', {
-          params: { page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to },
+          params: {
+            page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to,
+          },
         });
-        if (cancelled) return;
-        setRecords(resp.data.list);
+        if (!cancelled) {
+          setRecords(resp.data.list);
+        }
       } finally {
-        if (cancelled) return;
-        setIsLoadingRecords(false);
+        if (!cancelled) {
+          setIsLoadingRecords(false);
+        }
       }
     })();
     return () => {
@@ -95,13 +105,12 @@ const Home: React.FC = () => {
   }, [records]);
 
   const highlightedMuscles = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          records.flatMap((r) => (r.exercise?.muscles ? r.exercise.muscles : []))
-        )
-      ) as Muscles[],
-    [records]
+    () => Array.from(
+      new Set(
+        records.flatMap((r) => (r.exercise?.muscles ? r.exercise.muscles : [])),
+      ),
+    ) as Muscles[],
+    [records],
   );
 
   const submit = async () => {
@@ -117,7 +126,9 @@ const Home: React.FC = () => {
     setOpen(false);
     setForm({ exerciseId: '', kind: 'REPS', date: range.from });
     const resp = await api.get('/exercises/records', {
-      params: { page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to },
+      params: {
+        page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to,
+      },
     });
     setRecords(resp.data.list);
   };
@@ -134,7 +145,7 @@ const Home: React.FC = () => {
 
   return (
     <div className={styles.root}>
-       <DateRange value={range} onChange={setRange} />
+      <DateRange value={range} onChange={setRange} />
 
       {!!records.length && (
         <div className={styles.musclesBox}>
@@ -149,56 +160,55 @@ const Home: React.FC = () => {
           </div>
         ) : (
           <>
-            {groups.map((g) =>
-              g.records.length === 1 ? (
-                <ExerciseRecordCard
-                  key={g.records[0]._id}
-                  record={g.records[0]}
-                  showReps={false}
-                  onDeleted={(id) => setRecords((prev) => prev.filter((x) => x._id !== id))}
-                  onRepeated={(rec) => setRecords((prev) => [rec, ...prev])}
-                  onOpen={(rec) => {
-                    setEditId(rec._id);
-                    setForm({
-                      exerciseId: rec.exerciseId,
-                      kind: rec.kind,
-                      repsAmount: rec.kind === 'REPS' ? String(rec.repsAmount ?? '') : undefined,
-                      durationMs: rec.kind === 'TIME' ? String(rec.durationMs ?? '') : undefined,
-                      weight: rec.weight != null ? String(rec.weight) : undefined,
-                      note: rec.note,
-                      date: rec.date,
-                    });
-                    setEditOpen(true);
-                  }}
-                />
-              ) : (
-                <ExerciseGroupCard
-                  key={g.exercise?._id || g.records[0]._id}
-                  exercise={g.exercise}
-                  records={g.records}
-                  onDeleted={(id) => setRecords((prev) => prev.filter((x) => x._id !== id))}
-                  onRepeated={(rec) => setRecords((prev) => [rec, ...prev])}
-                  onOpen={(rec) => {
-                    setEditId(rec._id);
-                    setForm({
-                      exerciseId: rec.exerciseId,
-                      kind: rec.kind,
-                      repsAmount: rec.kind === 'REPS' ? String(rec.repsAmount ?? '') : undefined,
-                      durationMs: rec.kind === 'TIME' ? String(rec.durationMs ?? '') : undefined,
-                      weight: rec.weight != null ? String(rec.weight) : undefined,
-                      note: rec.note,
-                      date: rec.date,
-                    });
-                    setEditOpen(true);
-                  }}
-                />
-              )
-            )}
+            {groups.map((g) => (g.records.length === 1 ? (
+              <ExerciseRecordCard
+                key={g.records[0]._id}
+                record={g.records[0]}
+                showReps={false}
+                onDeleted={(id) => setRecords((prev) => prev.filter((x) => x._id !== id))}
+                onRepeated={(rec) => setRecords((prev) => [rec, ...prev])}
+                onOpen={(rec) => {
+                  setEditId(rec._id);
+                  setForm({
+                    exerciseId: rec.exerciseId,
+                    kind: rec.kind,
+                    repsAmount: rec.kind === 'REPS' ? String(rec.repsAmount ?? '') : undefined,
+                    durationMs: rec.kind === 'TIME' ? String(rec.durationMs ?? '') : undefined,
+                    weight: rec.weight != null ? String(rec.weight) : undefined,
+                    note: rec.note,
+                    date: rec.date,
+                  });
+                  setEditOpen(true);
+                }}
+              />
+            ) : (
+              <ExerciseGroupCard
+                key={g.exercise?._id || g.records[0]._id}
+                exercise={g.exercise}
+                records={g.records}
+                onDeleted={(id) => setRecords((prev) => prev.filter((x) => x._id !== id))}
+                onRepeated={(rec) => setRecords((prev) => [rec, ...prev])}
+                onOpen={(rec) => {
+                  setEditId(rec._id);
+                  setForm({
+                    exerciseId: rec.exerciseId,
+                    kind: rec.kind,
+                    repsAmount: rec.kind === 'REPS' ? String(rec.repsAmount ?? '') : undefined,
+                    durationMs: rec.kind === 'TIME' ? String(rec.durationMs ?? '') : undefined,
+                    weight: rec.weight != null ? String(rec.weight) : undefined,
+                    note: rec.note,
+                    date: rec.date,
+                  });
+                  setEditOpen(true);
+                }}
+              />
+            )))}
             {!records.length && (
               exercises.length === 0 ? (
                 <EmptyView title={t('home.noExercisesPrefix')}>
                   <div>
-                    <RouterLink to="/exercises?createNew=true">{t('home.createFirstOne')}</RouterLink>{' '}
+                    <RouterLink to="/exercises?createNew=true">{t('home.createFirstOne')}</RouterLink>
+                    {' '}
                     {t('home.noExercisesSuffix')}
                   </div>
                 </EmptyView>
@@ -214,9 +224,9 @@ const Home: React.FC = () => {
           </>
         )}
       </div>
-        {
+      {
             !!exercises.length && (
-                <AddFab onClick={openAddRecord} />
+            <AddFab onClick={openAddRecord} />
             )
         }
       {open && (
@@ -251,7 +261,9 @@ const Home: React.FC = () => {
                   setEditOpen(false);
                   // Refresh list
                   const resp = await api.get('/exercises/records', {
-                    params: { page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to },
+                    params: {
+                      page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to,
+                    },
                   });
                   setRecords(resp.data.list);
                 }}
@@ -267,5 +279,3 @@ const Home: React.FC = () => {
 };
 
 export default Home;
-
-
