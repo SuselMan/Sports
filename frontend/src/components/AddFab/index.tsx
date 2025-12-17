@@ -1,6 +1,6 @@
 import React from 'react';
-import { Fab } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
+import Button from '@uikit/components/Button/Button';
+import PlusIcon from '@uikit/icons/plus.svg?react';
 import styles from './styles.module.css';
 
 type Props = {
@@ -11,20 +11,17 @@ type Props = {
 
 export function AddFab({ onClick, ariaLabel = 'add', disabled }: Props) {
   return (
-    <Fab
-      className={styles.root}
-      color="primary"
-      aria-label={ariaLabel}
-      onClick={onClick}
-      disabled={disabled}
-      sx={{
-        position: 'fixed',
-        right: 16,
-        bottom: 16,
-        zIndex: (theme) => theme.zIndex.appBar + 1,
-      }}
-    >
-      <AddIcon />
-    </Fab>
+    <div className={styles.root}>
+      <Button
+        className={styles.button}
+        aria-label={ariaLabel}
+        onClick={onClick}
+        disabled={disabled}
+        type="active"
+        size="lg"
+      >
+        <PlusIcon aria-hidden="true" focusable="false" />
+      </Button>
+    </div>
   );
 }
