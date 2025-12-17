@@ -2,11 +2,12 @@
   padding: var(--spacing-md);
   background-color: var(--main-bg);
   cursor: pointer;
+  border-radius: 0;
 }
 
-.root:hover {
+/* .root:hover {
     background-color: var(--second-bg);
-}
+} */
 
 
 .row {

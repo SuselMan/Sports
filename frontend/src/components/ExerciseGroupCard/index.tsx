@@ -73,11 +73,11 @@ export function ExerciseGroupCard({
             {' '}
             <span className={styles.summary}>{summary}</span>
           </h3>
-          {!!exercise?.muscles?.length && (
-            <div className={styles.muscles}>
-              {exercise.muscles.join(', ')}
-            </div>
-          )}
+          {/*{!!exercise?.muscles?.length && (*/}
+          {/*  <div className={styles.muscles}>*/}
+          {/*    {exercise.muscles.join(', ')}*/}
+          {/*  </div>*/}
+          {/*)}*/}
         </div>
         <Button
           type="ghost"

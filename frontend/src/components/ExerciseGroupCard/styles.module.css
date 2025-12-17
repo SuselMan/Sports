@@ -2,11 +2,17 @@
   padding: var(--spacing-md);
   background-color: var(--main-bg);
   border-bottom: 1px solid var(--border-color);
+  border-radius: 0;
 }
 
-.root:hover {
-    background-color: var(--second-bg);
+.root:last-child {
+  border: none;
 }
+
+
+/* .root:hover {
+    background-color: var(--second-bg);
+} */
 
 .header {
   display: flex;
@@ -52,4 +58,12 @@
   gap: var(--spacing-sm);
 }
 
+.title {
+  font-weight: 400;
+  color: var(--second-text-color);
+}
 
+.title > span {
+  font-weight: 700;
+  color: var(--main-text-color);
+}

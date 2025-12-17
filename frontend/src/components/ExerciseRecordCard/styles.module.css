@@ -2,6 +2,11 @@
   padding: var(--spacing-md);
   background-color: var(--main-bg);
   border-bottom: 1px solid var(--border-color);
+  border-radius: 0;
+}
+
+.root:last-child {
+  border: none;
 }
 
 .root:hover {
@@ -43,3 +48,12 @@
 /*}*/
 
 
+.title {
+  font-weight: 400;
+  color: var(--second-text-color);
+}
+
+.title > span {
+  font-weight: 700;
+  color: var(--main-text-color);
+}
