@@ -19,8 +19,9 @@ export default defineConfig({
         name: 'Sports',
         short_name: 'Sports',
         description: 'Track exercises and statistics',
-        theme_color: '#000000',
-        background_color: '#121212',
+        // Should match CSS --main-bg in dark theme to avoid a visible seam under Android status bar
+        theme_color: '#2e2e2e',
+        background_color: '#2e2e2e',
         display: 'standalone',
         scope: '/',
         start_url: '/',

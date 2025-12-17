@@ -3,7 +3,7 @@
   top: 0;
   z-index: 10;
   background-color: var(--main-bg);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: none;
 }
 
 .inner {
@@ -43,10 +43,11 @@
   justify-content: center;
 }
 
-@media (min-width: 768px) {
+@media (width >= 768px) {
   .nav {
     display: flex; /* show nav on desktop */
   }
+
   .menuBtn {
     display: none; /* hide menu trigger on desktop */
   }

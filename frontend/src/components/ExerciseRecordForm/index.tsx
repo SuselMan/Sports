@@ -82,15 +82,15 @@ export function ExerciseRecordForm({
           <div className={styles.exerciseList} role="list">
             {filteredExercises.length ? (
               filteredExercises.map((e) => (
-                <Button
-                  key={e._id}
+            <Button
+              key={e._id}
                   type="ghost"
                   size="md"
                   className={styles.exerciseItem}
                   onClick={() => pickExercise(e)}
-                >
-                  {e.name}
-                </Button>
+            >
+              {e.name}
+            </Button>
               ))
             ) : (
               <div className={styles.emptyListText}>No exercises found</div>
@@ -117,63 +117,63 @@ export function ExerciseRecordForm({
               </Button>
             )}
           </div>
-          {isMobile ? (
-            <Input
-              label={t('records.date')}
-              type="date"
-              value={dateValue.format('YYYY-MM-DD')}
-              onChange={(e) => {
-                const d = dayjs((e.target as HTMLInputElement).value);
-                if (d.isValid()) onChange({ ...form, date: d.startOf('day').toISOString() });
-              }}
-              max={today.format('YYYY-MM-DD')}
-            />
-          ) : (
-            <DatePicker
-              label={t('records.date')}
-              value={dateValue.toISOString()}
-              onChange={(iso) => {
-                if (iso) onChange({ ...form, date: dayjs(iso).startOf('day').toISOString() });
-              }}
-              maxDate={today}
-            />
-          )}
-          {form.kind === 'REPS' ? (
-            <Input
-              label={t('records.reps')}
-              type="number"
-              value={form.repsAmount || ''}
-              onChange={(e) => onChange({ ...form, repsAmount: (e.target as HTMLInputElement).value })}
-            />
-          ) : (
-            <Input
-              label={t('records.durationMin')}
-              type="number"
-              value={form.durationMs ? String(Math.round(Number(form.durationMs) / 60000)) : ''}
-              onChange={(e) => {
-                const minutesStr = (e.target as HTMLInputElement).value;
-                if (minutesStr === '') {
-                  onChange({ ...form, durationMs: undefined });
-                  return;
-                }
-                const minutes = Number(minutesStr);
-                if (Number.isFinite(minutes) && minutes >= 0) {
-                  onChange({ ...form, durationMs: String(Math.round(minutes * 60000)) });
-                }
-              }}
-            />
-          )}
-          <Input
-            label={t('records.weightKg')}
-            type="number"
-            value={form.weight || ''}
-            onChange={(e) => onChange({ ...form, weight: (e.target as HTMLInputElement).value })}
-          />
-          {/* <Input */}
-          {/*  label={t('records.note')} */}
-          {/*  value={form.note || ''} */}
-          {/*  onChange={(e) => onChange({ ...form, note: (e.target as HTMLInputElement).value })} */}
-          {/* /> */}
+      {isMobile ? (
+        <Input
+          label={t('records.date')}
+          type="date"
+          value={dateValue.format('YYYY-MM-DD')}
+          onChange={(e) => {
+            const d = dayjs((e.target as HTMLInputElement).value);
+            if (d.isValid()) onChange({ ...form, date: d.startOf('day').toISOString() });
+          }}
+          max={today.format('YYYY-MM-DD')}
+        />
+      ) : (
+        <DatePicker
+          label={t('records.date')}
+          value={dateValue.toISOString()}
+          onChange={(iso) => {
+            if (iso) onChange({ ...form, date: dayjs(iso).startOf('day').toISOString() });
+          }}
+          maxDate={today}
+        />
+      )}
+      {form.kind === 'REPS' ? (
+        <Input
+          label={t('records.reps')}
+          type="number"
+          value={form.repsAmount || ''}
+          onChange={(e) => onChange({ ...form, repsAmount: (e.target as HTMLInputElement).value })}
+        />
+      ) : (
+        <Input
+          label={t('records.durationMin')}
+          type="number"
+          value={form.durationMs ? String(Math.round(Number(form.durationMs) / 60000)) : ''}
+          onChange={(e) => {
+            const minutesStr = (e.target as HTMLInputElement).value;
+            if (minutesStr === '') {
+              onChange({ ...form, durationMs: undefined });
+              return;
+            }
+            const minutes = Number(minutesStr);
+            if (Number.isFinite(minutes) && minutes >= 0) {
+              onChange({ ...form, durationMs: String(Math.round(minutes * 60000)) });
+            }
+          }}
+        />
+      )}
+      <Input
+        label={t('records.weightKg')}
+        type="number"
+        value={form.weight || ''}
+        onChange={(e) => onChange({ ...form, weight: (e.target as HTMLInputElement).value })}
+      />
+      {/* <Input */}
+      {/*  label={t('records.note')} */}
+      {/*  value={form.note || ''} */}
+      {/*  onChange={(e) => onChange({ ...form, note: (e.target as HTMLInputElement).value })} */}
+      {/* /> */}
         </>
       )}
     </div>
