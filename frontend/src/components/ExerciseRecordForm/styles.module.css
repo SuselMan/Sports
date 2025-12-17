@@ -1,4 +1,44 @@
 .root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
 }
 
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.exerciseList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  overflow: auto;
+  padding: var(--spacing-sm);
+  background: var(--main-bg);
+}
+
+.exerciseItem {
+  justify-content: flex-start;
+}
+
+.emptyListText {
+  color: var(--disabled-text-color);
+  font-size: var(--font-size-sm);
+  padding: var(--spacing-sm);
+}
+
+.selectedRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+}
+
+.selectedName {
+  font-weight: 600;
+  color: var(--main-text-color);
+}
 

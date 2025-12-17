@@ -13,6 +13,7 @@ import {
   ExerciseListResponse,
 } from '@shared/Exercise.model';
 import { AxiosResponse } from 'axios';
+import { setLastRecordDefaults } from '../../utils/lastRecordDefaults';
 import { DateRange } from '../../components/DateRange';
 import { api } from '../../api/client';
 import { useDateRangeStore } from '../../store/filters';
@@ -122,6 +123,11 @@ const Home: React.FC = () => {
       date: form.date,
       weight: form.weight ? Number(form.weight) : undefined,
       note: form.note || undefined,
+    });
+    setLastRecordDefaults(form.exerciseId, {
+      repsAmount: form.repsAmount || undefined,
+      durationMs: form.durationMs || undefined,
+      weight: form.weight || undefined,
     });
     setOpen(false);
     setForm({ exerciseId: '', kind: 'REPS', date: range.from });

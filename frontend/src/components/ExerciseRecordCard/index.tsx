@@ -8,6 +8,7 @@ import TrashIcon from '@uikit/icons/trash.svg?react';
 import RetryIcon from '@uikit/icons/arrow-path.svg?react';
 import styles from './styles.module.css';
 import { api } from '../../api/client';
+import { setLastRecordDefaults } from '../../utils/lastRecordDefaults';
 
 dayjs.extend(durationPlugin);
 
@@ -69,6 +70,11 @@ export function ExerciseRecordCard({
     });
     const created = resp.data as ExerciseRecordResponse;
     const withExercise: ExerciseRecordResponse = { ...created, exercise: record.exercise! };
+    setLastRecordDefaults(record.exerciseId, {
+      repsAmount: record.kind === 'REPS' && record.repsAmount != null ? String(record.repsAmount) : undefined,
+      durationMs: record.kind === 'TIME' && record.durationMs != null ? String(record.durationMs) : undefined,
+      weight: record.weight != null ? String(record.weight) : undefined,
+    });
     onRepeated?.(withExercise);
   };
 
