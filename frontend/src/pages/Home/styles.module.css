@@ -15,6 +15,16 @@
    gap: var(--spacing-sm);
  }
  
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-lg) 0;
+}
+
+.emptyActions {
+  margin-top: var(--spacing-md);
+}
+
  .emptyText {
    font-size: 14px;
    color: var(--disabled-text-color);
@@ -31,6 +41,11 @@
    flex-direction: row;
    gap: var(--spacing-sm);
    justify-content: flex-end;
+ }
+
+ .emptyActions{ 
+  display: flex;
+  justify-content: center;
  }
  
 

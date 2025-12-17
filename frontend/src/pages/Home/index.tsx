@@ -8,26 +8,30 @@ import { ExerciseRecordCard } from '../../components/ExerciseRecordCard';
 import { ExerciseGroupCard } from '../../components/ExerciseGroupCard';
 import { ExerciseRecordForm, ExerciseRecordFormValue } from '../../components/ExerciseRecordForm';
 import { MusclesMap } from '../../components/MusclesMap';
-import { Muscles } from '../../../../shared/Shared.model';
+import { Muscles } from '@shared/Shared.model';
 import { AddFab } from '../../components/AddFab';
 import { Link as RouterLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useModalBackClose } from '../../hooks/useModalBackClose';
+import Spinner from '@uikit/components/Spinner/Spinner';
+import EmptyView from '@uikit/components/EmptyView/EmptyView';
 import {
     Exercise,
     ExerciseRecordResponse,
     ExerciseRecordsListResponse,
     ExerciseListResponse,
-} from '../../../../shared/Exercise.model';
+} from '@shared/Exercise.model';
 import {AxiosResponse} from "axios";
 import styles from './styles.module.css';
 
-export default function Home() {
+const Home: React.FC = () => {
   const range = useDateRangeStore((s) => s.range);
   const setRange = useDateRangeStore((s) => s.setRange);
   const { t } = useTranslation();
   const [records, setRecords] = useState<ExerciseRecordResponse[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [isLoadingExercises, setIsLoadingExercises] = useState(true);
+  const [isLoadingRecords, setIsLoadingRecords] = useState(true);
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -38,19 +42,41 @@ export default function Home() {
   });
 
   useEffect(() => {
+    let cancelled = false;
     (async () => {
-      const ex: AxiosResponse<ExerciseListResponse> = await api.get('/exercises', { params: { page: 1, pageSize: 100, sortBy: 'name', sortOrder: 'asc' } });
-      setExercises(ex.data.list);
+      setIsLoadingExercises(true);
+      try {
+        const ex: AxiosResponse<ExerciseListResponse> = await api.get('/exercises', { params: { page: 1, pageSize: 100, sortBy: 'name', sortOrder: 'asc' } });
+        if (cancelled) return;
+        setExercises(ex.data.list);
+      } finally {
+        if (cancelled) return;
+        setIsLoadingExercises(false);
+      }
     })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
     (async () => {
-      const resp: AxiosResponse<ExerciseRecordsListResponse> = await api.get('/exercises/records', {
-        params: { page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to },
-      });
-      setRecords(resp.data.list);
+      setIsLoadingRecords(true);
+      try {
+        const resp: AxiosResponse<ExerciseRecordsListResponse> = await api.get('/exercises/records', {
+          params: { page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to },
+        });
+        if (cancelled) return;
+        setRecords(resp.data.list);
+      } finally {
+        if (cancelled) return;
+        setIsLoadingRecords(false);
+      }
     })();
+    return () => {
+      cancelled = true;
+    };
   }, [range]);
 
   const groups = useMemo<{ exercise: Exercise; records: ExerciseRecordResponse[] }[]>(() => {
@@ -100,6 +126,12 @@ export default function Home() {
   useModalBackClose(open, () => setOpen(false));
   useModalBackClose(editOpen, () => setEditOpen(false));
 
+  const isLoading = isLoadingExercises || isLoadingRecords;
+  const openAddRecord = () => {
+    setForm({ exerciseId: '', kind: 'REPS', date: range.from });
+    setOpen(true);
+  };
+
   return (
     <div className={styles.root}>
        <DateRange value={range} onChange={setRange} />
@@ -111,68 +143,80 @@ export default function Home() {
       )}
 
       <div className={styles.list}>
-        {groups.map((g) =>
-          g.records.length === 1 ? (
-            <ExerciseRecordCard
-              key={g.records[0]._id}
-              record={g.records[0]}
-              showReps={false}
-              onDeleted={(id) => setRecords((prev) => prev.filter((x) => x._id !== id))}
-              onRepeated={(rec) => setRecords((prev) => [rec, ...prev])}
-              onOpen={(rec) => {
-                setEditId(rec._id);
-                setForm({
-                  exerciseId: rec.exerciseId,
-                  kind: rec.kind,
-                  repsAmount: rec.kind === 'REPS' ? String(rec.repsAmount ?? '') : undefined,
-                  durationMs: rec.kind === 'TIME' ? String(rec.durationMs ?? '') : undefined,
-                  weight: rec.weight != null ? String(rec.weight) : undefined,
-                  note: rec.note,
-                  date: rec.date,
-                });
-                setEditOpen(true);
-              }}
-            />
-          ) : (
-            <ExerciseGroupCard
-              key={g.exercise?._id || g.records[0]._id}
-              exercise={g.exercise}
-              records={g.records}
-              onDeleted={(id) => setRecords((prev) => prev.filter((x) => x._id !== id))}
-              onRepeated={(rec) => setRecords((prev) => [rec, ...prev])}
-              onOpen={(rec) => {
-                setEditId(rec._id);
-                setForm({
-                  exerciseId: rec.exerciseId,
-                  kind: rec.kind,
-                  repsAmount: rec.kind === 'REPS' ? String(rec.repsAmount ?? '') : undefined,
-                  durationMs: rec.kind === 'TIME' ? String(rec.durationMs ?? '') : undefined,
-                  weight: rec.weight != null ? String(rec.weight) : undefined,
-                  note: rec.note,
-                  date: rec.date,
-                });
-                setEditOpen(true);
-              }}
-            />
-          )
-        )}
-        {!records.length && (
-          exercises.length === 0 ? (
-            <div className={styles.emptyText}>
-              {t('home.noExercisesPrefix')}{' '}
-              <RouterLink to="/exercises?createNew=true">{t('home.createFirstOne')}</RouterLink>{' '}
-              {t('home.noExercisesSuffix')}
-            </div>
-          ) : (
-            <div className={styles.emptyText}>
-              {t('home.noRecordsForPeriod')}
-            </div>
-          )
+        {isLoading ? (
+          <div className={styles.loading}>
+            <Spinner size="lg" />
+          </div>
+        ) : (
+          <>
+            {groups.map((g) =>
+              g.records.length === 1 ? (
+                <ExerciseRecordCard
+                  key={g.records[0]._id}
+                  record={g.records[0]}
+                  showReps={false}
+                  onDeleted={(id) => setRecords((prev) => prev.filter((x) => x._id !== id))}
+                  onRepeated={(rec) => setRecords((prev) => [rec, ...prev])}
+                  onOpen={(rec) => {
+                    setEditId(rec._id);
+                    setForm({
+                      exerciseId: rec.exerciseId,
+                      kind: rec.kind,
+                      repsAmount: rec.kind === 'REPS' ? String(rec.repsAmount ?? '') : undefined,
+                      durationMs: rec.kind === 'TIME' ? String(rec.durationMs ?? '') : undefined,
+                      weight: rec.weight != null ? String(rec.weight) : undefined,
+                      note: rec.note,
+                      date: rec.date,
+                    });
+                    setEditOpen(true);
+                  }}
+                />
+              ) : (
+                <ExerciseGroupCard
+                  key={g.exercise?._id || g.records[0]._id}
+                  exercise={g.exercise}
+                  records={g.records}
+                  onDeleted={(id) => setRecords((prev) => prev.filter((x) => x._id !== id))}
+                  onRepeated={(rec) => setRecords((prev) => [rec, ...prev])}
+                  onOpen={(rec) => {
+                    setEditId(rec._id);
+                    setForm({
+                      exerciseId: rec.exerciseId,
+                      kind: rec.kind,
+                      repsAmount: rec.kind === 'REPS' ? String(rec.repsAmount ?? '') : undefined,
+                      durationMs: rec.kind === 'TIME' ? String(rec.durationMs ?? '') : undefined,
+                      weight: rec.weight != null ? String(rec.weight) : undefined,
+                      note: rec.note,
+                      date: rec.date,
+                    });
+                    setEditOpen(true);
+                  }}
+                />
+              )
+            )}
+            {!records.length && (
+              exercises.length === 0 ? (
+                <EmptyView title={t('home.noExercisesPrefix')}>
+                  <div>
+                    <RouterLink to="/exercises?createNew=true">{t('home.createFirstOne')}</RouterLink>{' '}
+                    {t('home.noExercisesSuffix')}
+                  </div>
+                </EmptyView>
+              ) : (
+                <EmptyView title={t('home.noRecordsForPeriod')}>
+                  <div>{t('home.noRecordsForPeriodHint')}</div>
+                  <div className={styles.emptyActions}>
+                    <Button type="active" size="md" onClick={openAddRecord}>{t('home.addRecordCta')}</Button>
+                  </div>
+                </EmptyView>
+              )
+            )}
+          </>
         )}
       </div>
         {
             !!exercises.length && (
-                <AddFab onClick={() => { setForm({ exerciseId: '', kind: 'REPS', date: range.from }); setOpen(true); }} />
+                <AddFab onClick={openAddRecord} />
             )
         }
       {open && (
@@ -220,6 +264,8 @@ export default function Home() {
       )}
     </div>
   );
-}
+};
+
+export default Home;
 
 
