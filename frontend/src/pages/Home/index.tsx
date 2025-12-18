@@ -44,17 +44,20 @@ const Home: React.FC = () => {
   const [isLoadingRecords, setIsLoadingRecords] = useState(true);
   const [isLoadingMetrics, setIsLoadingMetrics] = useState(true);
   const [isLoadingMetricRecords, setIsLoadingMetricRecords] = useState(true);
-  const [logChoiceOpen, setLogChoiceOpen] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
+  type CurrentModal =
+    | 'RecordType'
+    | 'ExerciseCreate'
+    | 'ExerciseEdit'
+    | 'MetricCreate'
+    | 'MetricEdit'
+    | null;
+  const [currentModal, setCurrentModal] = useState<CurrentModal>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<ExerciseRecordFormValue>({
     exerciseId: '',
     kind: 'REPS',
     date: range.from,
   });
-  const [metricOpen, setMetricOpen] = useState(false);
-  const [metricEditOpen, setMetricEditOpen] = useState(false);
   const [metricEditId, setMetricEditId] = useState<string | null>(null);
   const [metricForm, setMetricForm] = useState<MetricRecordFormValue>({
     metricId: '',
@@ -196,7 +199,7 @@ const Home: React.FC = () => {
       durationMs: form.durationMs || undefined,
       weight: form.weight || undefined,
     });
-    setOpen(false);
+    setCurrentModal(null);
     setForm({ exerciseId: '', kind: 'REPS', date: range.from });
     const resp = await api.get('/exercises/records', {
       params: {
@@ -213,7 +216,7 @@ const Home: React.FC = () => {
       date: metricForm.date,
       note: metricForm.note || undefined,
     });
-    setMetricOpen(false);
+    setCurrentModal(null);
     setMetricForm({ metricId: '', date: range.from });
     const resp: AxiosResponse<MetricRecordListResponse> = await api.get('/metrics/records', {
       params: {
@@ -224,21 +227,17 @@ const Home: React.FC = () => {
   };
 
   // Close dialogs on mobile back button
-  useModalBackClose(open, () => setOpen(false));
-  useModalBackClose(editOpen, () => setEditOpen(false));
-  useModalBackClose(metricOpen, () => setMetricOpen(false));
-  useModalBackClose(metricEditOpen, () => setMetricEditOpen(false));
-  useModalBackClose(logChoiceOpen, () => setLogChoiceOpen(false));
+  useModalBackClose(currentModal != null, () => setCurrentModal(null));
 
   const isLoading = isLoadingExercises || isLoadingRecords || isLoadingMetrics || isLoadingMetricRecords;
   const openAddRecord = () => {
     setForm({ exerciseId: '', kind: 'REPS', date: range.from });
-    setOpen(true);
+    setCurrentModal('ExerciseCreate');
   };
 
   const openAddMetricRecord = () => {
     setMetricForm({ metricId: '', date: range.from });
-    setMetricOpen(true);
+    setCurrentModal('MetricCreate');
   };
 
   return (
@@ -277,7 +276,7 @@ const Home: React.FC = () => {
                     note: r.note,
                     date: r.date,
                   });
-                  setEditOpen(true);
+                  setCurrentModal('ExerciseEdit');
                 }}
               />
             ) : (
@@ -298,7 +297,7 @@ const Home: React.FC = () => {
                     note: r.note,
                     date: r.date,
                   });
-                  setEditOpen(true);
+                  setCurrentModal('ExerciseEdit');
                 }}
               />
             )))}
@@ -316,7 +315,7 @@ const Home: React.FC = () => {
                     note: r.note,
                     date: r.date,
                   });
-                  setMetricEditOpen(true);
+                  setCurrentModal('MetricEdit');
                 }}
               />
             ))}
@@ -334,7 +333,7 @@ const Home: React.FC = () => {
                 <EmptyView title={t('home.noRecordsForPeriod')}>
                   <div>{t('home.noRecordsForPeriodHint')}</div>
                   <div className={styles.emptyActions}>
-                    <Button type="active" size="md" onClick={() => setLogChoiceOpen(true)}>{t('home.addRecordCta')}</Button>
+                    <Button type="active" size="md" onClick={() => setCurrentModal('RecordType')}>{t('home.addRecordCta')}</Button>
                   </div>
                 </EmptyView>
               )
@@ -343,136 +342,130 @@ const Home: React.FC = () => {
         )}
       </div>
 
-      <AddFab onClick={() => setLogChoiceOpen(true)} disabled={isLoading} />
+      <AddFab onClick={() => setCurrentModal('RecordType')} disabled={isLoading} />
 
-      {logChoiceOpen && (
-        <Modal title={t('home.logWhat')} close={() => setLogChoiceOpen(false)}>
+      {currentModal && (
+        <Modal
+          title={
+            currentModal === 'RecordType' ? t('home.logWhat')
+              : currentModal === 'ExerciseCreate' ? t('records.addTitle')
+                : currentModal === 'ExerciseEdit' ? t('records.editTitle')
+                  : currentModal === 'MetricCreate' ? t('metricRecords.addTitle')
+                    : t('metricRecords.editTitle')
+          }
+          close={() => setCurrentModal(null)}
+        >
           <div className={styles.modalCol}>
-            <Button
-              type="active"
-              size="md"
-              onClick={() => {
-                setLogChoiceOpen(false);
-                setTimeout(() => openAddRecord(), 0);
-              }}
-              disabled={!exercises.length}
-            >
-              {t('home.logExercise')}
-            </Button>
-            <Button
-              type="active"
-              size="md"
-              onClick={() => {
-                setLogChoiceOpen(false);
-                setTimeout(() => openAddRecord(), 0);
-              }}
-              disabled={!metrics.length}
-            >
-              {t('home.logMetric')}
-            </Button>
-            {(!exercises.length || !metrics.length) && (
-              <div className={styles.emptyText}>
-                {!exercises.length ? (
-                  <div>
-                    <RouterLink to="/exercises?createNew=true">{t('home.createFirstOne')}</RouterLink>
+            {currentModal === 'RecordType' && (
+              <>
+                <Button
+                  type="active"
+                  size="md"
+                  onClick={() => {
+                    setForm({ exerciseId: '', kind: 'REPS', date: range.from });
+                    setCurrentModal('ExerciseCreate');
+                  }}
+                  disabled={!exercises.length}
+                >
+                  {t('home.logExercise')}
+                </Button>
+                <Button
+                  type="active"
+                  size="md"
+                  onClick={() => {
+                    setMetricForm({ metricId: '', date: range.from });
+                    setCurrentModal('MetricCreate');
+                  }}
+                  disabled={!metrics.length}
+                >
+                  {t('home.logMetric')}
+                </Button>
+                {(!exercises.length || !metrics.length) && (
+                  <div className={styles.emptyText}>
+                    {!exercises.length ? (
+                      <div>
+                        <RouterLink to="/exercises?createNew=true">{t('home.createFirstOne')}</RouterLink>
+                      </div>
+                    ) : null}
+                    {!metrics.length ? (
+                      <div>
+                        <RouterLink to="/metrics">{t('nav.metrics')}</RouterLink>
+                      </div>
+                    ) : null}
                   </div>
-                ) : null}
-                {!metrics.length ? (
-                  <div>
-                    <RouterLink to="/metrics">{t('nav.metrics')}</RouterLink>
-                  </div>
-                ) : null}
-              </div>
+                )}
+              </>
             )}
-          </div>
-        </Modal>
-      )}
 
-      {open && (
-        <Modal title={t('records.addTitle')} close={() => setOpen(false)}>
-          <div className={styles.modalCol}>
-            <ExerciseRecordForm exercises={exercises} form={form} onChange={setForm} />
-            <div className={styles.modalActions}>
-              <Button onClick={() => setOpen(false)}>{t('actions.cancel')}</Button>
-              <Button onClick={submit}>{t('actions.save')}</Button>
-            </div>
-          </div>
-        </Modal>
-      )}
+            {(currentModal === 'ExerciseCreate' || currentModal === 'ExerciseEdit') && (
+              <>
+                <ExerciseRecordForm exercises={exercises} form={form} onChange={setForm} />
+                <div className={styles.modalActions}>
+                  <Button onClick={() => setCurrentModal(null)}>{t('actions.cancel')}</Button>
+                  <Button
+                    onClick={async () => {
+                      if (currentModal === 'ExerciseCreate') {
+                        await submit();
+                        return;
+                      }
+                      if (!editId) return;
+                      await api.put(`/exercises/records/${editId}`, {
+                        exerciseId: form.exerciseId,
+                        kind: form.kind,
+                        repsAmount: form.kind === 'REPS' ? Number(form.repsAmount) : undefined,
+                        durationMs: form.kind === 'TIME' ? Number(form.durationMs) : undefined,
+                        date: form.date,
+                        weight: form.weight ? Number(form.weight) : undefined,
+                        note: form.note || undefined,
+                      });
+                      setCurrentModal(null);
+                      const resp = await api.get('/exercises/records', {
+                        params: {
+                          page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to,
+                        },
+                      });
+                      setRecords(resp.data.list);
+                    }}
+                  >
+                    {t('actions.save')}
+                  </Button>
+                </div>
+              </>
+            )}
 
-      {editOpen && (
-        <Modal title={t('records.editTitle')} close={() => setEditOpen(false)}>
-          <div className={styles.modalCol}>
-            <ExerciseRecordForm exercises={exercises} form={form} onChange={setForm} />
-            <div className={styles.modalActions}>
-              <Button
-                onClick={async () => {
-                  if (!editId) return;
-                  await api.put(`/exercises/records/${editId}`, {
-                    exerciseId: form.exerciseId,
-                    kind: form.kind,
-                    repsAmount: form.kind === 'REPS' ? Number(form.repsAmount) : undefined,
-                    durationMs: form.kind === 'TIME' ? Number(form.durationMs) : undefined,
-                    date: form.date,
-                    weight: form.weight ? Number(form.weight) : undefined,
-                    note: form.note || undefined,
-                  });
-                  setEditOpen(false);
-                  // Refresh list
-                  const resp = await api.get('/exercises/records', {
-                    params: {
-                      page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to,
-                    },
-                  });
-                  setRecords(resp.data.list);
-                }}
-              >
-                {t('actions.save')}
-              </Button>
-            </div>
-          </div>
-        </Modal>
-      )}
-
-      {metricOpen && (
-        <Modal title={t('metricRecords.addTitle')} close={() => setMetricOpen(false)}>
-          <div className={styles.modalCol}>
-            <MetricRecordForm metrics={metrics} form={metricForm} onChange={setMetricForm} />
-            <div className={styles.modalActions}>
-              <Button onClick={() => setMetricOpen(false)}>{t('actions.cancel')}</Button>
-              <Button onClick={submitMetric} disabled={!metricForm.metricId || !metricForm.value}>{t('actions.save')}</Button>
-            </div>
-          </div>
-        </Modal>
-      )}
-
-      {metricEditOpen && (
-        <Modal title={t('metricRecords.editTitle')} close={() => setMetricEditOpen(false)}>
-          <div className={styles.modalCol}>
-            <MetricRecordForm metrics={metrics} form={metricForm} onChange={setMetricForm} />
-            <div className={styles.modalActions}>
-              <Button
-                onClick={async () => {
-                  if (!metricEditId) return;
-                  await api.put(`/metrics/records/${metricEditId}`, {
-                    metricId: metricForm.metricId,
-                    value: metricForm.value != null ? Number(metricForm.value) : undefined,
-                    date: metricForm.date,
-                    note: metricForm.note || undefined,
-                  });
-                  setMetricEditOpen(false);
-                  const resp: AxiosResponse<MetricRecordListResponse> = await api.get('/metrics/records', {
-                    params: {
-                      page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to,
-                    },
-                  });
-                  setMetricRecords(resp.data.list);
-                }}
-                disabled={!metricForm.metricId || !metricForm.value}
-              >
-                {t('actions.save')}
-              </Button>
-            </div>
+            {(currentModal === 'MetricCreate' || currentModal === 'MetricEdit') && (
+              <>
+                <MetricRecordForm metrics={metrics} form={metricForm} onChange={setMetricForm} />
+                <div className={styles.modalActions}>
+                  <Button onClick={() => setCurrentModal(null)}>{t('actions.cancel')}</Button>
+                  <Button
+                    onClick={async () => {
+                      if (currentModal === 'MetricCreate') {
+                        await submitMetric();
+                        return;
+                      }
+                      if (!metricEditId) return;
+                      await api.put(`/metrics/records/${metricEditId}`, {
+                        metricId: metricForm.metricId,
+                        value: metricForm.value != null ? Number(metricForm.value) : undefined,
+                        date: metricForm.date,
+                        note: metricForm.note || undefined,
+                      });
+                      setCurrentModal(null);
+                      const resp: AxiosResponse<MetricRecordListResponse> = await api.get('/metrics/records', {
+                        params: {
+                          page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to,
+                        },
+                      });
+                      setMetricRecords(resp.data.list);
+                    }}
+                    disabled={!metricForm.metricId || !metricForm.value}
+                  >
+                    {t('actions.save')}
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </Modal>
       )}
