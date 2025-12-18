@@ -91,10 +91,12 @@ const resources = {
       statistics: {
         title: 'Statistics',
         exerciseLabel: 'Exercise',
-        chartRepsPerSet: 'Exercise: Total reps per set',
-        chartWeight: 'Exercise: Weight',
-        chartSetsPerDay: 'Exercise: Sets per day',
-        chartOverallRepsPerDay: 'Overall: Reps per day',
+        noExerciseSelected: 'Select an exercise to see stats',
+        maxRepsSet: 'Max reps (set)',
+        maxRepsDay: 'Max reps (day)',
+        bestE1rm: 'Best e1RM',
+        chartMaxRepsPerDay: 'Max reps per day',
+        chartE1rmPerDay: 'e1RM per day',
       },
       commonTexts: {
         noDataForPeriod: 'No data for chosen period.',
@@ -195,10 +197,12 @@ const resources = {
       statistics: {
         title: 'Статистика',
         exerciseLabel: 'Упражнение',
-        chartRepsPerSet: 'Упражнение: Повторы за подход',
-        chartWeight: 'Упражнение: Вес',
-        chartSetsPerDay: 'Упражнение: Подходов в день',
-        chartOverallRepsPerDay: 'Итого: Повторы в день',
+        noExerciseSelected: 'Выберите упражнение, чтобы увидеть статистику',
+        maxRepsSet: 'Макс. повторы (подход)',
+        maxRepsDay: 'Макс. повторы (день)',
+        bestE1rm: 'Лучший e1RM',
+        chartMaxRepsPerDay: 'Макс. повторы по дням',
+        chartE1rmPerDay: 'e1RM по дням',
       },
       commonTexts: {
         noDataForPeriod: 'Нет данных за выбранный период.',
