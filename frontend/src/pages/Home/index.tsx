@@ -353,7 +353,7 @@ const Home: React.FC = () => {
               size="md"
               onClick={() => {
                 setLogChoiceOpen(false);
-                openAddRecord();
+                setTimeout(() => openAddRecord(), 0);
               }}
               disabled={!exercises.length}
             >
@@ -364,7 +364,7 @@ const Home: React.FC = () => {
               size="md"
               onClick={() => {
                 setLogChoiceOpen(false);
-                openAddMetricRecord();
+                setTimeout(() => openAddRecord(), 0);
               }}
               disabled={!metrics.length}
             >
