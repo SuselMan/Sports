@@ -23,6 +23,7 @@ import { DateRange } from '../../components/DateRange';
 import { api } from '../../api/client';
 import { useDateRangeStore } from '../../store/filters';
 import { ExerciseRecordCard } from '../../components/ExerciseRecordCard';
+import { ExerciseGroupCard } from '../../components/ExerciseGroupCard';
 import { ExerciseRecordForm, ExerciseRecordFormValue } from '../../components/ExerciseRecordForm';
 import { MetricRecordForm, MetricRecordFormValue } from '../../components/MetricRecordForm';
 import { MetricRecordCard } from '../../components/MetricRecordCard';
@@ -165,6 +166,21 @@ const Home: React.FC = () => {
     [records],
   );
 
+  const groups = useMemo<{ exercise: Exercise; records: ExerciseRecordResponse[] }[]>(() => {
+    const order: string[] = [];
+    const map = new Map<string, { exercise: Exercise; records: ExerciseRecordResponse[] }>();
+    records.forEach((r) => {
+      const key = r.exerciseId;
+      if (!map.has(key)) {
+        order.push(key);
+        map.set(key, { exercise: r.exercise, records: [r] });
+      } else {
+        map.get(key)!.records.push(r);
+      }
+    });
+    return order.map((k) => map.get(k)!).filter(Boolean);
+  }, [records]);
+
   const submit = async () => {
     if (!form.exerciseId) return;
     await api.post(`/exercises/${form.exerciseId}/records`, {
@@ -242,10 +258,10 @@ const Home: React.FC = () => {
           </div>
         ) : (
           <>
-            {records.map((rec) => (
+            {groups.map((g) => (g.records.length === 1 ? (
               <ExerciseRecordCard
-                key={rec._id}
-                record={rec}
+                key={g.records[0]._id}
+                record={g.records[0]}
                 showReps={false}
                 showMuscles={false}
                 onDeleted={(id) => setRecords((prev) => prev.filter((x) => x._id !== id))}
@@ -264,7 +280,28 @@ const Home: React.FC = () => {
                   setEditOpen(true);
                 }}
               />
-            ))}
+            ) : (
+              <ExerciseGroupCard
+                key={g.exercise?._id || g.records[0]._id}
+                exercise={g.exercise}
+                records={g.records}
+                onDeleted={(id) => setRecords((prev) => prev.filter((x) => x._id !== id))}
+                onRepeated={(created) => setRecords((prev) => [created, ...prev])}
+                onOpen={(r) => {
+                  setEditId(r._id);
+                  setForm({
+                    exerciseId: r.exerciseId,
+                    kind: r.kind,
+                    repsAmount: r.kind === 'REPS' ? String(r.repsAmount ?? '') : undefined,
+                    durationMs: r.kind === 'TIME' ? String(r.durationMs ?? '') : undefined,
+                    weight: r.weight != null ? String(r.weight) : undefined,
+                    note: r.note,
+                    date: r.date,
+                  });
+                  setEditOpen(true);
+                }}
+              />
+            )))}
 
             {metricRecords.map((mr) => (
               <MetricRecordCard
