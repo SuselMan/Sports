@@ -29,6 +29,9 @@ const resources = {
         noRecordsForPeriod: 'No records for chosen period',
         noRecordsForPeriodHint: 'Add a record for this period to start tracking your workouts.',
         addRecordCta: 'Add record',
+        logWhat: 'What do you want to log?',
+        logExercise: 'Exercise',
+        logMetric: 'Metric',
       },
       dateRange: {
         from: 'From',
@@ -71,6 +74,15 @@ const resources = {
         durationLabel: 'duration',
         musclesLabel: 'muscles',
         fallbackExerciseName: 'Exercise',
+      },
+      metricRecords: {
+        addTitle: 'Add Metric Record',
+        editTitle: 'Edit Metric Record',
+        metric: 'Metric',
+        date: 'Date',
+        value: 'Value',
+        note: 'Note',
+        fallbackMetricName: 'Metric',
       },
       actions: {
         cancel: 'Cancel',
@@ -121,6 +133,9 @@ const resources = {
         noRecordsForPeriod: 'Нет записей за выбранный период',
         noRecordsForPeriodHint: 'Добавьте запись за этот период, чтобы начать отслеживание.',
         addRecordCta: 'Добавить запись',
+        logWhat: 'Что вы хотите записать?',
+        logExercise: 'Упражнение',
+        logMetric: 'Метрика',
       },
       dateRange: {
         from: 'От',
@@ -163,6 +178,15 @@ const resources = {
         durationLabel: 'длительность',
         musclesLabel: 'мышцы',
         fallbackExerciseName: 'Упражнение',
+      },
+      metricRecords: {
+        addTitle: 'Добавить метрику',
+        editTitle: 'Редактировать метрику',
+        metric: 'Метрика',
+        date: 'Дата',
+        value: 'Значение',
+        note: 'Заметка',
+        fallbackMetricName: 'Метрика',
       },
       actions: {
         cancel: 'Отмена',

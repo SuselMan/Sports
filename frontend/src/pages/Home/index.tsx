@@ -12,14 +12,20 @@ import {
   ExerciseRecordsListResponse,
   ExerciseListResponse,
 } from '@shared/Exercise.model';
+import type {
+  Metric,
+  MetricRecordListResponse,
+  MetricRecordResponse,
+} from '@shared/Metrics.model';
 import { AxiosResponse } from 'axios';
 import { setLastRecordDefaults } from '../../utils/lastRecordDefaults';
 import { DateRange } from '../../components/DateRange';
 import { api } from '../../api/client';
 import { useDateRangeStore } from '../../store/filters';
 import { ExerciseRecordCard } from '../../components/ExerciseRecordCard';
-import { ExerciseGroupCard } from '../../components/ExerciseGroupCard';
 import { ExerciseRecordForm, ExerciseRecordFormValue } from '../../components/ExerciseRecordForm';
+import { MetricRecordForm, MetricRecordFormValue } from '../../components/MetricRecordForm';
+import { MetricRecordCard } from '../../components/MetricRecordCard';
 import { MusclesMap } from '../../components/MusclesMap';
 import { AddFab } from '../../components/AddFab';
 import { useModalBackClose } from '../../hooks/useModalBackClose';
@@ -31,14 +37,26 @@ const Home: React.FC = () => {
   const { t } = useTranslation();
   const [records, setRecords] = useState<ExerciseRecordResponse[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [metrics, setMetrics] = useState<Metric[]>([]);
+  const [metricRecords, setMetricRecords] = useState<MetricRecordResponse[]>([]);
   const [isLoadingExercises, setIsLoadingExercises] = useState(true);
   const [isLoadingRecords, setIsLoadingRecords] = useState(true);
+  const [isLoadingMetrics, setIsLoadingMetrics] = useState(true);
+  const [isLoadingMetricRecords, setIsLoadingMetricRecords] = useState(true);
+  const [logChoiceOpen, setLogChoiceOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<ExerciseRecordFormValue>({
     exerciseId: '',
     kind: 'REPS',
+    date: range.from,
+  });
+  const [metricOpen, setMetricOpen] = useState(false);
+  const [metricEditOpen, setMetricEditOpen] = useState(false);
+  const [metricEditId, setMetricEditId] = useState<string | null>(null);
+  const [metricForm, setMetricForm] = useState<MetricRecordFormValue>({
+    metricId: '',
     date: range.from,
   });
 
@@ -58,6 +76,30 @@ const Home: React.FC = () => {
       } finally {
         if (!cancelled) {
           setIsLoadingExercises(false);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setIsLoadingMetrics(true);
+      try {
+        const resp = await api.get('/metrics', {
+          params: {
+            page: 1, pageSize: 200, sortBy: 'name', sortOrder: 'asc',
+          },
+        });
+        if (!cancelled) {
+          setMetrics(resp.data.list);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingMetrics(false);
         }
       }
     })();
@@ -90,20 +132,29 @@ const Home: React.FC = () => {
     };
   }, [range]);
 
-  const groups = useMemo<{ exercise: Exercise; records: ExerciseRecordResponse[] }[]>(() => {
-    const order: string[] = [];
-    const map = new Map<string, { exercise: Exercise; records: ExerciseRecordResponse[] }>();
-    records.forEach((r) => {
-      const key = r.exerciseId;
-      if (!map.has(key)) {
-        order.push(key);
-        map.set(key, { exercise: r.exercise, records: [r] });
-      } else {
-        map.get(key)!.records.push(r);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setIsLoadingMetricRecords(true);
+      try {
+        const resp: AxiosResponse<MetricRecordListResponse> = await api.get('/metrics/records', {
+          params: {
+            page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to,
+          },
+        });
+        if (!cancelled) {
+          setMetricRecords(resp.data.list);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingMetricRecords(false);
+        }
       }
-    });
-    return order.map((k) => map.get(k)!);
-  }, [records]);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [range]);
 
   const highlightedMuscles = useMemo(
     () => Array.from(
@@ -139,14 +190,39 @@ const Home: React.FC = () => {
     setRecords(resp.data.list);
   };
 
+  const submitMetric = async () => {
+    if (!metricForm.metricId || !metricForm.value) return;
+    await api.post(`/metrics/${metricForm.metricId}/records`, {
+      value: Number(metricForm.value),
+      date: metricForm.date,
+      note: metricForm.note || undefined,
+    });
+    setMetricOpen(false);
+    setMetricForm({ metricId: '', date: range.from });
+    const resp: AxiosResponse<MetricRecordListResponse> = await api.get('/metrics/records', {
+      params: {
+        page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to,
+      },
+    });
+    setMetricRecords(resp.data.list);
+  };
+
   // Close dialogs on mobile back button
   useModalBackClose(open, () => setOpen(false));
   useModalBackClose(editOpen, () => setEditOpen(false));
+  useModalBackClose(metricOpen, () => setMetricOpen(false));
+  useModalBackClose(metricEditOpen, () => setMetricEditOpen(false));
+  useModalBackClose(logChoiceOpen, () => setLogChoiceOpen(false));
 
-  const isLoading = isLoadingExercises || isLoadingRecords;
+  const isLoading = isLoadingExercises || isLoadingRecords || isLoadingMetrics || isLoadingMetricRecords;
   const openAddRecord = () => {
     setForm({ exerciseId: '', kind: 'REPS', date: range.from });
     setOpen(true);
+  };
+
+  const openAddMetricRecord = () => {
+    setMetricForm({ metricId: '', date: range.from });
+    setMetricOpen(true);
   };
 
   return (
@@ -166,52 +242,50 @@ const Home: React.FC = () => {
           </div>
         ) : (
           <>
-            {groups.map((g) => (g.records.length === 1 ? (
+            {records.map((rec) => (
               <ExerciseRecordCard
-                key={g.records[0]._id}
-                record={g.records[0]}
+                key={rec._id}
+                record={rec}
                 showReps={false}
                 showMuscles={false}
                 onDeleted={(id) => setRecords((prev) => prev.filter((x) => x._id !== id))}
-                onRepeated={(rec) => setRecords((prev) => [rec, ...prev])}
-                onOpen={(rec) => {
-                  setEditId(rec._id);
+                onRepeated={(created) => setRecords((prev) => [created, ...prev])}
+                onOpen={(r) => {
+                  setEditId(r._id);
                   setForm({
-                    exerciseId: rec.exerciseId,
-                    kind: rec.kind,
-                    repsAmount: rec.kind === 'REPS' ? String(rec.repsAmount ?? '') : undefined,
-                    durationMs: rec.kind === 'TIME' ? String(rec.durationMs ?? '') : undefined,
-                    weight: rec.weight != null ? String(rec.weight) : undefined,
-                    note: rec.note,
-                    date: rec.date,
+                    exerciseId: r.exerciseId,
+                    kind: r.kind,
+                    repsAmount: r.kind === 'REPS' ? String(r.repsAmount ?? '') : undefined,
+                    durationMs: r.kind === 'TIME' ? String(r.durationMs ?? '') : undefined,
+                    weight: r.weight != null ? String(r.weight) : undefined,
+                    note: r.note,
+                    date: r.date,
                   });
                   setEditOpen(true);
                 }}
               />
-            ) : (
-              <ExerciseGroupCard
-                key={g.exercise?._id || g.records[0]._id}
-                exercise={g.exercise}
-                records={g.records}
-                onDeleted={(id) => setRecords((prev) => prev.filter((x) => x._id !== id))}
-                onRepeated={(rec) => setRecords((prev) => [rec, ...prev])}
-                onOpen={(rec) => {
-                  setEditId(rec._id);
-                  setForm({
-                    exerciseId: rec.exerciseId,
-                    kind: rec.kind,
-                    repsAmount: rec.kind === 'REPS' ? String(rec.repsAmount ?? '') : undefined,
-                    durationMs: rec.kind === 'TIME' ? String(rec.durationMs ?? '') : undefined,
-                    weight: rec.weight != null ? String(rec.weight) : undefined,
-                    note: rec.note,
-                    date: rec.date,
+            ))}
+
+            {metricRecords.map((mr) => (
+              <MetricRecordCard
+                key={mr._id}
+                record={mr}
+                onDeleted={(id) => setMetricRecords((prev) => prev.filter((x) => x._id !== id))}
+                onOpen={(r) => {
+                  setMetricEditId(r._id);
+                  setMetricForm({
+                    metricId: r.metricId,
+                    value: String(r.value),
+                    note: r.note,
+                    date: r.date,
                   });
-                  setEditOpen(true);
+                  setMetricEditOpen(true);
                 }}
               />
-            )))}
-            {!records.length && (
-              exercises.length === 0 ? (
+            ))}
+
+            {!records.length && !metricRecords.length && (
+              exercises.length === 0 && metrics.length === 0 ? (
                 <EmptyView title={t('home.noExercisesPrefix')}>
                   <div>
                     <RouterLink to="/exercises?createNew=true">{t('home.createFirstOne')}</RouterLink>
@@ -223,7 +297,7 @@ const Home: React.FC = () => {
                 <EmptyView title={t('home.noRecordsForPeriod')}>
                   <div>{t('home.noRecordsForPeriodHint')}</div>
                   <div className={styles.emptyActions}>
-                    <Button type="active" size="md" onClick={openAddRecord}>{t('home.addRecordCta')}</Button>
+                    <Button type="active" size="md" onClick={() => setLogChoiceOpen(true)}>{t('home.addRecordCta')}</Button>
                   </div>
                 </EmptyView>
               )
@@ -231,11 +305,52 @@ const Home: React.FC = () => {
           </>
         )}
       </div>
-      {
-            !!exercises.length && (
-            <AddFab onClick={openAddRecord} />
-            )
-        }
+
+      <AddFab onClick={() => setLogChoiceOpen(true)} disabled={isLoading} />
+
+      {logChoiceOpen && (
+        <Modal title={t('home.logWhat')} close={() => setLogChoiceOpen(false)}>
+          <div className={styles.modalCol}>
+            <Button
+              type="active"
+              size="md"
+              onClick={() => {
+                setLogChoiceOpen(false);
+                openAddRecord();
+              }}
+              disabled={!exercises.length}
+            >
+              {t('home.logExercise')}
+            </Button>
+            <Button
+              type="active"
+              size="md"
+              onClick={() => {
+                setLogChoiceOpen(false);
+                openAddMetricRecord();
+              }}
+              disabled={!metrics.length}
+            >
+              {t('home.logMetric')}
+            </Button>
+            {(!exercises.length || !metrics.length) && (
+              <div className={styles.emptyText}>
+                {!exercises.length ? (
+                  <div>
+                    <RouterLink to="/exercises?createNew=true">{t('home.createFirstOne')}</RouterLink>
+                  </div>
+                ) : null}
+                {!metrics.length ? (
+                  <div>
+                    <RouterLink to="/metrics">{t('nav.metrics')}</RouterLink>
+                  </div>
+                ) : null}
+              </div>
+            )}
+          </div>
+        </Modal>
+      )}
+
       {open && (
         <Modal title={t('records.addTitle')} close={() => setOpen(false)}>
           <div className={styles.modalCol}>
@@ -274,6 +389,49 @@ const Home: React.FC = () => {
                   });
                   setRecords(resp.data.list);
                 }}
+              >
+                {t('actions.save')}
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {metricOpen && (
+        <Modal title={t('metricRecords.addTitle')} close={() => setMetricOpen(false)}>
+          <div className={styles.modalCol}>
+            <MetricRecordForm metrics={metrics} form={metricForm} onChange={setMetricForm} />
+            <div className={styles.modalActions}>
+              <Button onClick={() => setMetricOpen(false)}>{t('actions.cancel')}</Button>
+              <Button onClick={submitMetric} disabled={!metricForm.metricId || !metricForm.value}>{t('actions.save')}</Button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {metricEditOpen && (
+        <Modal title={t('metricRecords.editTitle')} close={() => setMetricEditOpen(false)}>
+          <div className={styles.modalCol}>
+            <MetricRecordForm metrics={metrics} form={metricForm} onChange={setMetricForm} />
+            <div className={styles.modalActions}>
+              <Button
+                onClick={async () => {
+                  if (!metricEditId) return;
+                  await api.put(`/metrics/records/${metricEditId}`, {
+                    metricId: metricForm.metricId,
+                    value: metricForm.value != null ? Number(metricForm.value) : undefined,
+                    date: metricForm.date,
+                    note: metricForm.note || undefined,
+                  });
+                  setMetricEditOpen(false);
+                  const resp: AxiosResponse<MetricRecordListResponse> = await api.get('/metrics/records', {
+                    params: {
+                      page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to,
+                    },
+                  });
+                  setMetricRecords(resp.data.list);
+                }}
+                disabled={!metricForm.metricId || !metricForm.value}
               >
                 {t('actions.save')}
               </Button>

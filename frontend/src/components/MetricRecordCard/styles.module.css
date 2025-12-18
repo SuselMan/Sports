@@ -1,0 +1,47 @@
+.root {
+  padding: var(--spacing-md);
+  background-color: var(--main-bg);
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 0;
+}
+
+.root:last-child {
+  border: none;
+}
+
+.root:hover {
+  background-color: var(--second-bg);
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.relative {
+  position: relative;
+}
+
+.iconDelete {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+}
+
+.caption {
+  font-size: var(--font-size-sm);
+  color: var(--disabled-text-color);
+}
+
+.title {
+  font-weight: 400;
+  color: var(--second-text-color);
+  font-size: var(--font-size-md);
+}
+
+.title > span {
+  font-weight: 700;
+  color: var(--main-text-color);
+  font-size: var(--font-size-md);
+}
+
+

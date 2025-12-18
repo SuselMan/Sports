@@ -1,6 +1,11 @@
 import { Router } from 'express';
 import mongoose from 'mongoose';
-import type { MetricCreateRequest, MetricUpdateRequest } from '../../../shared/Metrics.model';
+import type {
+  MetricCreateRequest,
+  MetricUpdateRequest,
+  MetricRecordCreateRequest,
+  MetricRecordUpdateRequest,
+} from '../../../shared/Metrics.model';
 import { MetricModel, MetricRecordModel } from '../models/Metric';
 import { AuthedRequest } from '../auth';
 import { buildSort, getPagination } from '../utils/pagination';
@@ -73,13 +78,55 @@ metricsRouter.post('/:metricId/records', async (req: AuthedRequest, res) => {
     const userId = new mongoose.Types.ObjectId(req.userId!);
     const { metricId } = req.params;
     const metricObjectId = new mongoose.Types.ObjectId(metricId);
-    const { value, date, note } = req.body as { value: number; date: string; note?: string };
+    const { value, date, note } = req.body as MetricRecordCreateRequest;
     const created = await MetricRecordModel.create({
       userId, metricId: metricObjectId, value, date, note,
     });
     res.json(created);
   } catch (e: any) {
     res.status(400).json({ error: e.message });
+  }
+});
+
+// Delete a record
+metricsRouter.delete('/records/:recordId', async (req: AuthedRequest, res) => {
+  try {
+    const userId = new mongoose.Types.ObjectId(req.userId!);
+    const { recordId } = req.params;
+    const _id = new mongoose.Types.ObjectId(recordId);
+    const result = await MetricRecordModel.deleteOne({ _id, userId });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Record not found' });
+    }
+    return res.json({ ok: true });
+  } catch (e: any) {
+    return res.status(400).json({ error: e.message });
+  }
+});
+
+// Update a record
+metricsRouter.put('/records/:recordId', async (req: AuthedRequest, res) => {
+  try {
+    const userId = new mongoose.Types.ObjectId(req.userId!);
+    const { recordId } = req.params;
+    const _id = new mongoose.Types.ObjectId(recordId);
+    const {
+      metricId,
+      value,
+      date,
+      note,
+    } = req.body as MetricRecordUpdateRequest;
+    const update: any = {};
+    if (metricId != null) update.metricId = new mongoose.Types.ObjectId(metricId);
+    if (value != null) update.value = value;
+    if (date != null) update.date = date;
+    if (note === null) update.note = undefined;
+    else if (note != null) update.note = note;
+    const result = await MetricRecordModel.findOneAndUpdate({ _id, userId }, update, { new: true });
+    if (!result) return res.status(404).json({ error: 'Record not found' });
+    return res.json(result);
+  } catch (e: any) {
+    return res.status(400).json({ error: e.message });
   }
 });
 

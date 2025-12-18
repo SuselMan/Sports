@@ -50,6 +50,19 @@ export type MetricRecord = {
   note?: string;
 };
 
+export type MetricRecordCreateRequest = {
+  value: number;
+  date: ISODateString;
+  note?: string;
+};
+
+export type MetricRecordUpdateRequest = {
+  metricId?: string;
+  value?: number;
+  date?: ISODateString;
+  note?: string | null;
+};
+
 export type MetricRecordResponse = MetricRecord & {
   metric: Metric;
 };
