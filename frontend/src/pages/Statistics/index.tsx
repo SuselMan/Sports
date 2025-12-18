@@ -146,17 +146,10 @@ export default function Statistics() {
     return max;
   }, [repsPerDayTotal]);
 
-  const dailyMaxRepsSeries = useMemo(() => {
-    const map = new Map<string, number>();
-    repsRecords.forEach((r) => {
-      const key = dayKey(r.date);
-      const v = r.repsAmount as number;
-      map.set(key, Math.max(map.get(key) || 0, v));
-    });
-    return Array.from(map.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([date, value]) => ({ date, value }));
-  }, [repsRecords]);
+  // reps per day (total reps for the day)
+  const repsPerDaySeries = useMemo(() => Array.from(repsPerDayTotal.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, value]) => ({ date, value })), [repsPerDayTotal]);
 
   const e1rmRecords = useMemo(() => repsRecords
     .filter((r) => typeof r.weight === 'number' && (r.weight as number) > 0)
@@ -224,7 +217,7 @@ export default function Statistics() {
               <div className={styles.blockTitle}>{t('statistics.chartMaxRepsPerDay')}</div>
               <div className={styles.chartBox}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={dailyMaxRepsSeries}>
+                  <LineChart data={repsPerDaySeries}>
                     <CartesianGrid stroke="#eee" />
                     <XAxis
                       dataKey="date"
