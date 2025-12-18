@@ -27,6 +27,9 @@ export function AppTopBar() {
             <Button type="ghost" onClick={() => navigate('/exercises')}>
               {t('nav.exercises')}
             </Button>
+            <Button type="ghost" onClick={() => navigate('/metrics')}>
+              {t('nav.metrics')}
+            </Button>
             <Button type="ghost" onClick={() => navigate('/statistics')}>
               {t('nav.statistics')}
             </Button>
@@ -52,6 +55,9 @@ export function AppTopBar() {
             </Button>
             <Button onClick={() => { setOpen(false); navigate('/exercises'); }}>
               {t('nav.exercises')}
+            </Button>
+            <Button onClick={() => { setOpen(false); navigate('/metrics'); }}>
+              {t('nav.metrics')}
             </Button>
             <Button onClick={() => { setOpen(false); navigate('/statistics'); }}>
               {t('nav.statistics')}

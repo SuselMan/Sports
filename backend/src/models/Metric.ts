@@ -9,6 +9,8 @@ const metricSchema = new mongoose.Schema(
       type: String, required: true, maxlength: 100, index: true,
     },
     unit: { type: String, required: true, maxlength: 20 },
+    muscles: { type: [String], required: false, default: [] },
+    archived: { type: Boolean, default: false, index: true },
   },
   { timestamps: true },
 );

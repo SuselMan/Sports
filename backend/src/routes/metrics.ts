@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import mongoose from 'mongoose';
-import type { Unit } from '../../../shared/Metrics.model';
+import type { MetricCreateRequest, MetricUpdateRequest } from '../../../shared/Metrics.model';
 import { MetricModel, MetricRecordModel } from '../models/Metric';
 import { AuthedRequest } from '../auth';
 import { buildSort, getPagination } from '../utils/pagination';
@@ -9,9 +9,14 @@ export const metricsRouter = Router();
 
 metricsRouter.post('/', async (req: AuthedRequest, res) => {
   try {
-    const userId = req.userId!;
-    const { name, unit } = req.body as { name: string; unit: Unit };
-    const created = await MetricModel.create({ userId, name, unit });
+    const userId = new mongoose.Types.ObjectId(req.userId!);
+    const { name, unit, muscles } = req.body as MetricCreateRequest;
+    const created = await MetricModel.create({
+      userId,
+      name,
+      unit,
+      muscles: muscles ?? [],
+    });
     res.json(created);
   } catch (e: any) {
     res.status(400).json({ error: e.message });
@@ -19,11 +24,11 @@ metricsRouter.post('/', async (req: AuthedRequest, res) => {
 });
 
 metricsRouter.get('/', async (req: AuthedRequest, res) => {
-  const userId = req.userId!;
+  const userId = new mongoose.Types.ObjectId(req.userId!);
   const {
     page, pageSize, sortBy, sortOrder,
   } = getPagination(req);
-  const q: any = { userId };
+  const q: any = { userId, archived: { $ne: true } };
   const total = await MetricModel.countDocuments(q);
   const list = await MetricModel.find(q)
     .sort(buildSort(sortBy!, sortOrder!) as any)
@@ -32,13 +37,45 @@ metricsRouter.get('/', async (req: AuthedRequest, res) => {
   res.json({ list, pagination: { total, page, pageSize } });
 });
 
+metricsRouter.put('/:metricId', async (req: AuthedRequest, res) => {
+  try {
+    const userId = new mongoose.Types.ObjectId(req.userId!);
+    const { metricId } = req.params;
+    const _id = new mongoose.Types.ObjectId(metricId);
+    const { name, unit, muscles } = req.body as MetricUpdateRequest;
+    const update: any = {};
+    if (name != null) update.name = name;
+    if (unit != null) update.unit = unit;
+    if (muscles != null) update.muscles = muscles;
+    const updated = await MetricModel.findOneAndUpdate({ _id, userId }, update, { new: true });
+    if (!updated) return res.status(404).json({ error: 'Metric not found' });
+    return res.json(updated);
+  } catch (e: any) {
+    return res.status(400).json({ error: e.message });
+  }
+});
+
+metricsRouter.delete('/:metricId', async (req: AuthedRequest, res) => {
+  try {
+    const userId = new mongoose.Types.ObjectId(req.userId!);
+    const { metricId } = req.params;
+    const _id = new mongoose.Types.ObjectId(metricId);
+    const updated = await MetricModel.findOneAndUpdate({ _id, userId }, { archived: true }, { new: true });
+    if (!updated) return res.status(404).json({ error: 'Metric not found' });
+    return res.json({ ok: true });
+  } catch (e: any) {
+    return res.status(400).json({ error: e.message });
+  }
+});
+
 metricsRouter.post('/:metricId/records', async (req: AuthedRequest, res) => {
   try {
-    const userId = req.userId!;
+    const userId = new mongoose.Types.ObjectId(req.userId!);
     const { metricId } = req.params;
+    const metricObjectId = new mongoose.Types.ObjectId(metricId);
     const { value, date, note } = req.body as { value: number; date: string; note?: string };
     const created = await MetricRecordModel.create({
-      userId, metricId, value, date, note,
+      userId, metricId: metricObjectId, value, date, note,
     });
     res.json(created);
   } catch (e: any) {
@@ -47,8 +84,7 @@ metricsRouter.post('/:metricId/records', async (req: AuthedRequest, res) => {
 });
 
 metricsRouter.get('/records', async (req: AuthedRequest, res) => {
-  const userId = req.userId!;
-  const userObjectId = new mongoose.Types.ObjectId(userId);
+  const userObjectId = new mongoose.Types.ObjectId(req.userId!);
   const {
     page, pageSize, sortBy, sortOrder,
   } = getPagination(req);

@@ -3,6 +3,8 @@ import Button from '@uikit/components/Button/Button';
 import Modal from '@uikit/components/Modal/Modal';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import Spinner from '@uikit/components/Spinner/Spinner';
+import EmptyView from '@uikit/components/EmptyView/EmptyView';
 import { Exercise, ExerciseType } from '@shared/Exercise.model';
 import type { Muscles } from '@shared/Shared.model';
 import { api } from '../../api/client';
@@ -14,6 +16,7 @@ import styles from './styles.module.css';
 
 export default function Exercises() {
   const [list, setList] = useState<Exercise[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<{ name: string; type: ExerciseType; muscles: Muscles[] }>({
     name: '',
@@ -31,12 +34,17 @@ export default function Exercises() {
   const { t } = useTranslation();
 
   const load = async () => {
-    const resp = await api.get('/exercises', {
-      params: {
-        page: 1, pageSize: 200, sortBy: 'name', sortOrder: 'asc',
-      },
-    });
-    setList(resp.data.list);
+    setIsLoading(true);
+    try {
+      const resp = await api.get('/exercises', {
+        params: {
+          page: 1, pageSize: 200, sortBy: 'name', sortOrder: 'asc',
+        },
+      });
+      setList(resp.data.list);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -79,22 +87,38 @@ export default function Exercises() {
       </div>
 
       <div className={styles.list}>
-        {list.map((e) => (
-          <ExerciseCard
-            key={e._id}
-            exercise={e}
-            onDelete={async (id) => {
-              await api.delete(`/exercises/${id}`);
-              setList((prev) => prev.filter((x) => x._id !== id));
-            }}
-            onOpen={(ex) => {
-              setEditId(ex._id);
-              setEditForm({ name: ex.name, type: ex.type, muscles: ex.muscles });
-              setEditOpen(true);
-            }}
-          />
-        ))}
-        {!list.length && <div className={styles.empty}>No data for chosen period.</div>}
+        {isLoading ? (
+          <div className={styles.loading}>
+            <Spinner size="lg" />
+          </div>
+        ) : (
+          <>
+            {list.map((e) => (
+              <ExerciseCard
+                key={e._id}
+                exercise={e}
+                onDelete={async (id) => {
+                  await api.delete(`/exercises/${id}`);
+                  setList((prev) => prev.filter((x) => x._id !== id));
+                }}
+                onOpen={(ex) => {
+                  setEditId(ex._id);
+                  setEditForm({ name: ex.name, type: ex.type, muscles: ex.muscles });
+                  setEditOpen(true);
+                }}
+              />
+            ))}
+            {!list.length && (
+              <EmptyView title={t('commonTexts.noDataForPeriod')}>
+                <div className={styles.emptyActions}>
+                  <Button type="active" size="md" onClick={() => setOpen(true)}>
+                    {t('exercises.addTitle')}
+                  </Button>
+                </div>
+              </EmptyView>
+            )}
+          </>
+        )}
       </div>
 
       {open && (

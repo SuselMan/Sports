@@ -1,4 +1,4 @@
-import { PaginationRequestData, PaginationResponseData, ISODateString } from './Shared.model';
+import { PaginationRequestData, PaginationResponseData, ISODateString, Muscles } from './Shared.model';
 
 export type Unit =
   | 'kg'
@@ -9,13 +9,13 @@ export type Unit =
   | 'bpm'
   | 'kcal'
   | 'count'
-  | string; // allow custom units
 
 export type Metric = {
     id: string, // uuid
     userId: string, // owner user id
     name: string, // MAX 100 SYMBOLS 
     unit: Unit, // suggest from list, allow custom
+    muscles?: Muscles,
 };
 
 export type MetricResponse = Metric;
@@ -29,6 +29,7 @@ export type MetricRecord = {
     id: string,
     userId: string,
     metricId: string // Metric id,
+    metric?: Metric,
     value: number,
     date: ISODateString,
     note?: string,

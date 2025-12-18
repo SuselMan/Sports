@@ -10,6 +10,7 @@ const resources = {
       nav: {
         home: 'Home',
         exercises: 'Exercises',
+        metrics: 'Metrics',
         statistics: 'Statistics',
         settings: 'Settings',
         logout: 'Logout',
@@ -46,6 +47,14 @@ const resources = {
         muscles: 'Muscles',
         kindReps: 'REPS',
         kindTime: 'TIME',
+        delete: 'Delete',
+      },
+      metrics: {
+        title: 'Metrics',
+        addTitle: 'Add Metric',
+        editTitle: 'Edit Metric',
+        name: 'Name',
+        unit: 'Unit',
         delete: 'Delete',
       },
       records: {
@@ -93,6 +102,7 @@ const resources = {
       nav: {
         home: 'Главная',
         exercises: 'Упражнения',
+        metrics: 'Метрики',
         statistics: 'Статистика',
         settings: 'Настройки',
         logout: 'Выйти',
@@ -129,6 +139,14 @@ const resources = {
         muscles: 'Мышцы',
         kindReps: 'ПОВТ',
         kindTime: 'ВРЕМЯ',
+        delete: 'Удалить',
+      },
+      metrics: {
+        title: 'Метрики',
+        addTitle: 'Добавить метрику',
+        editTitle: 'Редактировать метрику',
+        name: 'Название',
+        unit: 'Ед. изм.',
         delete: 'Удалить',
       },
       records: {

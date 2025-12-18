@@ -99,7 +99,7 @@ export function ExerciseRecordCard({
         <RetryIcon />
       </Button>
       {showName && (
-        <h3>
+        <h3 className={styles.title}>
           {record.exercise?.name || t('records.fallbackExerciseName')}
             {!showReps && (
             <span className={styles.reps}>
