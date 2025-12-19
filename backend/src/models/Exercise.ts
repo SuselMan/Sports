@@ -30,6 +30,7 @@ const exerciseRecordBase = {
   weight: { type: Number },
   rpe: { type: Number },
   restSec: { type: Number },
+  archived: { type: Boolean, default: false, index: true },
 };
 
 const exerciseRecordSchema = new mongoose.Schema(
@@ -42,7 +43,7 @@ const exerciseRecordSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-exerciseRecordSchema.index({ userId: 1, date: -1 });
+exerciseRecordSchema.index({ userId: 1, archived: 1, date: -1 });
 
 export type ExerciseRecordDocument = mongoose.InferSchemaType<typeof exerciseRecordSchema> & {
   _id: mongoose.Types.ObjectId;

@@ -29,11 +29,12 @@ const metricRecordSchema = new mongoose.Schema(
     value: { type: Number, required: true },
     date: { type: String, required: true }, // ISO
     note: { type: String },
+    archived: { type: Boolean, default: false, index: true },
   },
   { timestamps: true },
 );
 
-metricRecordSchema.index({ userId: 1, date: -1 });
+metricRecordSchema.index({ userId: 1, archived: 1, date: -1 });
 
 export type MetricRecordDocument = mongoose.InferSchemaType<typeof metricRecordSchema> & {
   _id: mongoose.Types.ObjectId;

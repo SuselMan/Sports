@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Button from '@uikit/components/Button/Button';
 import Modal from '@uikit/components/Modal/Modal';
 import { useSearchParams } from 'react-router-dom';
@@ -7,16 +7,19 @@ import Spinner from '@uikit/components/Spinner/Spinner';
 import EmptyView from '@uikit/components/EmptyView/EmptyView';
 import { Exercise, ExerciseType } from '@shared/Exercise.model';
 import type { Muscles } from '@shared/Shared.model';
-import { api } from '../../api/client';
 import { ExerciseForm } from '../../components/ExerciseForm';
 import { ExerciseCard } from '../../components/ExerciseCard';
 import { AddFab } from '../../components/AddFab';
 import { useModalBackClose } from '../../hooks/useModalBackClose';
+import { useDbReload } from '../../offline/hooks';
+import { getExercisesLocal } from '../../offline/repo';
+import { archiveExerciseLocal, upsertExerciseLocal } from '../../offline/mutations';
 import styles from './styles.module.css';
 
 export default function Exercises() {
-  const [list, setList] = useState<Exercise[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const loader = React.useCallback(() => getExercisesLocal(), []);
+  const { data: all, loading: isLoading } = useDbReload<Exercise[]>(loader, []);
+  const list = useMemo(() => all.filter((x) => !x.archived), [all]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<{ name: string; type: ExerciseType; muscles: Muscles[] }>({
     name: '',
@@ -32,24 +35,6 @@ export default function Exercises() {
   });
   const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useTranslation();
-
-  const load = async () => {
-    setIsLoading(true);
-    try {
-      const resp = await api.get('/exercises', {
-        params: {
-          page: 1, pageSize: 200, sortBy: 'name', sortOrder: 'asc',
-        },
-      });
-      setList(resp.data.list);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    load();
-  }, []);
 
   // Auto-open create dialog if ?createNew=true is present
   useEffect(() => {
@@ -70,10 +55,9 @@ export default function Exercises() {
   };
 
   const submit = async () => {
-    await api.post('/exercises', { name: form.name, type: form.type, muscles: form.muscles });
+    await upsertExerciseLocal({ name: form.name, type: form.type, muscles: form.muscles });
     closeCreateDialog();
     setForm({ name: '', type: 'REPS', muscles: [] });
-    await load();
   };
 
   // Close dialogs on mobile back button
@@ -98,8 +82,7 @@ export default function Exercises() {
                 key={e._id}
                 exercise={e}
                 onDelete={async (id) => {
-                  await api.delete(`/exercises/${id}`);
-                  setList((prev) => prev.filter((x) => x._id !== id));
+                  await archiveExerciseLocal(id);
                 }}
                 onOpen={(ex) => {
                   setEditId(ex._id);
@@ -141,13 +124,13 @@ export default function Exercises() {
               <Button
                 onClick={async () => {
                   if (!editId) return;
-                  const updated = await api.put(`/exercises/${editId}`, {
+                  await upsertExerciseLocal({
+                    _id: editId,
                     name: editForm.name,
                     type: editForm.type,
                     muscles: editForm.muscles,
                   });
                   setEditOpen(false);
-                  setList((prev) => prev.map((x) => (x._id === editId ? updated.data : x)));
                 }}
                 disabled={!editForm.name.trim()}
               >

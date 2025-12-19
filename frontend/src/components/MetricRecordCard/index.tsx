@@ -5,7 +5,7 @@ import type { MetricRecordResponse } from '@shared/Metrics.model';
 import Button from '@uikit/components/Button/Button';
 import TrashIcon from '@uikit/icons/trash.svg?react';
 import styles from './styles.module.css';
-import { api } from '../../api/client';
+import { archiveMetricRecordLocal } from '../../offline/mutations';
 
 export function MetricRecordCard({
   record,
@@ -27,7 +27,7 @@ export function MetricRecordCard({
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    await api.delete(`/metrics/records/${record._id}`);
+    await archiveMetricRecordLocal(record._id);
     onDeleted?.(record._id);
   };
 

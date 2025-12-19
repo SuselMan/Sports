@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Button from '@uikit/components/Button/Button';
 import Modal from '@uikit/components/Modal/Modal';
 import { useTranslation } from 'react-i18next';
@@ -6,16 +6,19 @@ import Spinner from '@uikit/components/Spinner/Spinner';
 import EmptyView from '@uikit/components/EmptyView/EmptyView';
 import type { Metric, Unit } from '@shared/Metrics.model';
 import type { Muscles } from '@shared/Shared.model';
-import { api } from '../../api/client';
 import { AddFab } from '../../components/AddFab';
 import { useModalBackClose } from '../../hooks/useModalBackClose';
 import { MetricForm } from '../../components/MetricForm';
 import { MetricCard } from '../../components/MetricCard';
+import { useDbReload } from '../../offline/hooks';
+import { getMetricsLocal } from '../../offline/repo';
+import { archiveMetricLocal, upsertMetricLocal } from '../../offline/mutations';
 import styles from './styles.module.css';
 
 export default function Metrics() {
-  const [list, setList] = useState<Metric[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const loader = React.useCallback(() => getMetricsLocal(), []);
+  const { data: all, loading: isLoading } = useDbReload<Metric[]>(loader, []);
+  const list = useMemo(() => all.filter((x) => !x.archived), [all]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<{ name: string; unit: Unit; muscles: Muscles[] }>({ name: '', unit: 'count', muscles: [] });
   const [editOpen, setEditOpen] = useState(false);
@@ -23,33 +26,14 @@ export default function Metrics() {
   const [editForm, setEditForm] = useState<{ name: string; unit: Unit; muscles: Muscles[] }>({ name: '', unit: 'count', muscles: [] });
   const { t } = useTranslation();
 
-  const load = async () => {
-    setIsLoading(true);
-    try {
-      const resp = await api.get('/metrics', {
-        params: {
-          page: 1, pageSize: 200, sortBy: 'name', sortOrder: 'asc',
-        },
-      });
-      setList(resp.data.list);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    load();
-  }, []);
-
   const closeCreateDialog = () => {
     setOpen(false);
   };
 
   const submit = async () => {
-    await api.post('/metrics', { name: form.name, unit: form.unit, muscles: form.muscles });
+    await upsertMetricLocal({ name: form.name, unit: form.unit, muscles: form.muscles });
     closeCreateDialog();
     setForm({ name: '', unit: 'count', muscles: [] });
-    await load();
   };
 
   // Close dialogs on mobile back button
@@ -74,8 +58,7 @@ export default function Metrics() {
                 key={m._id}
                 metric={m}
                 onDelete={async (id) => {
-                  await api.delete(`/metrics/${id}`);
-                  setList((prev) => prev.filter((x) => x._id !== id));
+                  await archiveMetricLocal(id);
                 }}
                 onOpen={(metric) => {
                   setEditId(metric._id);
@@ -117,13 +100,13 @@ export default function Metrics() {
               <Button
                 onClick={async () => {
                   if (!editId) return;
-                  const updated = await api.put(`/metrics/${editId}`, {
+                  await upsertMetricLocal({
+                    _id: editId,
                     name: editForm.name,
                     unit: editForm.unit,
                     muscles: editForm.muscles,
                   });
                   setEditOpen(false);
-                  setList((prev) => prev.map((x) => (x._id === editId ? updated.data : x)));
                 }}
                 disabled={!editForm.name.trim()}
               >

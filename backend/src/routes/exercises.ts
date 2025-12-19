@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import mongoose from 'mongoose';
-import type { ExerciseType } from '../../../shared/Exercise.model';
+import type { ExerciseCreateRequest, ExerciseRecordCreateRequest, ExerciseType } from '../../../shared/Exercise.model';
 import type { Muscles } from '../../../shared/Shared.model';
 import { ExerciseModel, ExerciseRecordModel } from '../models/Exercise';
 import { AuthedRequest } from '../auth';
@@ -12,8 +12,9 @@ export const exercisesRouter = Router();
 exercisesRouter.post('/', async (req: AuthedRequest, res) => {
   try {
     const userId = req.userId!;
-    const { name, type, muscles } = req.body as { name: string; type: ExerciseType; muscles: Muscles[] };
+    const { _id, name, type, muscles } = req.body as ExerciseCreateRequest;
     const created = await ExerciseModel.create({
+      ...(typeof _id === 'string' ? { _id: new mongoose.Types.ObjectId(_id) } : {}),
       userId, name, type, muscles,
     });
     res.json(created);
@@ -28,7 +29,14 @@ exercisesRouter.get('/', async (req: AuthedRequest, res) => {
   const {
     page, pageSize, sortBy, sortOrder,
   } = getPagination(req);
-  const q: any = { userId, archived: { $ne: true } };
+  const includeArchived = String((req.query as any).archived || 'false') === 'true';
+  const q: any = includeArchived ? { userId } : { userId, archived: { $ne: true } };
+  const updatedAfterRaw = (req.query as any).updatedAfter;
+  if (updatedAfterRaw) {
+    const d = new Date(String(updatedAfterRaw));
+    if (Number.isNaN(d.valueOf())) return res.status(400).json({ error: 'Invalid updatedAfter' });
+    q.updatedAt = { $gt: d };
+  }
   const total = await ExerciseModel.countDocuments(q);
   const list = await ExerciseModel.find(q)
     .sort(buildSort(sortBy!, sortOrder!) as any)
@@ -80,10 +88,12 @@ exercisesRouter.delete('/records/:recordId', async (req: AuthedRequest, res) => 
     const userId = new mongoose.Types.ObjectId(req.userId!);
     const { recordId } = req.params;
     const _id = new mongoose.Types.ObjectId(recordId);
-    const result = await ExerciseRecordModel.deleteOne({ _id, userId });
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ error: 'Record not found' });
-    }
+    const updated = await ExerciseRecordModel.findOneAndUpdate(
+      { _id, userId, archived: { $ne: true } },
+      { archived: true },
+      { new: true },
+    );
+    if (!updated) return res.status(404).json({ error: 'Record not found' });
     return res.json({ ok: true });
   } catch (e: any) {
     return res.status(400).json({ error: e.message });
@@ -118,7 +128,11 @@ exercisesRouter.put('/records/:recordId', async (req: AuthedRequest, res) => {
       update.durationMs = durationMs;
       update.repsAmount = undefined;
     }
-    const result = await ExerciseRecordModel.findOneAndUpdate({ _id, userId }, update, { new: true });
+    const result = await ExerciseRecordModel.findOneAndUpdate(
+      { _id, userId, archived: { $ne: true } },
+      update,
+      { new: true },
+    );
     if (!result) return res.status(404).json({ error: 'Record not found' });
     return res.json(result);
   } catch (e: any) {
@@ -129,14 +143,16 @@ exercisesRouter.put('/records/:recordId', async (req: AuthedRequest, res) => {
 // Create record
 exercisesRouter.post('/:exerciseId/records', async (req: AuthedRequest, res) => {
   try {
-    const userId = req.userId!;
+    const userId = new mongoose.Types.ObjectId(req.userId!);
     const { exerciseId } = req.params;
+    const exerciseObjectId = new mongoose.Types.ObjectId(exerciseId);
     const {
-      kind, repsAmount, durationMs, date, note, weight, rpe, restSec,
-    } = req.body as any;
+      _id, kind, repsAmount, durationMs, date, note, weight, rpe, restSec,
+    } = req.body as ExerciseRecordCreateRequest;
     const created = await ExerciseRecordModel.create({
       userId,
-      exerciseId,
+      ...(typeof _id === 'string' ? { _id: new mongoose.Types.ObjectId(_id) } : {}),
+      exerciseId: exerciseObjectId,
       kind,
       repsAmount,
       durationMs,
@@ -160,9 +176,15 @@ exercisesRouter.get('/records', async (req: AuthedRequest, res) => {
     page, pageSize, sortBy, sortOrder,
   } = getPagination(req);
   const {
-    dateFrom, dateTo, timeFrom, timeTo, muscles, exerciseIds,
+    dateFrom, dateTo, timeFrom, timeTo, muscles, exerciseIds, archived, updatedAfter,
   } = req.query as any;
-  const q: any = { userId: userObjectId };
+  const includeArchived = String(archived || 'false') === 'true';
+  const q: any = includeArchived ? { userId: userObjectId } : { userId: userObjectId, archived: { $ne: true } };
+  if (updatedAfter) {
+    const d = new Date(String(updatedAfter));
+    if (Number.isNaN(d.valueOf())) return res.status(400).json({ error: 'Invalid updatedAfter' });
+    q.updatedAt = { $gt: d };
+  }
   if (exerciseIds) {
     const ids = String(exerciseIds)
       .split(',')
@@ -209,6 +231,9 @@ exercisesRouter.get('/records', async (req: AuthedRequest, res) => {
     {
       $project: {
         _id: 1,
+        archived: 1,
+        createdAt: 1,
+        updatedAt: 1,
         kind: 1,
         exerciseId: 1,
         repsAmount: 1,
@@ -221,6 +246,9 @@ exercisesRouter.get('/records', async (req: AuthedRequest, res) => {
         exercise: {
           _id: '$exercise._id',
           userId: '$exercise.userId',
+          archived: '$exercise.archived',
+          createdAt: '$exercise.createdAt',
+          updatedAt: '$exercise.updatedAt',
           name: '$exercise.name',
           type: '$exercise.type',
           muscles: '$exercise.muscles',

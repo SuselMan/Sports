@@ -1,5 +1,6 @@
 import create from 'zustand';
-import { api } from '../api/client';
+import { apiClient } from '../api/apiClient';
+import { setOnUnauthorized } from '../api/client';
 
 type AuthState = {
   token: string | null;
@@ -15,12 +16,16 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ token: t });
   },
   signOut: () => {
-    localStorage.removeItem('auth_token');
+    apiClient.logout();
     set({ token: null });
   },
 }));
 
+setOnUnauthorized(() => {
+  const s = useAuthStore.getState();
+  if (s.token) s.signOut();
+});
+
 export async function exchangeGoogleIdToken(idToken: string) {
-  const resp = await api.post('/auth/google', { idToken });
-  return resp.data?.token as string;
+  return apiClient.exchangeGoogleIdToken(idToken);
 }

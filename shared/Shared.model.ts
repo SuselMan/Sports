@@ -86,6 +86,13 @@ export const muscleIdMap: Record<Muscles, any> = {
 
 export type ISODateString = string; // ISO 8601, e.g. "2025-11-10T10:00:00Z"
 
+// Shared sync metadata for offline-first (soft-delete + incremental sync)
+export type SyncMetaData = {
+  archived?: boolean;
+  createdAt?: ISODateString;
+  updatedAt?: ISODateString;
+};
+
 export type PaginationRequestData = {
   pageSize: number, //integer;
   page: number, //integer; 1-based

@@ -1,0 +1,11 @@
+.root {
+  padding: var(--spacing-md);
+}
+
+.actions {
+  margin-top: var(--spacing-md);
+  display: flex;
+  justify-content: center;
+}
+
+

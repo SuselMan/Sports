@@ -103,6 +103,12 @@ const resources = {
         type: 'Type',
         muscles: 'Muscles',
       },
+      notFound: {
+        title: 'Page not found',
+        description: 'The page you are looking for does not exist.',
+        goHome: 'Go home',
+        goLogin: 'Go to login',
+      },
       group: {
         total: 'total',
         min: 'min',
@@ -208,6 +214,12 @@ const resources = {
         noDataForPeriod: 'Нет данных за выбранный период.',
         type: 'Тип',
         muscles: 'Мышцы',
+      },
+      notFound: {
+        title: 'Страница не найдена',
+        description: 'Похоже, такой страницы не существует.',
+        goHome: 'На главную',
+        goLogin: 'Войти',
       },
       group: {
         total: 'итого',

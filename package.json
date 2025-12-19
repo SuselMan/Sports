@@ -6,7 +6,8 @@
     "lint:fix": "npm --prefix frontend run lint:fix && npm --prefix backend run lint:fix",
     "lint:css": "npm --prefix frontend run lint:css",
     "lint:css:fix": "npm --prefix frontend run lint:css:fix"
+  },
+  "dependencies": {
+    "uuid": "^13.0.0"
   }
 }
-
-

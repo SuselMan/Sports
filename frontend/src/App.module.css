@@ -8,6 +8,13 @@
    margin-bottom: var(--spacing-lg);
  }
  
+.bootLoading {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
  @media (min-width: 768px) {
    .container {
      max-width: 768px;

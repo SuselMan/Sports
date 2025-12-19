@@ -7,8 +7,8 @@ import Button from '@uikit/components/Button/Button';
 import TrashIcon from '@uikit/icons/trash.svg?react';
 import RetryIcon from '@uikit/icons/arrow-path.svg?react';
 import styles from './styles.module.css';
-import { api } from '../../api/client';
 import { setLastRecordDefaults } from '../../utils/lastRecordDefaults';
+import { archiveExerciseRecordLocal, upsertExerciseRecordLocal } from '../../offline/mutations';
 
 dayjs.extend(durationPlugin);
 
@@ -54,22 +54,24 @@ export function ExerciseRecordCard({
   };
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    await api.delete(`/exercises/records/${record._id}`);
+    await archiveExerciseRecordLocal(record._id);
     onDeleted?.(record._id);
   };
 
   const handleRepeat = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    const resp = await api.post(`/exercises/${record.exerciseId}/records`, {
+    const created = await upsertExerciseRecordLocal({
+      exerciseId: record.exerciseId,
       kind: record.kind,
       repsAmount: record.kind === 'REPS' ? record.repsAmount : undefined,
       durationMs: record.kind === 'TIME' ? record.durationMs : undefined,
       date: record.date,
       note: record.note,
       weight: record.weight,
+      rpe: record.rpe,
+      restSec: record.restSec,
     });
-    const created = resp.data as ExerciseRecordResponse;
-    const withExercise: ExerciseRecordResponse = { ...created, exercise: record.exercise! };
+    const withExercise: ExerciseRecordResponse = { ...created, exercise: record.exercise ?? (created as any).exercise };
     setLastRecordDefaults(record.exerciseId, {
       repsAmount: record.kind === 'REPS' && record.repsAmount != null ? String(record.repsAmount) : undefined,
       durationMs: record.kind === 'TIME' && record.durationMs != null ? String(record.durationMs) : undefined,

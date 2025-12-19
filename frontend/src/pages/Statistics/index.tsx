@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -9,9 +9,10 @@ import Spinner from '@uikit/components/Spinner/Spinner';
 import EmptyView from '@uikit/components/EmptyView/EmptyView';
 import Card from '@uikit/components/Card/Card';
 import type { Exercise, ExerciseRecordResponse } from '@shared/Exercise.model';
-import { api } from '../../api/client';
-import { useDateRangeStore } from '../../store/filters';
+import { useStatisticsDateRangeStore } from '../../store/filters';
 import { DateRange } from '../../components/DateRange';
+import { useDbReload } from '../../offline/hooks';
+import { getExerciseRecordsLocal, getExercisesLocal } from '../../offline/repo';
 import styles from './styles.module.css';
 
 function computeE1rm(weight: number, reps: number): number {
@@ -23,43 +24,19 @@ function dayKey(iso: string): string {
 }
 
 export default function Statistics() {
-  const range = useDateRangeStore((s) => s.range);
-  const setRange = useDateRangeStore((s) => s.setRange);
+  const range = useStatisticsDateRangeStore((s) => s.range);
+  const setRange = useStatisticsDateRangeStore((s) => s.setRange);
   const navigate = useNavigate();
   const params = useParams();
-  const [exercises, setExercises] = useState<Exercise[]>([]);
   const exerciseId = (params.exerciseId || '').trim();
-  const [exerciseRecords, setExerciseRecords] = useState<ExerciseRecordResponse[]>([]);
-  const [isLoadingExercises, setIsLoadingExercises] = useState(true);
-  const [isLoadingRecords, setIsLoadingRecords] = useState(true);
   const { t } = useTranslation();
 
-  useEffect(() => {
-    const to = dayjs().endOf('day').toISOString();
-    const from = dayjs().subtract(30, 'day').startOf('day').toISOString();
-    setRange({ from, to });
-  }, [setRange]);
+  const exercisesLoader = React.useCallback(() => getExercisesLocal(), []);
+  const { data: allExercises, loading: isLoadingExercises } = useDbReload<Exercise[]>(exercisesLoader, []);
+  const exercises = useMemo(() => allExercises.filter((e) => !e.archived), [allExercises]);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setIsLoadingExercises(true);
-      try {
-        const ex = await api.get('/exercises', {
-          params: {
-            page: 1, pageSize: 100, sortBy: 'name', sortOrder: 'asc',
-          },
-        });
-        if (cancelled) return;
-        setExercises(ex.data.list);
-      } finally {
-        if (!cancelled) setIsLoadingExercises(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const recordsLoader = React.useCallback(() => getExerciseRecordsLocal(), []);
+  const { data: allRecords, loading: isLoadingRecords } = useDbReload<ExerciseRecordResponse[]>(recordsLoader, []);
 
   useEffect(() => {
     if (!exerciseId && exercises.length) {
@@ -67,57 +44,29 @@ export default function Statistics() {
     }
   }, [exerciseId, exercises, navigate]);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      if (!exerciseId) {
-        setExerciseRecords([]);
-        setIsLoadingRecords(false);
-        return;
-      }
-      setIsLoadingRecords(true);
-      try {
-        const all: ExerciseRecordResponse[] = [];
-        const pageSize = 100; // backend cap
-        let page = 1;
-        let total = Infinity;
-        while (!cancelled && all.length < total) {
-          const resp = await api.get('/exercises/records', {
-            params: {
-              page,
-              pageSize,
-              sortBy: 'date',
-              sortOrder: 'asc',
-              dateFrom: range.from,
-              dateTo: range.to,
-              exerciseIds: exerciseId,
-            },
-          });
-          const chunk = resp.data?.list || [];
-          all.push(...chunk);
-          const t0 = resp.data?.pagination?.total;
-          total = typeof t0 === 'number' ? t0 : all.length;
-          if (chunk.length === 0) break;
-          page += 1;
-        }
-        if (!cancelled) setExerciseRecords(all);
-      } finally {
-        if (!cancelled) setIsLoadingRecords(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [range, exerciseId]);
-
   const selectedExercise = useMemo(
     () => exercises.find((x) => x._id === exerciseId) ?? null,
     [exercises, exerciseId],
   );
 
+  const exerciseRecordsAllTime = useMemo(
+    () => allRecords.filter((r) => !r.archived && r.exerciseId === exerciseId),
+    [allRecords, exerciseId],
+  );
+
+  const exerciseRecords = useMemo(
+    () => exerciseRecordsAllTime.filter((r) => r.date >= range.from && r.date <= range.to),
+    [exerciseRecordsAllTime, range],
+  );
+
   const repsRecords = useMemo(
     () => exerciseRecords.filter((r) => r.kind === 'REPS' && typeof r.repsAmount === 'number'),
     [exerciseRecords],
+  );
+
+  const repsRecordsAllTime = useMemo(
+    () => exerciseRecordsAllTime.filter((r) => r.kind === 'REPS' && typeof r.repsAmount === 'number'),
+    [exerciseRecordsAllTime],
   );
 
   const maxRepsSet = useMemo(() => {
@@ -139,12 +88,17 @@ export default function Statistics() {
   }, [repsRecords]);
 
   const maxRepsDay = useMemo(() => {
+    const map = new Map<string, number>();
+    repsRecordsAllTime.forEach((r) => {
+      const key = dayKey(r.date);
+      map.set(key, (map.get(key) || 0) + (r.repsAmount as number));
+    });
     let max = 0;
-    repsPerDayTotal.forEach((v) => {
+    map.forEach((v) => {
       if (v > max) max = v;
     });
     return max;
-  }, [repsPerDayTotal]);
+  }, [repsRecordsAllTime]);
 
   // reps per day (total reps for the day)
   const repsPerDaySeries = useMemo(() => Array.from(repsPerDayTotal.entries())

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Button from '@uikit/components/Button/Button';
 import Modal from '@uikit/components/Modal/Modal';
 import { Muscles } from '@shared/Shared.model';
@@ -9,18 +9,10 @@ import EmptyView from '@uikit/components/EmptyView/EmptyView';
 import {
   Exercise,
   ExerciseRecordResponse,
-  ExerciseRecordsListResponse,
-  ExerciseListResponse,
 } from '@shared/Exercise.model';
-import type {
-  Metric,
-  MetricRecordListResponse,
-  MetricRecordResponse,
-} from '@shared/Metrics.model';
-import { AxiosResponse } from 'axios';
+import type { Metric, MetricRecordResponse } from '@shared/Metrics.model';
 import { setLastRecordDefaults } from '../../utils/lastRecordDefaults';
 import { DateRange } from '../../components/DateRange';
-import { api } from '../../api/client';
 import { useDateRangeStore } from '../../store/filters';
 import { ExerciseRecordCard } from '../../components/ExerciseRecordCard';
 import { ExerciseGroupCard } from '../../components/ExerciseGroupCard';
@@ -30,20 +22,46 @@ import { MetricRecordCard } from '../../components/MetricRecordCard';
 import { MusclesMap } from '../../components/MusclesMap';
 import { AddFab } from '../../components/AddFab';
 import { useModalBackClose } from '../../hooks/useModalBackClose';
+import { useDbReload } from '../../offline/hooks';
+import {
+  getExerciseRecordsLocal,
+  getExercisesLocal,
+  getMetricRecordsLocal,
+  getMetricsLocal,
+} from '../../offline/repo';
+import { upsertExerciseRecordLocal, upsertMetricRecordLocal } from '../../offline/mutations';
 import styles from './styles.module.css';
 
 const Home: React.FC = () => {
   const range = useDateRangeStore((s) => s.range);
   const setRange = useDateRangeStore((s) => s.setRange);
   const { t } = useTranslation();
-  const [records, setRecords] = useState<ExerciseRecordResponse[]>([]);
-  const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [metrics, setMetrics] = useState<Metric[]>([]);
-  const [metricRecords, setMetricRecords] = useState<MetricRecordResponse[]>([]);
-  const [isLoadingExercises, setIsLoadingExercises] = useState(true);
-  const [isLoadingRecords, setIsLoadingRecords] = useState(true);
-  const [isLoadingMetrics, setIsLoadingMetrics] = useState(true);
-  const [isLoadingMetricRecords, setIsLoadingMetricRecords] = useState(true);
+  const exercisesLoader = React.useCallback(() => getExercisesLocal(), []);
+  const { data: allExercises, loading: isLoadingExercises } = useDbReload<Exercise[]>(exercisesLoader, []);
+  const metricsLoader = React.useCallback(() => getMetricsLocal(), []);
+  const { data: allMetrics, loading: isLoadingMetrics } = useDbReload<Metric[]>(metricsLoader, []);
+  const exerciseRecordsLoader = React.useCallback(() => getExerciseRecordsLocal(), []);
+  const { data: allExerciseRecords, loading: isLoadingRecords } = useDbReload<ExerciseRecordResponse[]>(exerciseRecordsLoader, []);
+  const metricRecordsLoader = React.useCallback(() => getMetricRecordsLocal(), []);
+  const { data: allMetricRecords, loading: isLoadingMetricRecords } = useDbReload<MetricRecordResponse[]>(metricRecordsLoader, []);
+
+  const exercises = useMemo(() => allExercises.filter((e) => !e.archived), [allExercises]);
+  const metrics = useMemo(() => allMetrics.filter((m) => !m.archived), [allMetrics]);
+
+  const exerciseById = useMemo(() => new Map(exercises.map((e) => [e._id, e])), [exercises]);
+  const metricById = useMemo(() => new Map(metrics.map((m) => [m._id, m])), [metrics]);
+
+  const records = useMemo(() => allExerciseRecords
+    .filter((r) => !r.archived)
+    .filter((r) => r.date >= range.from && r.date <= range.to)
+    .map((r) => ({ ...r, exercise: r.exercise ?? exerciseById.get(r.exerciseId) }))
+    .filter((r) => !!r.exercise) as ExerciseRecordResponse[], [allExerciseRecords, range, exerciseById]);
+
+  const metricRecords = useMemo(() => allMetricRecords
+    .filter((r) => !r.archived)
+    .filter((r) => r.date >= range.from && r.date <= range.to)
+    .map((r) => ({ ...r, metric: r.metric ?? metricById.get(r.metricId) }))
+    .filter((r) => !!r.metric) as MetricRecordResponse[], [allMetricRecords, range, metricById]);
   type CurrentModal =
     | 'RecordType'
     | 'ExerciseCreate'
@@ -63,102 +81,6 @@ const Home: React.FC = () => {
     metricId: '',
     date: range.from,
   });
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setIsLoadingExercises(true);
-      try {
-        const ex: AxiosResponse<ExerciseListResponse> = await api.get('/exercises', {
-          params: {
-            page: 1, pageSize: 100, sortBy: 'name', sortOrder: 'asc',
-          },
-        });
-        if (!cancelled) {
-          setExercises(ex.data.list);
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoadingExercises(false);
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setIsLoadingMetrics(true);
-      try {
-        const resp = await api.get('/metrics', {
-          params: {
-            page: 1, pageSize: 200, sortBy: 'name', sortOrder: 'asc',
-          },
-        });
-        if (!cancelled) {
-          setMetrics(resp.data.list);
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoadingMetrics(false);
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setIsLoadingRecords(true);
-      try {
-        const resp: AxiosResponse<ExerciseRecordsListResponse> = await api.get('/exercises/records', {
-          params: {
-            page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to,
-          },
-        });
-        if (!cancelled) {
-          setRecords(resp.data.list);
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoadingRecords(false);
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [range]);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setIsLoadingMetricRecords(true);
-      try {
-        const resp: AxiosResponse<MetricRecordListResponse> = await api.get('/metrics/records', {
-          params: {
-            page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to,
-          },
-        });
-        if (!cancelled) {
-          setMetricRecords(resp.data.list);
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoadingMetricRecords(false);
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [range]);
 
   const highlightedMuscles = useMemo(
     () => Array.from(
@@ -186,7 +108,8 @@ const Home: React.FC = () => {
 
   const submit = async () => {
     if (!form.exerciseId) return;
-    await api.post(`/exercises/${form.exerciseId}/records`, {
+    await upsertExerciseRecordLocal({
+      exerciseId: form.exerciseId,
       kind: form.kind,
       repsAmount: form.kind === 'REPS' ? Number(form.repsAmount) : undefined,
       durationMs: form.kind === 'TIME' ? Number(form.durationMs) : undefined,
@@ -201,29 +124,18 @@ const Home: React.FC = () => {
     });
     setCurrentModal(null);
     setForm({ exerciseId: '', kind: 'REPS', date: range.from });
-    const resp = await api.get('/exercises/records', {
-      params: {
-        page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to,
-      },
-    });
-    setRecords(resp.data.list);
   };
 
   const submitMetric = async () => {
     if (!metricForm.metricId || !metricForm.value) return;
-    await api.post(`/metrics/${metricForm.metricId}/records`, {
+    await upsertMetricRecordLocal({
+      metricId: metricForm.metricId,
       value: Number(metricForm.value),
       date: metricForm.date,
       note: metricForm.note || undefined,
     });
     setCurrentModal(null);
     setMetricForm({ metricId: '', date: range.from });
-    const resp: AxiosResponse<MetricRecordListResponse> = await api.get('/metrics/records', {
-      params: {
-        page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to,
-      },
-    });
-    setMetricRecords(resp.data.list);
   };
 
   // Close dialogs on mobile back button
@@ -263,8 +175,6 @@ const Home: React.FC = () => {
                 record={g.records[0]}
                 showReps={false}
                 showMuscles={false}
-                onDeleted={(id) => setRecords((prev) => prev.filter((x) => x._id !== id))}
-                onRepeated={(created) => setRecords((prev) => [created, ...prev])}
                 onOpen={(r) => {
                   setEditId(r._id);
                   setForm({
@@ -284,8 +194,6 @@ const Home: React.FC = () => {
                 key={g.exercise?._id || g.records[0]._id}
                 exercise={g.exercise}
                 records={g.records}
-                onDeleted={(id) => setRecords((prev) => prev.filter((x) => x._id !== id))}
-                onRepeated={(created) => setRecords((prev) => [created, ...prev])}
                 onOpen={(r) => {
                   setEditId(r._id);
                   setForm({
@@ -306,7 +214,6 @@ const Home: React.FC = () => {
               <MetricRecordCard
                 key={mr._id}
                 record={mr}
-                onDeleted={(id) => setMetricRecords((prev) => prev.filter((x) => x._id !== id))}
                 onOpen={(r) => {
                   setMetricEditId(r._id);
                   setMetricForm({
@@ -409,7 +316,8 @@ const Home: React.FC = () => {
                         return;
                       }
                       if (!editId) return;
-                      await api.put(`/exercises/records/${editId}`, {
+                      await upsertExerciseRecordLocal({
+                        _id: editId,
                         exerciseId: form.exerciseId,
                         kind: form.kind,
                         repsAmount: form.kind === 'REPS' ? Number(form.repsAmount) : undefined,
@@ -419,12 +327,6 @@ const Home: React.FC = () => {
                         note: form.note || undefined,
                       });
                       setCurrentModal(null);
-                      const resp = await api.get('/exercises/records', {
-                        params: {
-                          page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to,
-                        },
-                      });
-                      setRecords(resp.data.list);
                     }}
                   >
                     {t('actions.save')}
@@ -445,19 +347,14 @@ const Home: React.FC = () => {
                         return;
                       }
                       if (!metricEditId) return;
-                      await api.put(`/metrics/records/${metricEditId}`, {
+                      await upsertMetricRecordLocal({
+                        _id: metricEditId,
                         metricId: metricForm.metricId,
-                        value: metricForm.value != null ? Number(metricForm.value) : undefined,
+                        value: metricForm.value != null ? Number(metricForm.value) : 0,
                         date: metricForm.date,
                         note: metricForm.note || undefined,
                       });
                       setCurrentModal(null);
-                      const resp: AxiosResponse<MetricRecordListResponse> = await api.get('/metrics/records', {
-                        params: {
-                          page: 1, pageSize: 200, sortBy: 'date', sortOrder: 'desc', dateFrom: range.from, dateTo: range.to,
-                        },
-                      });
-                      setMetricRecords(resp.data.list);
                     }}
                     disabled={!metricForm.metricId || !metricForm.value}
                   >

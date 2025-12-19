@@ -7,6 +7,17 @@ export const api = axios.create({
   timeout: 15000,
 });
 
+let onUnauthorized: (() => void) | undefined;
+let lastServerDateIso: string | null = null;
+
+export function setOnUnauthorized(handler?: (() => void) | null) {
+  onUnauthorized = handler ?? undefined;
+}
+
+export function getLastServerTimeIso(): string | null {
+  return lastServerDateIso;
+}
+
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('auth_token');
   if (token) {
@@ -16,3 +27,25 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+api.interceptors.response.use(
+  (resp) => {
+    const dateHeader = (resp?.headers as any)?.date as string | undefined;
+    if (dateHeader) {
+      const d = new Date(dateHeader);
+      if (!Number.isNaN(d.valueOf())) lastServerDateIso = d.toISOString();
+    }
+    return resp;
+  },
+  (err) => {
+    const status = err?.response?.status as number | undefined;
+    if (status === 401) {
+      try {
+        onUnauthorized?.();
+      } catch {
+        // ignore
+      }
+    }
+    return Promise.reject(err);
+  },
+);

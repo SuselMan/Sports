@@ -3,6 +3,7 @@ import {
   PaginationRequestData,
   PaginationResponseData,
   ISODateString,
+  SyncMetaData,
 } from './Shared.model';
 
 export type Unit =
@@ -16,7 +17,7 @@ export type Unit =
   | 'count'
   | string; // allow custom units
 
-export type Metric = {
+export type Metric = SyncMetaData & {
   _id: string;
   name: string; // MAX 100 SYMBOLS
   unit: Unit; // suggest from list, allow custom
@@ -26,6 +27,7 @@ export type Metric = {
 export type MetricResponse = Metric;
 
 export type MetricCreateRequest = {
+  _id?: string; // optional client-generated id (ObjectId hex string)
   name: string;
   unit: Unit;
   muscles?: Muscles[];
@@ -42,7 +44,15 @@ export type MetricListResponse = {
   pagination: PaginationResponseData;
 };
 
-export type MetricRecord = {
+export type MetricListRequest = {
+  filters?: {
+    archived?: boolean; // if true, include archived items in response
+    updatedAfter?: ISODateString; // incremental sync
+  };
+  pagination: PaginationRequestData;
+};
+
+export type MetricRecord = SyncMetaData & {
   _id: string;
   metricId: string; // Metric id
   value: number;
@@ -51,6 +61,7 @@ export type MetricRecord = {
 };
 
 export type MetricRecordCreateRequest = {
+  _id?: string; // optional client-generated id (ObjectId hex string)
   value: number;
   date: ISODateString;
   note?: string;
@@ -78,6 +89,8 @@ export type MetricRecordsListRequest = {
     dateTo?: ISODateString;
     timeFrom?: string; // hh:mm:ss
     timeTo?: string; // hh:mm:ss
+    archived?: boolean; // if true, include archived items in response
+    updatedAfter?: ISODateString; // incremental sync
   };
   pagination: PaginationRequestData;
 };
