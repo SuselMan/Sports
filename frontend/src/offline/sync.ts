@@ -15,7 +15,8 @@ import {
   type ToSyncItem,
 } from './repo';
 
-const SYNC_PAGE_SIZE = 200;
+// Backend enforces pageSize <= 100 (see backend/src/utils/pagination.ts)
+const SYNC_PAGE_SIZE = 100;
 
 function authed() {
   return localStorage.getItem('auth_token') != null;
