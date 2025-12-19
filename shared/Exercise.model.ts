@@ -53,6 +53,8 @@ type ExerciseRecordBase = SyncMetaData & {
     date: string,
     note?: string,
     weight?: number,
+    rpe?: number,
+    restSec?: number,
 };
 
 export type RepsExerciseRecord = ExerciseRecordBase & {

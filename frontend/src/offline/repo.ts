@@ -2,6 +2,8 @@ import type { Exercise, ExerciseRecordResponse } from '@shared/Exercise.model';
 import type { Metric, MetricRecordResponse } from '@shared/Metrics.model';
 import { getDb, makeSyncKey, type SyncEntityType, type SyncOp, type ToSyncItem } from './db';
 
+export type { ToSyncItem } from './db';
+
 function nowIso() {
   return new Date().toISOString();
 }
