@@ -118,6 +118,7 @@ export async function upsertExerciseRecordLocal(input: {
   const _id = input._id ?? createObjectId();
   const t = nowIso();
   const existing = (await getExerciseRecordsLocal()).find((r) => r._id === _id);
+  const exercise = existing?.exercise ?? (await getExercisesLocal()).find((e) => e._id === input.exerciseId);
   const entity: ExerciseRecordResponse = {
     ...(existing ?? ({} as any)),
     _id,
@@ -133,8 +134,8 @@ export async function upsertExerciseRecordLocal(input: {
     archived: existing?.archived ?? false,
     createdAt: existing?.createdAt ?? t,
     updatedAt: t,
-    // `exercise` will be overwritten on next pull; keep whatever we had.
-    exercise: (existing as any)?.exercise,
+    // Keep whatever we had; if it's a new record, attach current exercise snapshot for UI.
+    exercise,
   };
   await putExerciseRecords([entity]);
   await queueSync('exerciseRecord', entity.archived ? 'archive' : (existing ? 'update' : 'create'), _id, {
@@ -173,6 +174,7 @@ export async function upsertMetricRecordLocal(input: {
   const _id = input._id ?? createObjectId();
   const t = nowIso();
   const existing = (await getMetricRecordsLocal()).find((r) => r._id === _id);
+  const metric = existing?.metric ?? (await getMetricsLocal()).find((m) => m._id === input.metricId);
   const entity: MetricRecordResponse = {
     ...(existing ?? ({} as any)),
     _id,
@@ -183,7 +185,7 @@ export async function upsertMetricRecordLocal(input: {
     archived: existing?.archived ?? false,
     createdAt: existing?.createdAt ?? t,
     updatedAt: t,
-    metric: (existing as any)?.metric,
+    metric,
   };
   await putMetricRecords([entity]);
   await queueSync('metricRecord', entity.archived ? 'archive' : (existing ? 'update' : 'create'), _id, {

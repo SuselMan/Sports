@@ -6,6 +6,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Spinner from '@uikit/components/Spinner/Spinner';
 import EmptyView from '@uikit/components/EmptyView/EmptyView';
+import dayjs from 'dayjs';
 import {
   Exercise,
   ExerciseRecordResponse,
@@ -51,17 +52,29 @@ const Home: React.FC = () => {
   const exerciseById = useMemo(() => new Map(exercises.map((e) => [e._id, e])), [exercises]);
   const metricById = useMemo(() => new Map(metrics.map((m) => [m._id, m])), [metrics]);
 
-  const records = useMemo(() => allExerciseRecords
-    .filter((r) => !r.archived)
-    .filter((r) => r.date >= range.from && r.date <= range.to)
-    .map((r) => ({ ...r, exercise: r.exercise ?? exerciseById.get(r.exerciseId) }))
-    .filter((r) => !!r.exercise) as ExerciseRecordResponse[], [allExerciseRecords, range, exerciseById]);
+  const inRange = React.useCallback((iso: string) => {
+    const d = dayjs(iso);
+    if (!d.isValid()) return false;
+    const from = dayjs(range.from);
+    const to = dayjs(range.to);
+    return d.valueOf() >= from.valueOf() && d.valueOf() <= to.valueOf();
+  }, [range.from, range.to]);
 
-  const metricRecords = useMemo(() => allMetricRecords
-    .filter((r) => !r.archived)
-    .filter((r) => r.date >= range.from && r.date <= range.to)
-    .map((r) => ({ ...r, metric: r.metric ?? metricById.get(r.metricId) }))
-    .filter((r) => !!r.metric) as MetricRecordResponse[], [allMetricRecords, range, metricById]);
+  const records = useMemo(
+    () => (allExerciseRecords
+      .filter((r) => !r.archived)
+      .filter((r) => inRange(r.date))
+      .map((r) => ({ ...r, exercise: r.exercise ?? exerciseById.get(r.exerciseId) })) as ExerciseRecordResponse[]),
+    [allExerciseRecords, inRange, exerciseById],
+  );
+
+  const metricRecords = useMemo(
+    () => (allMetricRecords
+      .filter((r) => !r.archived)
+      .filter((r) => inRange(r.date))
+      .map((r) => ({ ...r, metric: r.metric ?? metricById.get(r.metricId) })) as MetricRecordResponse[]),
+    [allMetricRecords, inRange, metricById],
+  );
   type CurrentModal =
     | 'RecordType'
     | 'ExerciseCreate'
@@ -91,9 +104,9 @@ const Home: React.FC = () => {
     [records],
   );
 
-  const groups = useMemo<{ exercise: Exercise; records: ExerciseRecordResponse[] }[]>(() => {
+  const groups = useMemo<{ exercise?: Exercise; records: ExerciseRecordResponse[] }[]>(() => {
     const order: string[] = [];
-    const map = new Map<string, { exercise: Exercise; records: ExerciseRecordResponse[] }>();
+    const map = new Map<string, { exercise?: Exercise; records: ExerciseRecordResponse[] }>();
     records.forEach((r) => {
       const key = r.exerciseId;
       if (!map.has(key)) {
