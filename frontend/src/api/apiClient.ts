@@ -33,10 +33,19 @@ class ApiClient {
     localStorage.removeItem('auth_token');
   }
 
-  // Version / build info
+  // Version / build info (fallback to /health if /version returns 404, e.g. old backend deploy)
   async getVersion(): Promise<{ backendBuild: number }> {
-    const resp = await api.get('/version');
-    return resp.data as { backendBuild: number };
+    try {
+      const resp = await api.get('/version');
+      return resp.data as { backendBuild: number };
+    } catch (err: any) {
+      if (err?.response?.status === 404) {
+        const healthResp = await api.get('/health');
+        const data = healthResp.data as { backendBuild?: number };
+        return { backendBuild: data?.backendBuild ?? 0 };
+      }
+      throw err;
+    }
   }
 
   // Exercises
