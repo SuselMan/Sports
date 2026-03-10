@@ -22,6 +22,7 @@ const resources = {
         dark: 'Dark',
         language: 'Language',
         resetLocalData: 'Reset local data',
+        resetLocalDataConfirm: 'Are you sure you want to reset data? All data not synced with the server will be deleted.',
       },
       home: {
         noExercisesPrefix: "You don't have any exercises yet.",
@@ -135,6 +136,7 @@ const resources = {
         dark: 'Тёмная',
         language: 'Язык',
         resetLocalData: 'Сбросить локальные данные',
+        resetLocalDataConfirm: 'Вы уверены, что хотите сбросить данные? Все данные, не синхронизированные с сервером, будут удалены.',
       },
       home: {
         noExercisesPrefix: 'У вас ещё нет упражнений.',
@@ -239,6 +241,7 @@ const resources = {
       settings: {
         title: 'Ajustes', theme: 'Tema', light: 'Claro', dark: 'Oscuro', language: 'Idioma',
         resetLocalData: 'Restablecer datos locales',
+        resetLocalDataConfirm: '¿Está seguro de que desea restablecer los datos? Se eliminarán todos los datos no sincronizados con el servidor.',
       },
       home: {
         noExercisesPrefix: 'Aún no tienes ejercicios.', createFirstOne: 'Crea el primero', noExercisesSuffix: 'para empezar a registrar.', noRecordsForPeriod: 'No hay registros para el período elegido', noRecordsForPeriodHint: 'Agrega un registro para este período para empezar a registrar.', addRecordCta: 'Agregar registro',
@@ -268,6 +271,7 @@ const resources = {
       settings: {
         title: 'Paramètres', theme: 'Thème', light: 'Clair', dark: 'Sombre', language: 'Langue',
         resetLocalData: 'Réinitialiser les données locales',
+        resetLocalDataConfirm: 'Voulez-vous vraiment réinitialiser les données ? Toutes les données non synchronisées avec le serveur seront supprimées.',
       },
       home: {
         noExercisesPrefix: "Vous n'avez pas encore d'exercices.", createFirstOne: 'Créez votre premier', noExercisesSuffix: 'pour commencer le suivi.', noRecordsForPeriod: 'Aucun enregistrement pour la période choisie', noRecordsForPeriodHint: 'Ajoutez un enregistrement pour cette période pour commencer le suivi.', addRecordCta: 'Ajouter un enregistrement',
@@ -297,6 +301,7 @@ const resources = {
       settings: {
         title: 'Configurações', theme: 'Tema', light: 'Claro', dark: 'Escuro', language: 'Idioma',
         resetLocalData: 'Redefinir dados locais',
+        resetLocalDataConfirm: 'Tem certeza de que deseja redefinir os dados? Todos os dados não sincronizados com o servidor serão excluídos.',
       },
       home: {
         noExercisesPrefix: 'Você ainda não tem exercícios.', createFirstOne: 'Crie o primeiro', noExercisesSuffix: 'para começar a acompanhar.', noRecordsForPeriod: 'Sem registros para o período escolhido', noRecordsForPeriodHint: 'Adicione um registro para este período para começar a acompanhar.', addRecordCta: 'Adicionar registro',
@@ -326,6 +331,7 @@ const resources = {
       settings: {
         title: '设置', theme: '主题', light: '浅色', dark: '深色', language: '语言',
         resetLocalData: '重置本地数据',
+        resetLocalDataConfirm: '您确定要重置数据吗？所有未与服务器同步的数据将被删除。',
       },
       home: {
         noExercisesPrefix: '你还没有练习。', createFirstOne: '创建第一个', noExercisesSuffix: '开始记录。', noRecordsForPeriod: '所选期间没有记录', noRecordsForPeriodHint: '为该期间添加一条记录以开始跟踪你的训练。', addRecordCta: '添加记录',
@@ -355,6 +361,7 @@ const resources = {
       settings: {
         title: 'सेटिंग्स', theme: 'थीम', light: 'लाइट', dark: 'डार्क', language: 'भाषा',
         resetLocalData: 'स्थानीय डेटा रीसेट करें',
+        resetLocalDataConfirm: 'क्या आप वाकई डेटा रीसेट करना चाहते हैं? सर्वर के साथ सिंक न होने वाला सभी डेटा हटा दिया जाएगा।',
       },
       home: {
         noExercisesPrefix: 'आपके पास कोई व्यायाम नहीं है।', createFirstOne: 'पहला बनाएं', noExercisesSuffix: 'ट्रैकिंग शुरू करने के लिए।', noRecordsForPeriod: 'चुने गए समय के लिए कोई रिकॉर्ड नहीं', noRecordsForPeriodHint: 'इस अवधि के लिए ट्रैकिंग शुरू करने के लिए एक रिकॉर्ड जोड़ें।', addRecordCta: 'रिकॉर्ड जोड़ें',
@@ -384,6 +391,7 @@ const resources = {
       settings: {
         title: 'الإعدادات', theme: 'السمة', light: 'فاتح', dark: 'داكن', language: 'اللغة',
         resetLocalData: 'إعادة تعيين البيانات المحلية',
+        resetLocalDataConfirm: 'هل أنت متأكد أنك تريد إعادة تعيين البيانات؟ سيتم حذف جميع البيانات غير المتزامنة مع الخادم.',
       },
       home: {
         noExercisesPrefix: 'ليس لديك أي تمارين بعد.', createFirstOne: 'أنشئ الأول', noExercisesSuffix: 'لتبدأ التتبع.', noRecordsForPeriod: 'لا توجد سجلات للفترة المختارة', noRecordsForPeriodHint: 'أضف سجلاً لهذه الفترة لبدء التتبع.', addRecordCta: 'إضافة سجل',
@@ -413,6 +421,7 @@ const resources = {
       settings: {
         title: 'সেটিংস', theme: 'থিম', light: 'লাইট', dark: 'ডার্ক', language: 'ভাষা',
         resetLocalData: 'স্থানীয় ডেটা রিসেট করুন',
+        resetLocalDataConfirm: 'আপনি কি নিশ্চিত যে আপনি ডেটা রিসেট করতে চান? সার্ভারের সাথে সিঙ্ক হয়নি এমন সমস্ত ডেটা মুছে ফেলা হবে।',
       },
       home: {
         noExercisesPrefix: 'আপনার এখনও কোনো ব্যায়াম নেই।', createFirstOne: 'প্রথমটি তৈরি করুন', noExercisesSuffix: 'ট্র্যাকিং শুরু করতে।', noRecordsForPeriod: 'নির্বাচিত সময়ের জন্য কোনো রেকর্ড নেই', noRecordsForPeriodHint: 'এই সময়ের জন্য ট্র্যাকিং শুরু করতে একটি রেকর্ড যোগ করুন।', addRecordCta: 'রেকর্ড যোগ করুন',

@@ -14,11 +14,21 @@ async function start() {
   app.use(cors({ origin: env.CORS_ORIGIN }));
   app.use(express.json());
 
-  app.get('/health', (_, res) => res.json({ ok: true, backendBuild: backendBuildNumber }));
-  app.get('/version', (_, res) => res.json({ backendBuild: backendBuildNumber }));
+  const jsonVersion = (_: express.Request, res: express.Response) =>
+    res.json({ backendBuild: backendBuildNumber });
+  const jsonHealth = (_: express.Request, res: express.Response) =>
+    res.json({ ok: true, backendBuild: backendBuildNumber });
+
+  app.get('/health', jsonHealth);
+  app.get('/version', jsonVersion);
+  app.get('/api/health', jsonHealth);
+  app.get('/api/version', jsonVersion);
   app.post('/auth/google', googleAuthHandler);
+  app.post('/api/auth/google', googleAuthHandler);
   app.use('/exercises', authMiddleware, exercisesRouter);
+  app.use('/api/exercises', authMiddleware, exercisesRouter);
   app.use('/metrics', authMiddleware, metricsRouter);
+  app.use('/api/metrics', authMiddleware, metricsRouter);
 
   app.listen(env.PORT, () => {
     // eslint-disable-next-line no-console

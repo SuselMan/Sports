@@ -39,22 +39,7 @@ export default function Settings({ mode, setMode }: { mode: 'light' | 'dark'; se
           </div>
         </Dropdown>
       </div>
-      <div className={styles.section}>
-        <Button
-          type="secondary"
-          onClick={async () => {
-            // eslint-disable-next-line no-alert
-            const ok = window.confirm(
-              'Вы уверены, что хотите сбросить данные? Все данные, не синхронизированные с сервером, будут удалены.',
-            );
-            if (!ok) return;
-            await resetLocalData();
-            await triggerSync();
-          }}
-        >
-          {t('settings.resetLocalData')}
-        </Button>
-      </div>
+
       <div className={styles.section}>
         <Dropdown
           header={`${t('settings.language')}: ${
@@ -83,6 +68,20 @@ export default function Settings({ mode, setMode }: { mode: 'light' | 'dark'; se
             <Button onClick={() => changeLanguage('bn')}>বাংলা</Button>
           </div>
         </Dropdown>
+      </div>
+      <div className={styles.section}>
+        <Button
+          type="secondary"
+          onClick={async () => {
+            // eslint-disable-next-line no-alert
+            const ok = window.confirm(t('settings.resetLocalDataConfirm'));
+            if (!ok) return;
+            await resetLocalData();
+            await triggerSync();
+          }}
+        >
+          {t('settings.resetLocalData')}
+        </Button>
       </div>
       <div className={styles.footer}>
         <small>
