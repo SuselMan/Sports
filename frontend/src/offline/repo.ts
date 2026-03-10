@@ -38,7 +38,7 @@ async function upsertMany<T extends { _id: string }>(
 ) {
   let toPut: T[] = items;
   if (storeName === 'exerciseRecords') {
-    toPut = dedupeAndNormalizeRecords(items as ExerciseRecordResponse[], (r) => {
+    const normalized = dedupeAndNormalizeRecords(items as unknown as ExerciseRecordResponse[], (r) => {
       const rec = r as ExerciseRecordResponse;
       const exerciseId = normalizeId(rec.exerciseId) as string;
       return {
@@ -49,9 +49,10 @@ async function upsertMany<T extends { _id: string }>(
           ? { ...rec.exercise, _id: normalizeId(rec.exercise._id) as string }
           : rec.exercise,
       };
-    }) as T[];
+    });
+    toPut = normalized as unknown as T[];
   } else if (storeName === 'metricRecords') {
-    toPut = dedupeAndNormalizeRecords(items as MetricRecordResponse[], (r) => {
+    const normalized = dedupeAndNormalizeRecords(items as unknown as MetricRecordResponse[], (r) => {
       const rec = r as MetricRecordResponse;
       const metricId = normalizeId(rec.metricId) as string;
       return {
@@ -62,7 +63,8 @@ async function upsertMany<T extends { _id: string }>(
           ? { ...rec.metric, _id: normalizeId(rec.metric._id) as string }
           : rec.metric,
       };
-    }) as T[];
+    });
+    toPut = normalized as unknown as T[];
   } else {
     toPut = dedupeAndNormalizeRecords(items, (item) => ({ ...item, _id: normalizeId(item._id) as string })) as T[];
   }

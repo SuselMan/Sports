@@ -52,7 +52,7 @@ export default function Settings({ mode, setMode }: { mode: 'light' | 'dark'; se
             await triggerSync();
           }}
         >
-          {t('settings.resetLocalData', 'Сбросить локальные данные')}
+          {t('settings.resetLocalData')}
         </Button>
       </div>
       <div className={styles.section}>
