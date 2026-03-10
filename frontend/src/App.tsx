@@ -6,6 +6,7 @@ import Spinner from '@uikit/components/Spinner/Spinner';
 import Login from './pages/Login';
 import Home from './pages/Home';
 import Metrics from './pages/Metrics';
+import MetricStatistics from './pages/MetricStatistics';
 import Statistics from './pages/Statistics';
 import Exercises from './pages/Exercises';
 import Settings from './pages/Settings';
@@ -69,6 +70,7 @@ export default function App() {
           <Route path="/" element={<Protected><Home /></Protected>} />
           <Route path="/exercises" element={<Protected><Exercises /></Protected>} />
           <Route path="/metrics" element={<Protected><Metrics /></Protected>} />
+          <Route path="/metrics/:metricId/statistics" element={<Protected><MetricStatistics /></Protected>} />
           <Route path="/statistics/:exerciseId?" element={<Protected><Statistics /></Protected>} />
           <Route
             path="/settings"

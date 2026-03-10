@@ -33,5 +33,10 @@ export const useStatisticsDateRangeStore = createDateRangeStore('statisticsDateR
   to: dayjs().endOf('day').toISOString(),
 });
 
+export const useMetricStatisticsDateRangeStore = createDateRangeStore('metricStatisticsDateRange', {
+  from: dayjs().subtract(30, 'day').startOf('day').toISOString(),
+  to: dayjs().endOf('day').toISOString(),
+});
+
 // Backward compat: existing imports in older code should keep working.
 export const useDateRangeStore = useHomeDateRangeStore;

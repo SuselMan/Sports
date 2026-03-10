@@ -99,6 +99,9 @@ const resources = {
         bestE1rm: 'Best e1RM',
         chartMaxRepsPerDay: 'Max reps per day',
         chartE1rmPerDay: 'e1RM per day',
+        metricMin: 'Min',
+        metricMax: 'Max',
+        chartValueOverTime: 'Value over time',
       },
       commonTexts: {
         noDataForPeriod: 'No data for chosen period.',
@@ -213,6 +216,9 @@ const resources = {
         bestE1rm: 'Лучший e1RM',
         chartMaxRepsPerDay: 'Макс. повторы по дням',
         chartE1rmPerDay: 'e1RM по дням',
+        metricMin: 'Мин',
+        metricMax: 'Макс',
+        chartValueOverTime: 'Значение по времени',
       },
       commonTexts: {
         noDataForPeriod: 'Нет данных за выбранный период.',
@@ -258,6 +264,7 @@ const resources = {
       actions: { cancel: 'Cancelar', save: 'Guardar' },
       statistics: {
         title: 'Estadísticas', exerciseLabel: 'Ejercicio', chartRepsPerSet: 'Ejercicio: Repeticiones por serie', chartWeight: 'Ejercicio: Peso', chartSetsPerDay: 'Ejercicio: Series por día', chartOverallRepsPerDay: 'Total: Repeticiones por día',
+        metricMin: 'Mín', metricMax: 'Máx', chartValueOverTime: 'Valor en el tiempo',
       },
       commonTexts: { noDataForPeriod: 'No hay datos para el período elegido.', type: 'Tipo', muscles: 'Músculos' },
     },
@@ -288,6 +295,7 @@ const resources = {
       actions: { cancel: 'Annuler', save: 'Enregistrer' },
       statistics: {
         title: 'Statistiques', exerciseLabel: 'Exercice', chartRepsPerSet: 'Exercice : Répétitions par série', chartWeight: 'Exercice : Poids', chartSetsPerDay: 'Exercice : Séries par jour', chartOverallRepsPerDay: 'Total : Répétitions par jour',
+        metricMin: 'Min', metricMax: 'Max', chartValueOverTime: 'Valeur dans le temps',
       },
       commonTexts: { noDataForPeriod: 'Pas de données pour la période choisie.', type: 'Type', muscles: 'Muscles' },
     },
@@ -318,6 +326,7 @@ const resources = {
       actions: { cancel: 'Cancelar', save: 'Salvar' },
       statistics: {
         title: 'Estatísticas', exerciseLabel: 'Exercício', chartRepsPerSet: 'Exercício: Repetições por série', chartWeight: 'Exercício: Peso', chartSetsPerDay: 'Exercício: Séries por dia', chartOverallRepsPerDay: 'Total: Repetições por dia',
+        metricMin: 'Mín', metricMax: 'Máx', chartValueOverTime: 'Valor ao longo do tempo',
       },
       commonTexts: { noDataForPeriod: 'Sem dados para o período escolhido.', type: 'Tipo', muscles: 'Músculos' },
     },
@@ -348,6 +357,7 @@ const resources = {
       actions: { cancel: '取消', save: '保存' },
       statistics: {
         title: '统计', exerciseLabel: '练习', chartRepsPerSet: '练习：每组次数', chartWeight: '练习：重量', chartSetsPerDay: '练习：每天组数', chartOverallRepsPerDay: '总计：每天次数',
+        metricMin: '最小', metricMax: '最大', chartValueOverTime: '数值随时间',
       },
       commonTexts: { noDataForPeriod: '所选期间没有数据。', type: '类型', muscles: '肌群' },
     },
@@ -378,6 +388,7 @@ const resources = {
       actions: { cancel: 'रद्द करें', save: 'सेव' },
       statistics: {
         title: 'आँकड़े', exerciseLabel: 'व्यायाम', chartRepsPerSet: 'व्यायाम: प्रति सेट रिप्स', chartWeight: 'व्यायाम: वजन', chartSetsPerDay: 'व्यायाम: प्रति दिन सेट', chartOverallRepsPerDay: 'कुल: प्रति दिन रिप्स',
+        metricMin: 'न्यून', metricMax: 'अधिकतम', chartValueOverTime: 'समय के साथ मान',
       },
       commonTexts: { noDataForPeriod: 'चुने गए समय के लिए डेटा नहीं।', type: 'प्रकार', muscles: 'मसल्स' },
     },
@@ -408,6 +419,7 @@ const resources = {
       actions: { cancel: 'إلغاء', save: 'حفظ' },
       statistics: {
         title: 'الإحصائيات', exerciseLabel: 'تمرين', chartRepsPerSet: 'تمرين: التكرارات لكل مجموعة', chartWeight: 'تمرين: الوزن', chartSetsPerDay: 'تمرين: المجموعات يومياً', chartOverallRepsPerDay: 'الإجمالي: التكرارات يومياً',
+        metricMin: 'الحد الأدنى', metricMax: 'الحد الأقصى', chartValueOverTime: 'القيمة عبر الزمن',
       },
       commonTexts: { noDataForPeriod: 'لا توجد بيانات للفترة المختارة.', type: 'النوع', muscles: 'العضلات' },
     },
@@ -438,6 +450,7 @@ const resources = {
       actions: { cancel: 'বাতিল', save: 'সংরক্ষণ' },
       statistics: {
         title: 'পরিসংখ্যান', exerciseLabel: 'ব্যায়াম', chartRepsPerSet: 'ব্যায়াম: প্রতি সেট রিপস', chartWeight: 'ব্যায়াম: ওজন', chartSetsPerDay: 'ব্যায়াম: দিনে সেট', chartOverallRepsPerDay: 'মোট: দিনে রিপস',
+        metricMin: 'সর্বনিম্ন', metricMax: 'সর্বোচ্চ', chartValueOverTime: 'সময়ের সাথে মান',
       },
       commonTexts: { noDataForPeriod: 'নির্বাচিত সময়ের জন্য কোনো তথ্য নেই।', type: 'ধরন', muscles: 'মাংসপেশী' },
     },

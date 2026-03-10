@@ -1,0 +1,48 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-lg) 0;
+}
+
+.highlights {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-sm);
+}
+
+@media (max-width: 720px) {
+  .highlights {
+    grid-template-columns: 1fr;
+  }
+}
+
+.highlightCard {
+  padding: var(--spacing-md);
+}
+
+.highlightLabel {
+  font-size: var(--font-size-sm);
+  color: var(--disabled-text-color);
+}
+
+.highlightValue {
+  margin-top: 6px;
+  font-size: var(--font-size-lg);
+  color: var(--main-text-color);
+  font-weight: 700;
+}
+
+.blockTitle {
+  font-size: var(--font-size-md);
+  color: var(--main-text-color);
+}
+
+.chartBox {
+  height: 240px;
+}
