@@ -50,7 +50,6 @@ async function run(mode: SyncMode): Promise<void> {
       if (m === 'full') {
         const lastSync = await getLastSync();
         await pullAllUpdatedAfter(lastSync as any);
-        await setLastSync(serverNowIso());
       }
     }
   })().finally(() => {
@@ -269,8 +268,18 @@ async function syncQueueItem(item: ToSyncItem) {
   }
 }
 
-async function pullAllUpdatedAfter(updatedAfter: ISODateString | '') {
+function latestUpdatedAt(items: { updatedAt?: string }[]): string | null {
+  let latest: string | null = null;
+  for (const item of items) {
+    const t = item?.updatedAt;
+    if (t && (!latest || t > latest)) latest = t;
+  }
+  return latest;
+}
+
+async function pullAllUpdatedAfter(updatedAfter: ISODateString | ''): Promise<void> {
   const updatedAfterParam = updatedAfter || undefined;
+  let maxUpdatedAt: string | null = null;
 
   // Exercises
   {
@@ -286,6 +295,8 @@ async function pullAllUpdatedAfter(updatedAfter: ISODateString | '') {
         sortBy: 'name',
         sortOrder: 'asc',
       });
+      const latest = latestUpdatedAt(resp.list as { updatedAt?: string }[]);
+      if (latest && (!maxUpdatedAt || latest > maxUpdatedAt)) maxUpdatedAt = latest;
       // eslint-disable-next-line no-await-in-loop
       await putExercises(resp.list as Exercise[]);
       if (resp.list.length < SYNC_PAGE_SIZE) break;
@@ -306,6 +317,8 @@ async function pullAllUpdatedAfter(updatedAfter: ISODateString | '') {
         sortBy: 'name',
         sortOrder: 'asc',
       });
+      const latest = latestUpdatedAt(resp.list as { updatedAt?: string }[]);
+      if (latest && (!maxUpdatedAt || latest > maxUpdatedAt)) maxUpdatedAt = latest;
       // eslint-disable-next-line no-await-in-loop
       await putMetrics(resp.list as Metric[]);
       if (resp.list.length < SYNC_PAGE_SIZE) break;
@@ -326,6 +339,8 @@ async function pullAllUpdatedAfter(updatedAfter: ISODateString | '') {
         sortBy: 'date',
         sortOrder: 'asc',
       });
+      const latest = latestUpdatedAt(resp.list as { updatedAt?: string }[]);
+      if (latest && (!maxUpdatedAt || latest > maxUpdatedAt)) maxUpdatedAt = latest;
       // eslint-disable-next-line no-await-in-loop
       await putExerciseRecords(resp.list as ExerciseRecordResponse[]);
       if (resp.list.length < SYNC_PAGE_SIZE) break;
@@ -346,12 +361,23 @@ async function pullAllUpdatedAfter(updatedAfter: ISODateString | '') {
         sortBy: 'date',
         sortOrder: 'asc',
       });
+      const latest = latestUpdatedAt(resp.list as { updatedAt?: string }[]);
+      if (latest && (!maxUpdatedAt || latest > maxUpdatedAt)) maxUpdatedAt = latest;
       // eslint-disable-next-line no-await-in-loop
       await putMetricRecords(resp.list as MetricRecordResponse[]);
       if (resp.list.length < SYNC_PAGE_SIZE) break;
       page += 1;
     }
   }
+
+  // Persist latest updatedAt so next pull doesn't re-fetch the same records (avoids any overlap/duplicate risk)
+  if (maxUpdatedAt) {
+    const serverNow = serverNowIso();
+    const nextLastSync = !serverNow || maxUpdatedAt > serverNow ? maxUpdatedAt : serverNow;
+    await setLastSync(nextLastSync as ISODateString);
+    return;
+  }
+  await setLastSync(serverNowIso() as ISODateString);
 }
 
 // Fast path: send only the local queue (used on each local write when online)

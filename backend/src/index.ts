@@ -5,6 +5,7 @@ import { env, assertEnv } from './env';
 import { googleAuthHandler, authMiddleware } from './auth';
 import { exercisesRouter } from './routes/exercises';
 import { metricsRouter } from './routes/metrics';
+import { backendBuildNumber } from './version';
 
 async function start() {
   assertEnv();
@@ -13,7 +14,8 @@ async function start() {
   app.use(cors({ origin: env.CORS_ORIGIN }));
   app.use(express.json());
 
-  app.get('/health', (_, res) => res.json({ ok: true }));
+  app.get('/health', (_, res) => res.json({ ok: true, backendBuild: backendBuildNumber }));
+  app.get('/version', (_, res) => res.json({ backendBuild: backendBuildNumber }));
   app.post('/auth/google', googleAuthHandler);
   app.use('/exercises', authMiddleware, exercisesRouter);
   app.use('/metrics', authMiddleware, metricsRouter);

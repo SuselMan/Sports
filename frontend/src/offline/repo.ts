@@ -12,13 +12,64 @@ function emitDbChange() {
   window.dispatchEvent(new CustomEvent('sports-db-change'));
 }
 
+function normalizeId(value: unknown): string {
+  if (value == null) return '';
+  if (typeof value === 'string') return value;
+  if (typeof value === 'object' && value !== null && '_id' in value) return String((value as { _id?: unknown })._id);
+  return String(value);
+}
+
+/** Dedupe by _id (last wins) and normalize id fields so IndexedDB keyPath is always consistent (string). */
+function dedupeAndNormalizeRecords<T extends { _id: string }>(
+  items: T[],
+  normalize: (item: T) => T,
+): T[] {
+  const byId = new Map<string, T>();
+  for (const item of items) {
+    const id = normalizeId(item._id);
+    byId.set(id, normalize({ ...item, _id: id }));
+  }
+  return Array.from(byId.values());
+}
+
 async function upsertMany<T extends { _id: string }>(
   storeName: 'exercises' | 'exerciseRecords' | 'metrics' | 'metricRecords',
   items: T[],
 ) {
+  let toPut: T[] = items;
+  if (storeName === 'exerciseRecords') {
+    toPut = dedupeAndNormalizeRecords(items as ExerciseRecordResponse[], (r) => {
+      const rec = r as ExerciseRecordResponse;
+      const exerciseId = normalizeId(rec.exerciseId) as string;
+      return {
+        ...rec,
+        _id: normalizeId(rec._id) as string,
+        exerciseId,
+        exercise: rec.exercise
+          ? { ...rec.exercise, _id: normalizeId(rec.exercise._id) as string }
+          : rec.exercise,
+      };
+    }) as T[];
+  } else if (storeName === 'metricRecords') {
+    toPut = dedupeAndNormalizeRecords(items as MetricRecordResponse[], (r) => {
+      const rec = r as MetricRecordResponse;
+      const metricId = normalizeId(rec.metricId) as string;
+      return {
+        ...rec,
+        _id: normalizeId(rec._id) as string,
+        metricId,
+        metric: rec.metric
+          ? { ...rec.metric, _id: normalizeId(rec.metric._id) as string }
+          : rec.metric,
+      };
+    }) as T[];
+  } else {
+    toPut = dedupeAndNormalizeRecords(items, (item) => ({ ...item, _id: normalizeId(item._id) as string })) as T[];
+  }
+
   const db = await getDb();
   const tx = db.transaction(storeName, 'readwrite');
-  for (const item of items) {
+  for (const item of toPut) {
     // eslint-disable-next-line no-await-in-loop
     await tx.store.put(item as any);
   }
@@ -119,6 +170,24 @@ export async function getExerciseRecordsLocal(): Promise<ExerciseRecordResponse[
 
 export async function getMetricRecordsLocal(): Promise<MetricRecordResponse[]> {
   return getAll<MetricRecordResponse>('metricRecords');
+}
+
+export async function resetLocalData(): Promise<void> {
+  const db = await getDb();
+  // Clear all data stores and reset lastSync and sync queue
+  const tx = db.transaction(['meta', 'exercises', 'exerciseRecords', 'metrics', 'metricRecords', 'toSync'], 'readwrite');
+  await Promise.all([
+    tx.objectStore('exercises').clear(),
+    tx.objectStore('exerciseRecords').clear(),
+    tx.objectStore('metrics').clear(),
+    tx.objectStore('metricRecords').clear(),
+    tx.objectStore('toSync').clear(),
+    (async () => {
+      await tx.objectStore('meta').put({ key: 'lastSync', value: '' });
+    })(),
+  ]);
+  await tx.done;
+  emitDbChange();
 }
 
 

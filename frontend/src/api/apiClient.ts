@@ -33,6 +33,12 @@ class ApiClient {
     localStorage.removeItem('auth_token');
   }
 
+  // Version / build info
+  async getVersion(): Promise<{ backendBuild: number }> {
+    const resp = await api.get('/version');
+    return resp.data as { backendBuild: number };
+  }
+
   // Exercises
   async getExercises(params?: ListParams & { archived?: boolean; updatedAfter?: ISODateString }): Promise<ExerciseListResponse> {
     const resp = await api.get('/exercises', {

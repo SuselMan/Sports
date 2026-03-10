@@ -3,12 +3,24 @@ import { useTranslation } from 'react-i18next';
 import Dropdown from '@uikit/components/Dropdown/Dropdown';
 import Button from '@uikit/components/Button/Button';
 import i18n from '../../i18n';
+import { apiClient } from '../../api/apiClient';
+import { frontendBuildNumber } from '../../buildInfo';
 import { storage } from '../../utils/storage';
+import { useSyncStore } from '../../store/sync';
+import { resetLocalData } from '../../offline/repo';
 import styles from './styles.module.css';
 
 export default function Settings({ mode, setMode }: { mode: 'light' | 'dark'; setMode: (m: 'light' | 'dark') => void }) {
   const { t } = useTranslation();
   const [lang, setLang] = React.useState<string>(() => storage.get<string>('language', i18n.language || 'en'));
+  const [backendBuild, setBackendBuild] = React.useState<number | null>(null);
+  const triggerSync = useSyncStore((s) => s.triggerSync);
+
+  React.useEffect(() => {
+    apiClient.getVersion()
+      .then((v) => setBackendBuild(v.backendBuild))
+      .catch(() => setBackendBuild(null));
+  }, []);
 
   const changeLanguage = (code: string) => {
     setLang(code);
@@ -26,6 +38,22 @@ export default function Settings({ mode, setMode }: { mode: 'light' | 'dark'; se
             <Button onClick={() => setMode('dark')}>{t('settings.dark')}</Button>
           </div>
         </Dropdown>
+      </div>
+      <div className={styles.section}>
+        <Button
+          type="secondary"
+          onClick={async () => {
+            // eslint-disable-next-line no-alert
+            const ok = window.confirm(
+              'Вы уверены, что хотите сбросить данные? Все данные, не синхронизированные с сервером, будут удалены.',
+            );
+            if (!ok) return;
+            await resetLocalData();
+            await triggerSync();
+          }}
+        >
+          {t('settings.resetLocalData', 'Сбросить локальные данные')}
+        </Button>
       </div>
       <div className={styles.section}>
         <Dropdown
@@ -55,6 +83,14 @@ export default function Settings({ mode, setMode }: { mode: 'light' | 'dark'; se
             <Button onClick={() => changeLanguage('bn')}>বাংলা</Button>
           </div>
         </Dropdown>
+      </div>
+      <div className={styles.footer}>
+        <small>
+          Build&nbsp;
+          {frontendBuildNumber}
+          /
+          {backendBuild ?? '?'}
+        </small>
       </div>
     </div>
   );
