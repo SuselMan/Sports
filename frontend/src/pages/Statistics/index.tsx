@@ -23,6 +23,22 @@ function dayKey(iso: string): string {
   return dayjs(iso).format('YYYY-MM-DD');
 }
 
+/** Add a `trend` field to each point using least-squares linear regression. */
+function addTrendLine<T extends { value: number }>(data: T[]): (T & { trend: number })[] {
+  const n = data.length;
+  if (n < 2) return data.map((d) => ({ ...d, trend: d.value }));
+  let sumX = 0; let sumY = 0; let sumXY = 0; let sumX2 = 0;
+  data.forEach((d, i) => {
+    sumX += i;
+    sumY += d.value;
+    sumXY += i * d.value;
+    sumX2 += i * i;
+  });
+  const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+  const intercept = (sumY - slope * sumX) / n;
+  return data.map((d, i) => ({ ...d, trend: Math.round((intercept + slope * i) * 100) / 100 }));
+}
+
 export default function Statistics() {
   const range = useStatisticsDateRangeStore((s) => s.range);
   const setRange = useStatisticsDateRangeStore((s) => s.setRange);
@@ -101,9 +117,11 @@ export default function Statistics() {
   }, [repsRecordsAllTime]);
 
   // reps per day (total reps for the day)
-  const repsPerDaySeries = useMemo(() => Array.from(repsPerDayTotal.entries())
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([date, value]) => ({ date, value })), [repsPerDayTotal]);
+  const repsPerDaySeries = useMemo(() => addTrendLine(
+    Array.from(repsPerDayTotal.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, value]) => ({ date, value })),
+  ), [repsPerDayTotal]);
 
   const e1rmRecords = useMemo(() => repsRecords
     .filter((r) => typeof r.weight === 'number' && (r.weight as number) > 0)
@@ -120,15 +138,43 @@ export default function Statistics() {
     return max;
   }, [e1rmRecords]);
 
+  const weightRecords = useMemo(
+    () => exerciseRecords.filter((r) => typeof r.weight === 'number' && (r.weight as number) > 0),
+    [exerciseRecords],
+  );
+
+  const bestWeight = useMemo(() => {
+    let max = 0;
+    weightRecords.forEach((r) => {
+      if ((r.weight as number) > max) max = r.weight as number;
+    });
+    return max;
+  }, [weightRecords]);
+
+  const dailyMaxWeightSeries = useMemo(() => {
+    const map = new Map<string, number>();
+    weightRecords.forEach((r) => {
+      const key = dayKey(r.date);
+      map.set(key, Math.max(map.get(key) || 0, r.weight as number));
+    });
+    return addTrendLine(
+      Array.from(map.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([date, value]) => ({ date, value })),
+    );
+  }, [weightRecords]);
+
   const dailyMaxE1rmSeries = useMemo(() => {
     const map = new Map<string, number>();
     e1rmRecords.forEach((r) => {
       const key = dayKey(r.date);
       map.set(key, Math.max(map.get(key) || 0, r.e1rm));
     });
-    return Array.from(map.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([date, value]) => ({ date, value }));
+    return addTrendLine(
+      Array.from(map.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([date, value]) => ({ date, value })),
+    );
   }, [e1rmRecords]);
 
   return (
@@ -166,6 +212,12 @@ export default function Statistics() {
                   <div className={styles.highlightLabel}>{t('statistics.bestE1rm')}</div>
                   <div className={styles.highlightValue}>{bestE1rm ? bestE1rm.toFixed(1) : '-'}</div>
                 </Card>
+                {!!weightRecords.length && (
+                  <Card className={styles.highlightCard}>
+                    <div className={styles.highlightLabel}>{t('statistics.bestWeight')}</div>
+                    <div className={styles.highlightValue}>{bestWeight || '-'}</div>
+                  </Card>
+                )}
               </div>
 
               <div className={styles.blockTitle}>{t('statistics.chartMaxRepsPerDay')}</div>
@@ -182,6 +234,7 @@ export default function Statistics() {
                       labelFormatter={(d) => dayjs(String(d)).format('DD/MM/YYYY')}
                     />
                     <Line type="monotone" dataKey="value" stroke="#ef6c00" />
+                    <Line type="linear" dataKey="trend" stroke="#ef6c00" strokeDasharray="6 3" strokeOpacity={0.5} dot={false} activeDot={false} tooltipType="none" />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -203,6 +256,31 @@ export default function Statistics() {
                           formatter={(v) => [Number(v).toFixed(1), 'e1RM']}
                         />
                         <Line type="monotone" dataKey="value" stroke="#2e7d32" />
+                        <Line type="linear" dataKey="trend" stroke="#2e7d32" strokeDasharray="6 3" strokeOpacity={0.5} dot={false} activeDot={false} tooltipType="none" />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </>
+              )}
+
+              {!!dailyMaxWeightSeries.length && (
+                <>
+                  <div className={styles.blockTitle}>{t('statistics.chartBestWeightPerDay')}</div>
+                  <div className={styles.chartBox}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={dailyMaxWeightSeries}>
+                        <CartesianGrid stroke="#eee" />
+                        <XAxis
+                          dataKey="date"
+                          tickFormatter={(d) => dayjs(d).format('DD/MM')}
+                        />
+                        <YAxis />
+                        <Tooltip
+                          labelFormatter={(d) => dayjs(String(d)).format('DD/MM/YYYY')}
+                          formatter={(v) => [Number(v), t('records.weightKg')]}
+                        />
+                        <Line type="monotone" dataKey="value" stroke="#1565c0" />
+                        <Line type="linear" dataKey="trend" stroke="#1565c0" strokeDasharray="6 3" strokeOpacity={0.5} dot={false} activeDot={false} tooltipType="none" />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
