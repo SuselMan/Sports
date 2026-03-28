@@ -61,6 +61,7 @@ async function run(mode: SyncMode): Promise<void> {
 
 async function drainQueueOnce() {
   const queued = await listQueuedSync();
+  if (queued.length) console.warn('[SYNC] drainQueue:', queued.length, 'items', queued.map((q) => `${q.entity}:${q.op}:${q._id}`));
   for (const item of queued) {
     if (!authed()) throw new Error('unauthorized');
     // eslint-disable-next-line no-await-in-loop
@@ -280,6 +281,7 @@ function latestUpdatedAt(items: { updatedAt?: string }[]): string | null {
 async function pullAllUpdatedAfter(updatedAfter: ISODateString | ''): Promise<void> {
   const updatedAfterParam = updatedAfter || undefined;
   let maxUpdatedAt: string | null = null;
+  console.warn('[SYNC] pullAllUpdatedAfter, lastSync =', updatedAfter || '(empty)');
 
   // Exercises
   {

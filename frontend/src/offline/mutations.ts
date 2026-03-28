@@ -116,6 +116,7 @@ export async function upsertExerciseRecordLocal(input: {
   restSec?: number;
 }) {
   const _id = input._id ?? createObjectId();
+  console.warn(`[MUTATION] upsertExerciseRecord _id=${_id} isNew=${!input._id} exerciseId=${input.exerciseId}`);
   const t = nowIso();
   const existing = (await getExerciseRecordsLocal()).find((r) => r._id === _id);
   const exercise = existing?.exercise ?? (await getExercisesLocal()).find((e) => e._id === input.exerciseId);

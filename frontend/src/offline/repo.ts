@@ -70,12 +70,26 @@ async function upsertMany<T extends { _id: string }>(
   }
 
   const db = await getDb();
+  // Debug: count before write
+  const countBefore = await db.count(storeName);
+  const existingIds = new Set((await db.getAllKeys(storeName)).map(String));
+  const newIds = toPut.map((item) => (item as any)._id as string);
+  const trulyNew = newIds.filter((id) => !existingIds.has(id));
+  if (trulyNew.length > 0) {
+    console.warn(`[SYNC] upsertMany(${storeName}): ${toPut.length} items, ${trulyNew.length} NEW ids not in IDB:`, trulyNew);
+  }
+
   const tx = db.transaction(storeName, 'readwrite');
   for (const item of toPut) {
     // eslint-disable-next-line no-await-in-loop
     await tx.store.put(item as any);
   }
   await tx.done;
+
+  const countAfter = await db.count(storeName);
+  if (countAfter !== countBefore) {
+    console.warn(`[SYNC] upsertMany(${storeName}): count ${countBefore} → ${countAfter} (diff: +${countAfter - countBefore})`);
+  }
   emitDbChange();
 }
 
