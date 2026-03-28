@@ -36,7 +36,9 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
   return (
     <div className={styles.root}>
       <div className={styles.row}>
-        <Button size="md" onClick={() => shift(-1)}><ChevronLeftIcon /></Button>
+        <div className={styles.arrowLeft}>
+          <Button size="md" onClick={() => shift(-1)}><ChevronLeftIcon /></Button>
+        </div>
         {isMobile ? (
           <>
             <div className={styles.dateInputWrapper}>
@@ -47,7 +49,7 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
                 value={from.format('YYYY-MM-DD')}
                 onChange={(e) => onChange({ from: dayjs((e.target as HTMLInputElement).value).startOf('day').toISOString(), to: to.toISOString() })}
                 max={fromMaxMobile}
-                inputClasses={styles.inputWithIcon}
+                inputClasses={styles.inputWithIconFirst}
                 onClick={() => {
                   const el = document.getElementById('date-from') as HTMLInputElement | null;
                   if (el && typeof (el as any).showPicker === 'function') {
@@ -67,7 +69,7 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
                 onChange={(e) => onChange({ from: from.toISOString(), to: dayjs((e.target as HTMLInputElement).value).endOf('day').toISOString() })}
                 min={toMinMobile}
                 max={today.format('YYYY-MM-DD')}
-                inputClasses={styles.inputWithIcon}
+                inputClasses={styles.inputWithIconLast}
                 onClick={() => {
                   const el = document.getElementById('date-to') as HTMLInputElement | null;
                   if (el && typeof (el as any).showPicker === 'function') {
@@ -87,7 +89,7 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
                 if (iso) onChange({ from: iso, to: to.toISOString() });
               }}
               maxDate={maxFromDate}
-              inputClassName={styles.fieldInput}
+              inputClassName={styles.fieldFirst}
             />
             <DatePicker
               value={to.toISOString()}
@@ -96,11 +98,13 @@ export function DateRange({ value, onChange }: { value: DateRangeValue; onChange
               }}
               minDate={from}
               maxDate={today}
-              inputClassName={styles.fieldInput}
+              inputClassName={styles.fieldLast}
             />
           </>
         )}
-        <Button size="md" onClick={() => shift(1)} disabled={rightDisabled}><ChevronRightIcon /></Button>
+        <div className={styles.arrowRight}>
+          <Button size="md" onClick={() => shift(1)} disabled={rightDisabled}><ChevronRightIcon /></Button>
+        </div>
       </div>
       <div className={styles.quick}>
         <Button

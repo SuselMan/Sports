@@ -8,6 +8,23 @@
   align-items: center;
   flex-wrap: nowrap;
   width: 100%;
+  position: relative;
+}
+
+.arrowLeft,
+.arrowRight {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.arrowLeft {
+  left: 4px;
+}
+
+.arrowRight {
+  right: 4px;
 }
 
 .quick {
@@ -47,6 +64,20 @@
     font-size: var(--font-size-sm);
 }
 
+.inputWithIconFirst {
+    width: 100%;
+    padding: var(--spacing-md);
+    padding-left: 44px;
+    font-size: var(--font-size-sm);
+}
+
+.inputWithIconLast {
+    width: 100%;
+    padding: var(--spacing-md);
+    padding-right: 36px;
+    font-size: var(--font-size-sm);
+}
+
 .input {
     width: 100%;
 }
@@ -69,4 +100,14 @@
   min-width: 0;
 }
 
+.fieldFirst {
+  flex: 1 1 0;
+  min-width: 0;
+  padding-left: 28px;
+}
 
+.fieldLast {
+  flex: 1 1 0;
+  min-width: 0;
+  padding-right: 28px;
+}

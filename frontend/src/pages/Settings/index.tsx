@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Dropdown from '@uikit/components/Dropdown/Dropdown';
 import Button from '@uikit/components/Button/Button';
@@ -6,6 +7,7 @@ import i18n from '../../i18n';
 import { apiClient } from '../../api/apiClient';
 import { frontendBuildNumber } from '../../buildInfo';
 import { storage } from '../../utils/storage';
+import { useAuthStore } from '../../store/auth';
 import { useSyncStore } from '../../store/sync';
 import { resetLocalData } from '../../offline/repo';
 import styles from './styles.module.css';
@@ -17,6 +19,8 @@ export default function Settings({ mode, setMode, mapSex, setMapSex }: {
   mapSex: MapSex; setMapSex: (s: MapSex) => void;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const signOut = useAuthStore((s) => s.signOut);
   const [lang, setLang] = React.useState<string>(() => storage.get<string>('language', i18n.language || 'en'));
   const [backendBuild, setBackendBuild] = React.useState<number | null>(null);
   const triggerSync = useSyncStore((s) => s.triggerSync);
@@ -97,6 +101,15 @@ export default function Settings({ mode, setMode, mapSex, setMapSex }: {
           {t('settings.resetLocalData')}
         </Button>
       </div>
+      <div className={styles.section}>
+        <Button
+          type="secondary"
+          onClick={() => { signOut(); navigate('/login'); }}
+        >
+          {t('nav.logout')}
+        </Button>
+      </div>
+
       <div className={styles.footer}>
         <small>
           Build&nbsp;

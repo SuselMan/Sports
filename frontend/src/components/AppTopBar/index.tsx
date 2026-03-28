@@ -8,7 +8,7 @@ import { useAuthStore } from '../../store/auth';
 import styles from './styles.module.css';
 
 export function AppTopBar() {
-  const { token, signOut } = useAuthStore();
+  const { token } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
@@ -33,9 +33,6 @@ export function AppTopBar() {
             <Button type="ghost" onClick={() => navigate('/settings')}>
               {t('nav.settings')}
             </Button>
-            <Button type="ghost" onClick={() => { signOut(); navigate('/login'); }}>
-              {t('nav.logout')}
-            </Button>
           </nav>
         )}
         {token && (
@@ -58,9 +55,6 @@ export function AppTopBar() {
             </Button>
             <Button onClick={() => { setOpen(false); navigate('/settings'); }}>
               {t('nav.settings')}
-            </Button>
-            <Button onClick={() => { setOpen(false); signOut(); navigate('/login'); }}>
-              {t('nav.logout')}
             </Button>
           </div>
         </Sidebar>

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  ComposedChart, Area, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from 'recharts';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
@@ -40,10 +40,14 @@ function addTrendLine<T extends { value: number }>(data: T[]): (T & { trend: num
 }
 
 function useCssVar(name: string, fallback: string): string {
-  const [value, setValue] = React.useState(fallback);
+  const read = () => getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+  const [value, setValue] = React.useState(read);
   useEffect(() => {
-    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-    if (v) setValue(v);
+    setValue(read());
+    const observer = new MutationObserver(() => setValue(read()));
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => observer.disconnect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [name]);
   return value;
 }
@@ -56,6 +60,7 @@ export default function Statistics() {
   const exerciseId = (params.exerciseId || '').trim();
   const { t } = useTranslation();
   const mainColor = useCssVar('--main-active-color', '#ef6c00');
+  const gridColor = useCssVar('--chart-grid-color', 'rgba(0,0,0,0.1)');
 
   const exercisesLoader = React.useCallback(() => getExercisesLocal(), []);
   const { data: allExercises, loading: isLoadingExercises } = useDbReload<Exercise[]>(exercisesLoader, []);
@@ -233,19 +238,20 @@ export default function Statistics() {
               <div className={styles.blockTitle}>{t('statistics.chartMaxRepsPerDay')}</div>
               <div className={styles.chartBox}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={repsPerDaySeries}>
-                    <CartesianGrid stroke="#eee" />
-                    <XAxis
-                      dataKey="date"
-                      tickFormatter={(d) => dayjs(d).format('DD/MM')}
-                    />
-                    <YAxis />
-                    <Tooltip
-                      labelFormatter={(d) => dayjs(String(d)).format('DD/MM/YYYY')}
-                    />
-                    <Line type="monotone" dataKey="value" stroke={mainColor} strokeWidth={2} />
+                  <ComposedChart data={repsPerDaySeries}>
+                    <defs>
+                      <linearGradient id="fillReps" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={mainColor} stopOpacity={0.15} />
+                        <stop offset="100%" stopColor={mainColor} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid stroke={gridColor} />
+                    <XAxis dataKey="date" tickFormatter={(d) => dayjs(d).format('DD/MM')} />
+                    <YAxis width={35} />
+                    <Tooltip labelFormatter={(d) => dayjs(String(d)).format('DD/MM/YYYY')} />
+                    <Area type="monotone" dataKey="value" stroke={mainColor} strokeWidth={2} fill="url(#fillReps)" />
                     <Line type="linear" dataKey="trend" stroke={mainColor} strokeDasharray="6 3" strokeOpacity={0.5} dot={false} activeDot={false} tooltipType="none" />
-                  </LineChart>
+                  </ComposedChart>
                 </ResponsiveContainer>
               </div>
 
@@ -254,20 +260,23 @@ export default function Statistics() {
                   <div className={styles.blockTitle}>{t('statistics.chartE1rmPerDay')}</div>
                   <div className={styles.chartBox}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={dailyMaxE1rmSeries}>
-                        <CartesianGrid stroke="#eee" />
-                        <XAxis
-                          dataKey="date"
-                          tickFormatter={(d) => dayjs(d).format('DD/MM')}
-                        />
-                        <YAxis />
+                      <ComposedChart data={dailyMaxE1rmSeries}>
+                        <defs>
+                          <linearGradient id="fillE1rm" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={mainColor} stopOpacity={0.15} />
+                            <stop offset="100%" stopColor={mainColor} stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid stroke={gridColor} />
+                        <XAxis dataKey="date" tickFormatter={(d) => dayjs(d).format('DD/MM')} />
+                        <YAxis width={35} />
                         <Tooltip
                           labelFormatter={(d) => dayjs(String(d)).format('DD/MM/YYYY')}
                           formatter={(v) => [Number(v).toFixed(1), 'e1RM']}
                         />
-                        <Line type="monotone" dataKey="value" stroke={mainColor} strokeWidth={2} />
+                        <Area type="monotone" dataKey="value" stroke={mainColor} strokeWidth={2} fill="url(#fillE1rm)" />
                         <Line type="linear" dataKey="trend" stroke={mainColor} strokeDasharray="6 3" strokeOpacity={0.5} dot={false} activeDot={false} tooltipType="none" />
-                      </LineChart>
+                      </ComposedChart>
                     </ResponsiveContainer>
                   </div>
                 </>
@@ -278,20 +287,23 @@ export default function Statistics() {
                   <div className={styles.blockTitle}>{t('statistics.chartBestWeightPerDay')}</div>
                   <div className={styles.chartBox}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={dailyMaxWeightSeries}>
-                        <CartesianGrid stroke="#eee" />
-                        <XAxis
-                          dataKey="date"
-                          tickFormatter={(d) => dayjs(d).format('DD/MM')}
-                        />
-                        <YAxis />
+                      <ComposedChart data={dailyMaxWeightSeries}>
+                        <defs>
+                          <linearGradient id="fillWeight" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={mainColor} stopOpacity={0.15} />
+                            <stop offset="100%" stopColor={mainColor} stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid stroke={gridColor} />
+                        <XAxis dataKey="date" tickFormatter={(d) => dayjs(d).format('DD/MM')} />
+                        <YAxis width={35} />
                         <Tooltip
                           labelFormatter={(d) => dayjs(String(d)).format('DD/MM/YYYY')}
                           formatter={(v) => [Number(v), t('records.weightKg')]}
                         />
-                        <Line type="monotone" dataKey="value" stroke={mainColor} strokeWidth={2} />
+                        <Area type="monotone" dataKey="value" stroke={mainColor} strokeWidth={2} fill="url(#fillWeight)" />
                         <Line type="linear" dataKey="trend" stroke={mainColor} strokeDasharray="6 3" strokeOpacity={0.5} dot={false} activeDot={false} tooltipType="none" />
-                      </LineChart>
+                      </ComposedChart>
                     </ResponsiveContainer>
                   </div>
                 </>

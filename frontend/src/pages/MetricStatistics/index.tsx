@@ -15,6 +15,19 @@ import { useDbReload } from '../../offline/hooks';
 import { getMetricRecordsLocal, getMetricsLocal } from '../../offline/repo';
 import styles from './styles.module.css';
 
+function useCssVar(name: string, fallback: string): string {
+  const read = () => getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+  const [value, setValue] = React.useState(read);
+  useEffect(() => {
+    setValue(read());
+    const observer = new MutationObserver(() => setValue(read()));
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => observer.disconnect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [name]);
+  return value;
+}
+
 export default function MetricStatistics() {
   const range = useMetricStatisticsDateRangeStore((s) => s.range);
   const setRange = useMetricStatisticsDateRangeStore((s) => s.setRange);
@@ -22,6 +35,7 @@ export default function MetricStatistics() {
   const params = useParams();
   const metricId = (params.metricId || '').trim();
   const { t } = useTranslation();
+  const gridColor = useCssVar('--chart-grid-color', 'rgba(0,0,0,0.1)');
 
   const metricsLoader = React.useCallback(() => getMetricsLocal(), []);
   const { data: allMetrics, loading: isLoadingMetrics } = useDbReload<Metric[]>(metricsLoader, []);
@@ -114,12 +128,12 @@ export default function MetricStatistics() {
               <div className={styles.chartBox}>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartSeries}>
-                    <CartesianGrid stroke="#eee" />
+                    <CartesianGrid stroke={gridColor} />
                     <XAxis
                       dataKey="date"
                       tickFormatter={(d) => dayjs(d).format('DD/MM')}
                     />
-                    <YAxis />
+                    <YAxis width={35} />
                     <Tooltip
                       labelFormatter={(d) => dayjs(String(d)).format('DD/MM/YYYY')}
                       formatter={(v: number) => [v, selectedMetric?.unit ?? '']}
