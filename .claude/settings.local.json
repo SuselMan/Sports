@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__sentry__find_organizations",
+      "mcp__sentry__get_issue_details",
+      "Read",
+      "Edit",
+      "Write",
+      "Glob",
+      "Grep",
+      "Bash",
+      "WebFetch",
+      "WebSearch",
+      "mcp__figma-remote-mcp__get_design_context",
+      "mcp__figma-remote-mcp__get_screenshot",
+      "mcp__figma-remote-mcp__get_metadata",
+      "Bash(git -C /c/projects/Sports log --oneline)",
+      "Bash(mkdir -p /c/projects/Sports/.claude/context)",
+      "Bash(mkdir -p /c/projects/Sports/tasks)",
+      "Bash(grep -r \"@mui\\\\|@emotion\\\\|Material\\\\|ThemeProvider\\\\|createTheme\" C:projectsSportsfrontendsrc --include=*.tsx --include=*.ts)",
+      "Bash(grep -r \"from.*@mui\\\\|from.*@emotion\\\\|import.*Material\" C:projectsSportsfrontend --include=*.tsx --include=*.ts)",
+      "Bash(npm uninstall:*)",
+      "Bash(npm run:*)",
+      "Bash(ls /c/projects/Sports/frontend/.env*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": []
+}

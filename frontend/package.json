@@ -13,11 +13,6 @@
     "lint:css:fix": "stylelint \"src/**/*.css\" \"UiKit/**/*.css\" --fix"
   },
   "dependencies": {
-    "@emotion/react": "^11.13.3",
-    "@emotion/styled": "^11.13.0",
-    "@mui/icons-material": "^6.1.6",
-    "@mui/material": "^6.1.6",
-    "@mui/x-date-pickers": "^7.18.0",
     "axios": "^1.7.7",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",

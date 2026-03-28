@@ -21,6 +21,7 @@ export default function Exercises() {
   const { data: all, loading: isLoading } = useDbReload<Exercise[]>(loader, []);
   const list = useMemo(() => all.filter((x) => !x.archived), [all]);
   const [open, setOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState<{ name: string; type: ExerciseType; muscles: Muscles[] }>({
     name: '',
     type: 'REPS',
@@ -55,9 +56,15 @@ export default function Exercises() {
   };
 
   const submit = async () => {
-    await upsertExerciseLocal({ name: form.name, type: form.type, muscles: form.muscles });
-    closeCreateDialog();
-    setForm({ name: '', type: 'REPS', muscles: [] });
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      await upsertExerciseLocal({ name: form.name, type: form.type, muscles: form.muscles });
+      closeCreateDialog();
+      setForm({ name: '', type: 'REPS', muscles: [] });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Close dialogs on mobile back button
@@ -110,7 +117,7 @@ export default function Exercises() {
             <ExerciseForm form={form} onChange={setForm} />
             <div className={styles.modalActions}>
               <Button onClick={closeCreateDialog}>{t('actions.cancel')}</Button>
-              <Button onClick={submit} disabled={!form.name.trim()}>{t('actions.save')}</Button>
+              <Button onClick={submit} disabled={!form.name.trim() || submitting}>{t('actions.save')}</Button>
             </div>
           </div>
         </Modal>
@@ -123,16 +130,21 @@ export default function Exercises() {
             <div className={styles.modalActions}>
               <Button
                 onClick={async () => {
-                  if (!editId) return;
-                  await upsertExerciseLocal({
-                    _id: editId,
-                    name: editForm.name,
-                    type: editForm.type,
-                    muscles: editForm.muscles,
-                  });
-                  setEditOpen(false);
+                  if (!editId || submitting) return;
+                  setSubmitting(true);
+                  try {
+                    await upsertExerciseLocal({
+                      _id: editId,
+                      name: editForm.name,
+                      type: editForm.type,
+                      muscles: editForm.muscles,
+                    });
+                    setEditOpen(false);
+                  } finally {
+                    setSubmitting(false);
+                  }
                 }}
-                disabled={!editForm.name.trim()}
+                disabled={!editForm.name.trim() || submitting}
               >
                 {t('actions.save')}
               </Button>

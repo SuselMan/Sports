@@ -20,6 +20,7 @@ export default function Metrics() {
   const { data: all, loading: isLoading } = useDbReload<Metric[]>(loader, []);
   const list = useMemo(() => all.filter((x) => !x.archived), [all]);
   const [open, setOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState<{ name: string; unit: Unit; muscles: Muscles[] }>({ name: '', unit: 'count', muscles: [] });
   const [editOpen, setEditOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -31,9 +32,15 @@ export default function Metrics() {
   };
 
   const submit = async () => {
-    await upsertMetricLocal({ name: form.name, unit: form.unit, muscles: form.muscles });
-    closeCreateDialog();
-    setForm({ name: '', unit: 'count', muscles: [] });
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      await upsertMetricLocal({ name: form.name, unit: form.unit, muscles: form.muscles });
+      closeCreateDialog();
+      setForm({ name: '', unit: 'count', muscles: [] });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Close dialogs on mobile back button
@@ -86,7 +93,7 @@ export default function Metrics() {
             <MetricForm form={form} onChange={setForm} />
             <div className={styles.modalActions}>
               <Button onClick={closeCreateDialog}>{t('actions.cancel')}</Button>
-              <Button onClick={submit} disabled={!form.name.trim()}>{t('actions.save')}</Button>
+              <Button onClick={submit} disabled={!form.name.trim() || submitting}>{t('actions.save')}</Button>
             </div>
           </div>
         </Modal>
@@ -99,16 +106,21 @@ export default function Metrics() {
             <div className={styles.modalActions}>
               <Button
                 onClick={async () => {
-                  if (!editId) return;
-                  await upsertMetricLocal({
-                    _id: editId,
-                    name: editForm.name,
-                    unit: editForm.unit,
-                    muscles: editForm.muscles,
-                  });
-                  setEditOpen(false);
+                  if (!editId || submitting) return;
+                  setSubmitting(true);
+                  try {
+                    await upsertMetricLocal({
+                      _id: editId,
+                      name: editForm.name,
+                      unit: editForm.unit,
+                      muscles: editForm.muscles,
+                    });
+                    setEditOpen(false);
+                  } finally {
+                    setSubmitting(false);
+                  }
                 }}
-                disabled={!editForm.name.trim()}
+                disabled={!editForm.name.trim() || submitting}
               >
                 {t('actions.save')}
               </Button>

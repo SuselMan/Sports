@@ -83,6 +83,7 @@ const Home: React.FC = () => {
     | 'MetricEdit'
     | null;
   const [currentModal, setCurrentModal] = useState<CurrentModal>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<ExerciseRecordFormValue>({
     exerciseId: '',
@@ -120,35 +121,45 @@ const Home: React.FC = () => {
   }, [records]);
 
   const submit = async () => {
-    if (!form.exerciseId) return;
-    await upsertExerciseRecordLocal({
-      exerciseId: form.exerciseId,
-      kind: form.kind,
-      repsAmount: form.kind === 'REPS' ? Number(form.repsAmount) : undefined,
-      durationMs: form.kind === 'TIME' ? Number(form.durationMs) : undefined,
-      date: form.date,
-      weight: form.weight ? Number(form.weight) : undefined,
-      note: form.note || undefined,
-    });
-    setLastRecordDefaults(form.exerciseId, {
-      repsAmount: form.repsAmount || undefined,
-      durationMs: form.durationMs || undefined,
-      weight: form.weight || undefined,
-    });
-    setCurrentModal(null);
-    setForm({ exerciseId: '', kind: 'REPS', date: range.from });
+    if (!form.exerciseId || submitting) return;
+    setSubmitting(true);
+    try {
+      await upsertExerciseRecordLocal({
+        exerciseId: form.exerciseId,
+        kind: form.kind,
+        repsAmount: form.kind === 'REPS' ? Number(form.repsAmount) : undefined,
+        durationMs: form.kind === 'TIME' ? Number(form.durationMs) : undefined,
+        date: form.date,
+        weight: form.weight ? Number(form.weight) : undefined,
+        note: form.note || undefined,
+      });
+      setLastRecordDefaults(form.exerciseId, {
+        repsAmount: form.repsAmount || undefined,
+        durationMs: form.durationMs || undefined,
+        weight: form.weight || undefined,
+      });
+      setCurrentModal(null);
+      setForm({ exerciseId: '', kind: 'REPS', date: range.from });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const submitMetric = async () => {
-    if (!metricForm.metricId || !metricForm.value) return;
-    await upsertMetricRecordLocal({
-      metricId: metricForm.metricId,
-      value: Number(metricForm.value),
-      date: metricForm.date,
-      note: metricForm.note || undefined,
-    });
-    setCurrentModal(null);
-    setMetricForm({ metricId: '', date: range.from });
+    if (!metricForm.metricId || !metricForm.value || submitting) return;
+    setSubmitting(true);
+    try {
+      await upsertMetricRecordLocal({
+        metricId: metricForm.metricId,
+        value: Number(metricForm.value),
+        date: metricForm.date,
+        note: metricForm.note || undefined,
+      });
+      setCurrentModal(null);
+      setMetricForm({ metricId: '', date: range.from });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Close dialogs on mobile back button
@@ -323,23 +334,30 @@ const Home: React.FC = () => {
                 <div className={styles.modalActions}>
                   <Button onClick={() => setCurrentModal(null)}>{t('actions.cancel')}</Button>
                   <Button
+                    disabled={submitting}
                     onClick={async () => {
+                      if (submitting) return;
                       if (currentModal === 'ExerciseCreate') {
                         await submit();
                         return;
                       }
                       if (!editId) return;
-                      await upsertExerciseRecordLocal({
-                        _id: editId,
-                        exerciseId: form.exerciseId,
-                        kind: form.kind,
-                        repsAmount: form.kind === 'REPS' ? Number(form.repsAmount) : undefined,
-                        durationMs: form.kind === 'TIME' ? Number(form.durationMs) : undefined,
-                        date: form.date,
-                        weight: form.weight ? Number(form.weight) : undefined,
-                        note: form.note || undefined,
-                      });
-                      setCurrentModal(null);
+                      setSubmitting(true);
+                      try {
+                        await upsertExerciseRecordLocal({
+                          _id: editId,
+                          exerciseId: form.exerciseId,
+                          kind: form.kind,
+                          repsAmount: form.kind === 'REPS' ? Number(form.repsAmount) : undefined,
+                          durationMs: form.kind === 'TIME' ? Number(form.durationMs) : undefined,
+                          date: form.date,
+                          weight: form.weight ? Number(form.weight) : undefined,
+                          note: form.note || undefined,
+                        });
+                        setCurrentModal(null);
+                      } finally {
+                        setSubmitting(false);
+                      }
                     }}
                   >
                     {t('actions.save')}
@@ -355,21 +373,27 @@ const Home: React.FC = () => {
                   <Button onClick={() => setCurrentModal(null)}>{t('actions.cancel')}</Button>
                   <Button
                     onClick={async () => {
+                      if (submitting) return;
                       if (currentModal === 'MetricCreate') {
                         await submitMetric();
                         return;
                       }
                       if (!metricEditId) return;
-                      await upsertMetricRecordLocal({
-                        _id: metricEditId,
-                        metricId: metricForm.metricId,
-                        value: metricForm.value != null ? Number(metricForm.value) : 0,
-                        date: metricForm.date,
-                        note: metricForm.note || undefined,
-                      });
-                      setCurrentModal(null);
+                      setSubmitting(true);
+                      try {
+                        await upsertMetricRecordLocal({
+                          _id: metricEditId,
+                          metricId: metricForm.metricId,
+                          value: metricForm.value != null ? Number(metricForm.value) : 0,
+                          date: metricForm.date,
+                          note: metricForm.note || undefined,
+                        });
+                        setCurrentModal(null);
+                      } finally {
+                        setSubmitting(false);
+                      }
                     }}
-                    disabled={!metricForm.metricId || !metricForm.value}
+                    disabled={!metricForm.metricId || !metricForm.value || submitting}
                   >
                     {t('actions.save')}
                   </Button>
