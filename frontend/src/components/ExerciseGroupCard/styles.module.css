@@ -38,6 +38,12 @@
   color: var(--disabled-text-color);
 }
 
+.repeatBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .chevron {
   display: inline-flex;
   align-items: center;

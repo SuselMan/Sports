@@ -11,7 +11,7 @@
 
 **Status**: TODO | IN_PROGRESS | DONE
 **Priority**: P0 | P1 | P2
-**Category**: security | ux | feature | infra | quality
+**Category**: security | ux | feature | infra | quality | bug
 
 ## Description
 Что нужно сделать и зачем.

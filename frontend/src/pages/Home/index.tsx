@@ -21,6 +21,8 @@ import { ExerciseRecordForm, ExerciseRecordFormValue } from '../../components/Ex
 import { MetricRecordForm, MetricRecordFormValue } from '../../components/MetricRecordForm';
 import { MetricRecordCard } from '../../components/MetricRecordCard';
 import { MusclesMap } from '../../components/MusclesMap';
+import { MusclesMapFemale } from '../../components/MusclesMapFemale';
+import type { MapSex } from '../Settings';
 import { AddFab } from '../../components/AddFab';
 import { useModalBackClose } from '../../hooks/useModalBackClose';
 import { useDbReload } from '../../offline/hooks';
@@ -33,7 +35,7 @@ import {
 import { upsertExerciseRecordLocal, upsertMetricRecordLocal } from '../../offline/mutations';
 import styles from './styles.module.css';
 
-const Home: React.FC = () => {
+const Home: React.FC<{ mapSex?: MapSex }> = ({ mapSex = 'male' }) => {
   const range = useDateRangeStore((s) => s.range);
   const setRange = useDateRangeStore((s) => s.setRange);
   const { t } = useTranslation();
@@ -182,7 +184,9 @@ const Home: React.FC = () => {
 
       {!!records.length && (
         <div className={styles.musclesBox}>
-          <MusclesMap muscles={highlightedMuscles} onMuscleClicked={() => {}} />
+          {mapSex === 'female'
+            ? <MusclesMapFemale muscles={highlightedMuscles} onMuscleClicked={() => {}} />
+            : <MusclesMap muscles={highlightedMuscles} onMuscleClicked={() => {}} />}
         </div>
       )}
 

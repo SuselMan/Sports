@@ -7,6 +7,8 @@ import Button from '@uikit/components/Button/Button';
 import SearchSelect from '@uikit/components/SearchSelect/SearchSelect';
 import styles from './styles.module.css';
 import { MusclesMap } from '../MusclesMap';
+import { MusclesMapFemale } from '../MusclesMapFemale';
+import { storage } from '../../utils/storage';
 import { MUSCLES_OPTIONS } from '../../constants/muscles';
 
 export type ExerciseFormValue = {
@@ -72,10 +74,9 @@ export function ExerciseForm({
       />
 
       <div style={{ height: '260px', border: '1px solid #eee', borderRadius: 4 }}>
-        <MusclesMap
-          muscles={form.muscles}
-          onMuscleClicked={(m: Muscles) => toggleMuscle(m)}
-        />
+        {storage.get<string>('mapSex', 'male') === 'female'
+          ? <MusclesMapFemale muscles={form.muscles} onMuscleClicked={(m: Muscles) => toggleMuscle(m)} />
+          : <MusclesMap muscles={form.muscles} onMuscleClicked={(m: Muscles) => toggleMuscle(m)} />}
       </div>
     </div>
   );

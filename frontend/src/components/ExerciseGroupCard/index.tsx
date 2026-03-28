@@ -3,8 +3,11 @@ import type { Exercise, ExerciseRecordResponse } from '@shared/Exercise.model';
 import { useTranslation } from 'react-i18next';
 import Button from '@uikit/components/Button/Button';
 import ChevronDownIcon from '@uikit/icons/chevron-down.svg?react';
+import RetryIcon from '@uikit/icons/arrow-path.svg?react';
 import styles from './styles.module.css';
 import { ExerciseRecordCard } from '../ExerciseRecordCard';
+import { setLastRecordDefaults } from '../../utils/lastRecordDefaults';
+import { upsertExerciseRecordLocal } from '../../offline/mutations';
 
 export function ExerciseGroupCard({
   exercise,
@@ -58,6 +61,29 @@ export function ExerciseGroupCard({
     }
   };
 
+  const handleRepeatLast = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const last = records[records.length - 1];
+    if (!last) return;
+    const created = await upsertExerciseRecordLocal({
+      exerciseId: last.exerciseId,
+      kind: last.kind,
+      repsAmount: last.kind === 'REPS' ? last.repsAmount : undefined,
+      durationMs: last.kind === 'TIME' ? last.durationMs : undefined,
+      date: last.date,
+      note: last.note,
+      weight: last.weight,
+      rpe: last.rpe,
+      restSec: last.restSec,
+    });
+    setLastRecordDefaults(last.exerciseId, {
+      repsAmount: last.kind === 'REPS' && last.repsAmount != null ? String(last.repsAmount) : undefined,
+      durationMs: last.kind === 'TIME' && last.durationMs != null ? String(last.durationMs) : undefined,
+      weight: last.weight != null ? String(last.weight) : undefined,
+    });
+    onRepeated?.({ ...created, exercise: last.exercise ?? (created as any).exercise });
+  };
+
   return (
     <div className={styles.root}>
       <div
@@ -79,6 +105,15 @@ export function ExerciseGroupCard({
           {/*  </div>*/}
           {/*)}*/}
         </div>
+        <Button
+          type="ghost"
+          size="sm"
+          aria-label="repeat last set"
+          className={styles.repeatBtn}
+          onClick={handleRepeatLast}
+        >
+          <RetryIcon />
+        </Button>
         <Button
           type="ghost"
           size="sm"

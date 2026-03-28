@@ -10,7 +10,12 @@ import { useSyncStore } from '../../store/sync';
 import { resetLocalData } from '../../offline/repo';
 import styles from './styles.module.css';
 
-export default function Settings({ mode, setMode }: { mode: 'light' | 'dark'; setMode: (m: 'light' | 'dark') => void }) {
+export type MapSex = 'male' | 'female';
+
+export default function Settings({ mode, setMode, mapSex, setMapSex }: {
+  mode: 'light' | 'dark'; setMode: (m: 'light' | 'dark') => void;
+  mapSex: MapSex; setMapSex: (s: MapSex) => void;
+}) {
   const { t } = useTranslation();
   const [lang, setLang] = React.useState<string>(() => storage.get<string>('language', i18n.language || 'en'));
   const [backendBuild, setBackendBuild] = React.useState<number | null>(null);
@@ -69,6 +74,15 @@ export default function Settings({ mode, setMode }: { mode: 'light' | 'dark'; se
           </div>
         </Dropdown>
       </div>
+      <div className={styles.section}>
+        <Dropdown header={`${t('settings.muscleMap')}: ${mapSex === 'male' ? t('settings.male') : t('settings.female')}`}>
+          <div className={styles.menuCol}>
+            <Button onClick={() => setMapSex('male')}>{t('settings.male')}</Button>
+            <Button onClick={() => setMapSex('female')}>{t('settings.female')}</Button>
+          </div>
+        </Dropdown>
+      </div>
+
       <div className={styles.section}>
         <Button
           type="secondary"

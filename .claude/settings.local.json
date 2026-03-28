@@ -21,7 +21,10 @@
       "Bash(grep -r \"from.*@mui\\\\|from.*@emotion\\\\|import.*Material\" C:projectsSportsfrontend --include=*.tsx --include=*.ts)",
       "Bash(npm uninstall:*)",
       "Bash(npm run:*)",
-      "Bash(ls /c/projects/Sports/frontend/.env*)"
+      "Bash(ls /c/projects/Sports/frontend/.env*)",
+      "Bash(python3 -c \":*)",
+      "Read(//tmp/**)",
+      "Bash(npx tsc:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

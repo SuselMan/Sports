@@ -9,7 +9,7 @@ import Metrics from './pages/Metrics';
 import MetricStatistics from './pages/MetricStatistics';
 import Statistics from './pages/Statistics';
 import Exercises from './pages/Exercises';
-import Settings from './pages/Settings';
+import Settings, { type MapSex } from './pages/Settings';
 import NotFound from './pages/NotFound';
 import { useAuthStore } from './store/auth';
 import { storage } from './utils/storage';
@@ -40,6 +40,7 @@ function syncThemeColorToCssVar(): void {
 
 export default function App() {
   const [mode, setMode] = React.useState<'light' | 'dark'>(() => storage.get<'light' | 'dark'>('themeMode', 'light'));
+  const [mapSex, setMapSex] = React.useState<MapSex>(() => storage.get<MapSex>('mapSex', 'male'));
   const token = useAuthStore((s) => s.token);
   const bootstrap = useSyncStore((s) => s.bootstrap);
 
@@ -67,7 +68,7 @@ export default function App() {
       <div className={styles.container}>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Protected><Home /></Protected>} />
+          <Route path="/" element={<Protected><Home mapSex={mapSex} /></Protected>} />
           <Route path="/exercises" element={<Protected><Exercises /></Protected>} />
           <Route path="/metrics" element={<Protected><Metrics /></Protected>} />
           <Route path="/metrics/:metricId/statistics" element={<Protected><MetricStatistics /></Protected>} />
@@ -81,6 +82,11 @@ export default function App() {
                   setMode={(m) => {
                     storage.set('themeMode', m);
                     setMode(m);
+                  }}
+                  mapSex={mapSex}
+                  setMapSex={(s) => {
+                    storage.set('mapSex', s);
+                    setMapSex(s);
                   }}
                 />
               </Protected>
