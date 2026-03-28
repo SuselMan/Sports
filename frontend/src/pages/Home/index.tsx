@@ -345,7 +345,7 @@ const Home: React.FC<{ mapSex?: MapSex }> = ({ mapSex = 'male' }) => {
 
             {(currentModal === 'ExerciseCreate' || currentModal === 'ExerciseEdit') && (
               <>
-                <ExerciseRecordForm exercises={exercises} form={form} onChange={setForm} initialMuscleFilter={muscleFilterForForm} />
+                <ExerciseRecordForm exercises={exercises} form={form} onChange={setForm} initialMuscleFilter={muscleFilterForForm} onClose={() => setCurrentModal(null)} />
                 <div className={styles.modalActions}>
                   <Button onClick={() => setCurrentModal(null)}>{t('actions.cancel')}</Button>
                   <Button

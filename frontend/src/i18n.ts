@@ -79,6 +79,9 @@ const resources = {
         durationLabel: 'duration',
         musclesLabel: 'muscles',
         fallbackExerciseName: 'Exercise',
+        noExercisesFound: 'No exercises found.',
+        noExercisesForMuscles: 'No exercises found for selected muscles.',
+        createExercise: 'Create exercise',
       },
       metricRecords: {
         addTitle: 'Add Metric Record',
@@ -199,6 +202,9 @@ const resources = {
         durationLabel: 'длительность',
         musclesLabel: 'мышцы',
         fallbackExerciseName: 'Упражнение',
+        noExercisesFound: 'Упражнений не найдено.',
+        noExercisesForMuscles: 'Упражнений для выбранных мышц не найдено.',
+        createExercise: 'Создать упражнение',
       },
       metricRecords: {
         addTitle: 'Добавить метрику',

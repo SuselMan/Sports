@@ -2,6 +2,7 @@ import React from 'react';
 import dayjs from 'dayjs';
 import { isMobile } from 'react-device-detect';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import type { Exercise } from '@shared/Exercise.model';
 import type { Muscles } from '@shared/Shared.model';
 import Input from '@uikit/components/Input/Input';
@@ -28,11 +29,13 @@ export function ExerciseRecordForm({
   form,
   onChange,
   initialMuscleFilter,
+  onClose,
 }: {
   exercises: Exercise[];
   form: ExerciseRecordFormValue;
   onChange: (next: ExerciseRecordFormValue) => void;
   initialMuscleFilter?: Muscles[];
+  onClose?: () => void;
 }) {
   const today = dayjs();
   const dateValue = dayjs(form.date);
@@ -41,6 +44,7 @@ export function ExerciseRecordForm({
   const [step, setStep] = React.useState<'pickExercise' | 'details'>(isEditing ? 'details' : 'pickExercise');
   const [query, setQuery] = React.useState('');
   const [muscleFilter, setMuscleFilter] = React.useState<Muscles[]>(initialMuscleFilter ?? []);
+  const navigate = useNavigate();
   const isFemaleMap = storage.get<string>('mapSex', 'male') === 'female';
 
   const toggleMuscleFilter = (m: Muscles) => {
@@ -114,7 +118,22 @@ export function ExerciseRecordForm({
             </Button>
               ))
             ) : (
-              <div className={styles.emptyListText}>No exercises found</div>
+              <div className={styles.emptyListText}>
+                {muscleFilter.length
+                  ? t('records.noExercisesForMuscles')
+                  : t('records.noExercisesFound')}
+                {' '}
+                <button
+                  type="button"
+                  className={styles.createLink}
+                  onClick={() => {
+                    onClose?.();
+                    setTimeout(() => navigate('/exercises?createNew=true'), 50);
+                  }}
+                >
+                  {t('records.createExercise')}
+                </button>
+              </div>
             )}
           </div>
         </div>
