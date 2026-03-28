@@ -24,7 +24,14 @@
       "Bash(ls /c/projects/Sports/frontend/.env*)",
       "Bash(python3 -c \":*)",
       "Read(//tmp/**)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(ssh:*)",
+      "Bash(apt-get install:*)",
+      "Bash(sudo apt-get:*)",
+      "Bash(choco install:*)",
+      "Bash(pip install:*)",
+      "Bash(python -c \":*)",
+      "Bash(python:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

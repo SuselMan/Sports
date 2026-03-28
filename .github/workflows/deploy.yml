@@ -30,7 +30,7 @@ jobs:
           if [ -f package-lock.json ]; then npm ci; else npm install; fi
           npm run build
 
-      - name: Ensure frontend dir on VPS
+      - name: Ensure dirs on VPS
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.VPS_IP }}
@@ -38,9 +38,8 @@ jobs:
           password: ${{ secrets.SSH_PASS }}
           script: |
             set -e
-            sudo mkdir -p /var/www/sports-frontend
-            sudo chown -R $USER:$USER /var/www/sports-frontend
-            mkdir -p ~/apps/sports-backend ~/apps/sports-backend-src
+            mkdir -p /var/www/sports-frontend
+            mkdir -p ~/sports
 
       - name: Upload frontend build to VPS
         uses: appleboy/scp-action@v0.1.7
@@ -52,16 +51,16 @@ jobs:
           strip_components: 2
           target: "/var/www/sports-frontend"
 
-      - name: Upload backend source to VPS
+      - name: Upload project to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_IP }}
           username: ${{ secrets.SSH_LOGIN }}
           password: ${{ secrets.SSH_PASS }}
-          source: "backend/**"
-          target: "~/apps/sports-backend"
+          source: "backend/,shared/,docker/,docker-compose.yml"
+          target: "~/sports"
 
-      - name: Deploy backend with PM2
+      - name: Deploy with Docker Compose
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.VPS_IP }}
@@ -69,13 +68,8 @@ jobs:
           password: ${{ secrets.SSH_PASS }}
           script: |
             set -e
-            if ! command -v pm2 >/dev/null 2>&1; then
-              sudo npm i -g pm2
-            fi
-            cd ~/apps/sports-backend
-            if [ -f package-lock.json ]; then npm ci; else npm install; fi
-            npm run build
-            pm2 describe sports-api >/dev/null 2>&1 || PORT=4000 pm2 start dist/index.js --name sports-api
-            pm2 reload sports-api
-            pm2 save
-
+            cd ~/sports
+            docker compose build --no-cache backend
+            docker compose up -d
+            sleep 5
+            curl -sf http://127.0.0.1:4000/health || (docker compose logs backend --tail 20 && exit 1)
