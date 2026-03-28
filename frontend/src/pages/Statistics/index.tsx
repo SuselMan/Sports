@@ -39,6 +39,15 @@ function addTrendLine<T extends { value: number }>(data: T[]): (T & { trend: num
   return data.map((d, i) => ({ ...d, trend: Math.round((intercept + slope * i) * 100) / 100 }));
 }
 
+function useCssVar(name: string, fallback: string): string {
+  const [value, setValue] = React.useState(fallback);
+  useEffect(() => {
+    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    if (v) setValue(v);
+  }, [name]);
+  return value;
+}
+
 export default function Statistics() {
   const range = useStatisticsDateRangeStore((s) => s.range);
   const setRange = useStatisticsDateRangeStore((s) => s.setRange);
@@ -46,6 +55,7 @@ export default function Statistics() {
   const params = useParams();
   const exerciseId = (params.exerciseId || '').trim();
   const { t } = useTranslation();
+  const mainColor = useCssVar('--main-active-color', '#ef6c00');
 
   const exercisesLoader = React.useCallback(() => getExercisesLocal(), []);
   const { data: allExercises, loading: isLoadingExercises } = useDbReload<Exercise[]>(exercisesLoader, []);
@@ -233,8 +243,8 @@ export default function Statistics() {
                     <Tooltip
                       labelFormatter={(d) => dayjs(String(d)).format('DD/MM/YYYY')}
                     />
-                    <Line type="monotone" dataKey="value" stroke="#ef6c00" />
-                    <Line type="linear" dataKey="trend" stroke="#ef6c00" strokeDasharray="6 3" strokeOpacity={0.5} dot={false} activeDot={false} tooltipType="none" />
+                    <Line type="monotone" dataKey="value" stroke={mainColor} strokeWidth={2} />
+                    <Line type="linear" dataKey="trend" stroke={mainColor} strokeDasharray="6 3" strokeOpacity={0.5} dot={false} activeDot={false} tooltipType="none" />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -255,8 +265,8 @@ export default function Statistics() {
                           labelFormatter={(d) => dayjs(String(d)).format('DD/MM/YYYY')}
                           formatter={(v) => [Number(v).toFixed(1), 'e1RM']}
                         />
-                        <Line type="monotone" dataKey="value" stroke="#2e7d32" />
-                        <Line type="linear" dataKey="trend" stroke="#2e7d32" strokeDasharray="6 3" strokeOpacity={0.5} dot={false} activeDot={false} tooltipType="none" />
+                        <Line type="monotone" dataKey="value" stroke={mainColor} strokeWidth={2} />
+                        <Line type="linear" dataKey="trend" stroke={mainColor} strokeDasharray="6 3" strokeOpacity={0.5} dot={false} activeDot={false} tooltipType="none" />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
@@ -279,8 +289,8 @@ export default function Statistics() {
                           labelFormatter={(d) => dayjs(String(d)).format('DD/MM/YYYY')}
                           formatter={(v) => [Number(v), t('records.weightKg')]}
                         />
-                        <Line type="monotone" dataKey="value" stroke="#1565c0" />
-                        <Line type="linear" dataKey="trend" stroke="#1565c0" strokeDasharray="6 3" strokeOpacity={0.5} dot={false} activeDot={false} tooltipType="none" />
+                        <Line type="monotone" dataKey="value" stroke={mainColor} strokeWidth={2} />
+                        <Line type="linear" dataKey="trend" stroke={mainColor} strokeDasharray="6 3" strokeOpacity={0.5} dot={false} activeDot={false} tooltipType="none" />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
