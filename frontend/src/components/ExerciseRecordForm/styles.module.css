@@ -10,6 +10,12 @@
   gap: var(--spacing-sm);
 }
 
+.muscleFilterMap {
+  height: 180px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
 .exerciseList {
   display: flex;
   flex-direction: column;

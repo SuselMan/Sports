@@ -3,11 +3,15 @@ import dayjs from 'dayjs';
 import { isMobile } from 'react-device-detect';
 import { useTranslation } from 'react-i18next';
 import type { Exercise } from '@shared/Exercise.model';
+import type { Muscles } from '@shared/Shared.model';
 import Input from '@uikit/components/Input/Input';
 import Button from '@uikit/components/Button/Button';
 import DatePicker from '@uikit/components/DatePicker/DatePicker';
 import styles from './styles.module.css';
 import { getLastRecordDefaults } from '../../utils/lastRecordDefaults';
+import { MusclesMap } from '../MusclesMap';
+import { MusclesMapFemale } from '../MusclesMapFemale';
+import { storage } from '../../utils/storage';
 
 export type ExerciseRecordFormValue = {
   exerciseId: string;
@@ -23,10 +27,12 @@ export function ExerciseRecordForm({
   exercises,
   form,
   onChange,
+  initialMuscleFilter,
 }: {
   exercises: Exercise[];
   form: ExerciseRecordFormValue;
   onChange: (next: ExerciseRecordFormValue) => void;
+  initialMuscleFilter?: Muscles[];
 }) {
   const today = dayjs();
   const dateValue = dayjs(form.date);
@@ -34,6 +40,12 @@ export function ExerciseRecordForm({
   const isEditing = Boolean(form.exerciseId);
   const [step, setStep] = React.useState<'pickExercise' | 'details'>(isEditing ? 'details' : 'pickExercise');
   const [query, setQuery] = React.useState('');
+  const [muscleFilter, setMuscleFilter] = React.useState<Muscles[]>(initialMuscleFilter ?? []);
+  const isFemaleMap = storage.get<string>('mapSex', 'male') === 'female';
+
+  const toggleMuscleFilter = (m: Muscles) => {
+    setMuscleFilter((prev) => (prev.includes(m) ? prev.filter((x) => x !== m) : [...prev, m]));
+  };
 
   React.useEffect(() => {
     if (form.exerciseId) {
@@ -51,10 +63,14 @@ export function ExerciseRecordForm({
   );
 
   const filteredExercises = React.useMemo(() => {
+    let result = exercises;
     const q = query.trim().toLowerCase();
-    if (!q) return exercises;
-    return exercises.filter((e) => e.name.toLowerCase().includes(q));
-  }, [exercises, query]);
+    if (q) result = result.filter((e) => e.name.toLowerCase().includes(q));
+    if (muscleFilter.length) {
+      result = result.filter((e) => e.muscles?.some((m) => muscleFilter.includes(m as Muscles)));
+    }
+    return result;
+  }, [exercises, query, muscleFilter]);
 
   const pickExercise = (e: Exercise) => {
     const defaults = getLastRecordDefaults(e._id);
@@ -73,6 +89,11 @@ export function ExerciseRecordForm({
     <div className={styles.root}>
       {step === 'pickExercise' ? (
         <div className={styles.step}>
+          <div className={styles.muscleFilterMap}>
+            {isFemaleMap
+              ? <MusclesMapFemale muscles={muscleFilter} onMuscleClicked={toggleMuscleFilter} />
+              : <MusclesMap muscles={muscleFilter} onMuscleClicked={toggleMuscleFilter} />}
+          </div>
           <Input
             value={query}
             onChange={(evt) => setQuery((evt.target as HTMLInputElement).value)}

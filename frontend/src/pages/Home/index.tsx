@@ -92,6 +92,7 @@ const Home: React.FC<{ mapSex?: MapSex }> = ({ mapSex = 'male' }) => {
     kind: 'REPS',
     date: range.from,
   });
+  const [muscleFilterForForm, setMuscleFilterForForm] = useState<Muscles[]>([]);
   const [metricEditId, setMetricEditId] = useState<string | null>(null);
   const [metricForm, setMetricForm] = useState<MetricRecordFormValue>({
     metricId: '',
@@ -170,6 +171,7 @@ const Home: React.FC<{ mapSex?: MapSex }> = ({ mapSex = 'male' }) => {
   const isLoading = isLoadingExercises || isLoadingRecords || isLoadingMetrics || isLoadingMetricRecords;
   const openAddRecord = () => {
     setForm({ exerciseId: '', kind: 'REPS', date: range.from });
+    setMuscleFilterForForm([]);
     setCurrentModal('ExerciseCreate');
   };
 
@@ -185,8 +187,16 @@ const Home: React.FC<{ mapSex?: MapSex }> = ({ mapSex = 'male' }) => {
       {!!records.length && (
         <div className={styles.musclesBox}>
           {mapSex === 'female'
-            ? <MusclesMapFemale muscles={highlightedMuscles} onMuscleClicked={() => {}} />
-            : <MusclesMap muscles={highlightedMuscles} onMuscleClicked={() => {}} />}
+            ? <MusclesMapFemale muscles={highlightedMuscles} onMuscleClicked={(m: Muscles) => {
+              setForm({ exerciseId: '', kind: 'REPS', date: range.from });
+              setMuscleFilterForForm([m]);
+              setCurrentModal('ExerciseCreate');
+            }} />
+            : <MusclesMap muscles={highlightedMuscles} onMuscleClicked={(m: Muscles) => {
+              setForm({ exerciseId: '', kind: 'REPS', date: range.from });
+              setMuscleFilterForForm([m]);
+              setCurrentModal('ExerciseCreate');
+            }} />}
         </div>
       )}
 
@@ -298,6 +308,7 @@ const Home: React.FC<{ mapSex?: MapSex }> = ({ mapSex = 'male' }) => {
                   size="md"
                   onClick={() => {
                     setForm({ exerciseId: '', kind: 'REPS', date: range.from });
+                    setMuscleFilterForForm([]);
                     setCurrentModal('ExerciseCreate');
                   }}
                   disabled={!exercises.length}
@@ -334,7 +345,7 @@ const Home: React.FC<{ mapSex?: MapSex }> = ({ mapSex = 'male' }) => {
 
             {(currentModal === 'ExerciseCreate' || currentModal === 'ExerciseEdit') && (
               <>
-                <ExerciseRecordForm exercises={exercises} form={form} onChange={setForm} />
+                <ExerciseRecordForm exercises={exercises} form={form} onChange={setForm} initialMuscleFilter={muscleFilterForForm} />
                 <div className={styles.modalActions}>
                   <Button onClick={() => setCurrentModal(null)}>{t('actions.cancel')}</Button>
                   <Button
