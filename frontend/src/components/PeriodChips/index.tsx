@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useEffect } from 'react';
+import React, { useMemo, useRef, useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import type { ExerciseRecordResponse } from '@shared/Exercise.model';
@@ -28,7 +28,8 @@ type ChipData = {
 
 function buildChips(
   granularity: Granularity,
-  range: DateRangeValue,
+  anchor: string,
+  selectedFrom: string,
   records: ExerciseRecordResponse[],
 ): ChipData[] {
   const daySet = new Set<string>();
@@ -42,12 +43,13 @@ function buildChips(
     yearSet.add(d.format('YYYY'));
   }
 
-  const anchor = dayjs(range.from);
+  const anchorDay = dayjs(anchor);
+  const sel = dayjs(selectedFrom);
   const chips: ChipData[] = [];
 
   switch (granularity) {
     case 'day': {
-      const center = anchor.startOf('day');
+      const center = anchorDay.startOf('day');
       for (let i = -7; i <= 6; i++) {
         const d = center.add(i, 'day');
         chips.push({
@@ -55,14 +57,15 @@ function buildChips(
           label: d.format('dd D'),
           from: d.startOf('day').toISOString(),
           to: d.endOf('day').toISOString(),
-          selected: i === 0,
+          selected: d.isSame(sel, 'day'),
           active: daySet.has(d.format('YYYY-MM-DD')),
         });
       }
       break;
     }
     case 'week': {
-      const center = anchor.startOf('isoWeek');
+      const center = anchorDay.startOf('isoWeek');
+      const selWeekStart = sel.startOf('isoWeek');
       for (let i = -6; i <= 5; i++) {
         const ws = center.add(i, 'week');
         let active = false;
@@ -77,14 +80,14 @@ function buildChips(
           label: `W${ws.isoWeek()}`,
           from: ws.toISOString(),
           to: ws.endOf('isoWeek').toISOString(),
-          selected: i === 0,
+          selected: ws.isSame(selWeekStart, 'day'),
           active,
         });
       }
       break;
     }
     case 'month': {
-      const center = anchor.startOf('month');
+      const center = anchorDay.startOf('month');
       for (let i = -6; i <= 5; i++) {
         const ms = center.add(i, 'month');
         chips.push({
@@ -92,14 +95,14 @@ function buildChips(
           label: ms.format('MMM'),
           from: ms.toISOString(),
           to: ms.endOf('month').toISOString(),
-          selected: i === 0,
+          selected: sel.isSame(ms, 'month'),
           active: monthSet.has(ms.format('YYYY-MM')),
         });
       }
       break;
     }
     case 'year': {
-      const center = anchor.startOf('year');
+      const center = anchorDay.startOf('year');
       for (let i = -3; i <= 2; i++) {
         const ys = center.add(i, 'year');
         chips.push({
@@ -107,7 +110,7 @@ function buildChips(
           label: ys.format('YYYY'),
           from: ys.toISOString(),
           to: ys.endOf('year').toISOString(),
-          selected: i === 0,
+          selected: sel.isSame(ys, 'year'),
           active: yearSet.has(ys.format('YYYY')),
         });
       }
@@ -127,11 +130,37 @@ export function PeriodChips({
   onChange: (v: DateRangeValue) => void;
   records: ExerciseRecordResponse[];
 }) {
+  const [anchor, setAnchor] = useState(range.from);
+  const chipClickRef = useRef(false);
+
   const granularity = useMemo(() => getGranularity(range), [range]);
+
+  // When range changes externally (quick filter, arrows, date picker) — re-center.
+  // When range changes from our own chip click — keep anchor stable.
+  useEffect(() => {
+    if (chipClickRef.current) {
+      chipClickRef.current = false;
+    } else {
+      setAnchor(range.from);
+    }
+  }, [range.from]);
+
   const chips = useMemo(
-    () => buildChips(granularity, range, records),
-    [granularity, range, records],
+    () => buildChips(granularity, anchor, range.from, records),
+    [granularity, anchor, range.from, records],
   );
+
+  // If selected range falls outside visible chips, re-center
+  useEffect(() => {
+    if (chips.length === 0) return;
+    const from = dayjs(range.from);
+    const first = dayjs(chips[0].from);
+    const last = dayjs(chips[chips.length - 1].to);
+    if (from.isBefore(first) || from.isAfter(last)) {
+      setAnchor(range.from);
+    }
+  }, [range.from, chips]);
+
   const selectedRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -141,6 +170,11 @@ export function PeriodChips({
       inline: 'center',
     });
   }, [range.from]);
+
+  const handleChipClick = (chip: ChipData) => {
+    chipClickRef.current = true;
+    onChange({ from: chip.from, to: chip.to });
+  };
 
   return (
     <div className={styles.root}>
@@ -153,7 +187,7 @@ export function PeriodChips({
             chip.active && styles.active,
             chip.selected && styles.selected,
           ].filter(Boolean).join(' ')}
-          onClick={() => onChange({ from: chip.from, to: chip.to })}
+          onClick={() => handleChipClick(chip)}
         >
           {chip.label}
         </button>
