@@ -1,6 +1,7 @@
 import create from 'zustand';
 import { getDb } from '../offline/db';
 import { fullSyncNow } from '../offline/sync';
+import { OFFLINE_ONLY } from '../config';
 
 type SyncState = {
   bootstrapped: boolean;
@@ -27,7 +28,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
       set({ bootstrapped: false, error: null });
       await getDb(); // ensure IndexedDB is ready so we can render from it
 
-      if (navigator.onLine && token) {
+      if (!OFFLINE_ONLY && navigator.onLine && token) {
         set({ syncing: true });
         try {
           await fullSyncNow();
@@ -45,6 +46,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
   },
 
   triggerSync: async () => {
+    if (OFFLINE_ONLY) return;
     if (get().syncing) return;
     if (!navigator.onLine) return;
     if (!localStorage.getItem('auth_token')) return;
@@ -60,6 +62,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
 }));
 
 export function installSyncListeners() {
+  if (OFFLINE_ONLY) return;
   if (listenersInstalled) return;
   listenersInstalled = true;
 

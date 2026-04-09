@@ -10,6 +10,7 @@ import { storage } from '../../utils/storage';
 import { useAuthStore } from '../../store/auth';
 import { useSyncStore } from '../../store/sync';
 import { resetLocalData } from '../../offline/repo';
+import { OFFLINE_ONLY } from '../../config';
 import styles from './styles.module.css';
 
 export type MapSex = 'male' | 'female';
@@ -26,6 +27,7 @@ export default function Settings({ mode, setMode, mapSex, setMapSex }: {
   const triggerSync = useSyncStore((s) => s.triggerSync);
 
   React.useEffect(() => {
+    if (OFFLINE_ONLY) return;
     apiClient.getVersion()
       .then((v) => setBackendBuild(v.backendBuild))
       .catch(() => setBackendBuild(null));
@@ -95,27 +97,28 @@ export default function Settings({ mode, setMode, mapSex, setMapSex }: {
             const ok = window.confirm(t('settings.resetLocalDataConfirm'));
             if (!ok) return;
             await resetLocalData();
-            await triggerSync();
+            if (!OFFLINE_ONLY) await triggerSync();
           }}
         >
           {t('settings.resetLocalData')}
         </Button>
       </div>
-      <div className={styles.section}>
-        <Button
-          type="secondary"
-          onClick={() => { signOut(); navigate('/login'); }}
-        >
-          {t('nav.logout')}
-        </Button>
-      </div>
+      {!OFFLINE_ONLY && (
+        <div className={styles.section}>
+          <Button
+            type="secondary"
+            onClick={() => { signOut(); navigate('/login'); }}
+          >
+            {t('nav.logout')}
+          </Button>
+        </div>
+      )}
 
       <div className={styles.footer}>
         <small>
           Build&nbsp;
           {frontendBuildNumber}
-          /
-          {backendBuild ?? '?'}
+          {!OFFLINE_ONLY && `/${backendBuild ?? '?'}`}
         </small>
       </div>
     </div>

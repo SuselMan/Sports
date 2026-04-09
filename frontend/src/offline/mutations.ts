@@ -14,12 +14,14 @@ import {
   queueSync,
 } from './repo';
 import { syncQueueNow } from './sync';
+import { OFFLINE_ONLY } from '../config';
 
 function nowIso(): ISODateString {
   return new Date().toISOString();
 }
 
 async function maybeSync() {
+  if (OFFLINE_ONLY) return;
   if (navigator.onLine) await syncQueueNow();
 }
 

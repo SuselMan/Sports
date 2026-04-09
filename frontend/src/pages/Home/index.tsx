@@ -14,6 +14,7 @@ import {
 import type { Metric, MetricRecordResponse } from '@shared/Metrics.model';
 import { setLastRecordDefaults } from '../../utils/lastRecordDefaults';
 import { DateRange } from '../../components/DateRange';
+import { PeriodChips } from '../../components/PeriodChips';
 import { useDateRangeStore } from '../../store/filters';
 import { ExerciseRecordCard } from '../../components/ExerciseRecordCard';
 import { ExerciseGroupCard } from '../../components/ExerciseGroupCard';
@@ -183,6 +184,7 @@ const Home: React.FC<{ mapSex?: MapSex }> = ({ mapSex = 'male' }) => {
   return (
     <div className={styles.root}>
       <DateRange value={range} onChange={setRange} />
+      <PeriodChips range={range} onChange={setRange} records={allExerciseRecords} />
 
       {!!records.length && (
         <div className={styles.musclesBox}>

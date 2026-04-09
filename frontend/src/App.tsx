@@ -15,12 +15,13 @@ import { useAuthStore } from './store/auth';
 import { storage } from './utils/storage';
 import { AppTopBar } from './components/AppTopBar';
 import { installSyncListeners, useSyncStore } from './store/sync';
+import { OFFLINE_ONLY } from './config';
 import styles from './App.module.css';
 
 function Protected({ children }: { children: React.ReactElement }) {
   const token = useAuthStore((s) => s.token);
   const bootstrapped = useSyncStore((s) => s.bootstrapped);
-  if (!token) return <Navigate to="/login" replace />;
+  if (!OFFLINE_ONLY && !token) return <Navigate to="/login" replace />;
   if (!bootstrapped) {
     return (
       <div className={styles.bootLoading}>
@@ -54,12 +55,13 @@ export default function App() {
   }, [mode]);
 
   React.useEffect(() => {
-    installSyncListeners();
+    if (!OFFLINE_ONLY) installSyncListeners();
   }, []);
 
   React.useEffect(() => {
-    // (Re)bootstrap after login so we pull the latest data into IndexedDB.
-    if (token) bootstrap();
+    // In offline mode, always bootstrap (no token needed).
+    // In online mode, (re)bootstrap after login so we pull the latest data into IndexedDB.
+    if (OFFLINE_ONLY || token) bootstrap();
   }, [token, bootstrap]);
 
   return (
@@ -67,7 +69,7 @@ export default function App() {
       <AppTopBar />
       <div className={styles.container}>
         <Routes>
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={OFFLINE_ONLY ? <Navigate to="/" replace /> : <Login />} />
           <Route path="/" element={<Protected><Home mapSex={mapSex} /></Protected>} />
           <Route path="/exercises" element={<Protected><Exercises /></Protected>} />
           <Route path="/metrics" element={<Protected><Metrics /></Protected>} />
