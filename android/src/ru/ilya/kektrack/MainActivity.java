@@ -2,6 +2,13 @@ package ru.ilya.kektrack;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Build;
+import android.graphics.Color;
+import android.graphics.Insets;
+import android.view.View;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
+import android.widget.FrameLayout;
 import android.content.Intent;
 import android.webkit.*;
 import android.net.Uri;
@@ -13,12 +20,41 @@ import java.util.concurrent.Executors;
 
 public class MainActivity extends Activity {
     private WebView web;
+    private FrameLayout container;
     private ValueCallback<Uri[]> fileCallback;
     private String backupText;
     private static final String HOST="appassets.androidplatform.net";
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         if((getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE)!=0)WebView.setWebContentsDebuggingEnabled(true);
+        if(Build.VERSION.SDK_INT>=30)getWindow().setDecorFitsSystemWindows(false);
+        else getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE|View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN|View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+        getWindow().setStatusBarColor(Color.TRANSPARENT);
+        getWindow().setNavigationBarColor(Color.TRANSPARENT);
+        container=new FrameLayout(this);
+        final int bottomGap=Math.round(8*getResources().getDisplayMetrics().density);
+        container.setOnApplyWindowInsetsListener((view,insets)->{
+            if(Build.VERSION.SDK_INT>=30){
+                int safeTypes=WindowInsets.Type.systemBars()|WindowInsets.Type.displayCutout();
+                int handledTypes=safeTypes|WindowInsets.Type.ime();
+                Insets safe=insets.getInsets(handledTypes);
+                view.setPadding(safe.left,safe.top,safe.right,safe.bottom+bottomGap);
+                // The container already reserves this space: forward zeroed insets to WebView.
+                return new WindowInsets.Builder(insets).setInsets(handledTypes,Insets.NONE)
+                    .setInsetsIgnoringVisibility(safeTypes,Insets.NONE).build();
+            }
+            int left=insets.getSystemWindowInsetLeft(),top=insets.getSystemWindowInsetTop();
+            int right=insets.getSystemWindowInsetRight(),bottom=insets.getSystemWindowInsetBottom();
+            if(Build.VERSION.SDK_INT>=28 && insets.getDisplayCutout()!=null){
+                left=Math.max(left,insets.getDisplayCutout().getSafeInsetLeft());
+                top=Math.max(top,insets.getDisplayCutout().getSafeInsetTop());
+                right=Math.max(right,insets.getDisplayCutout().getSafeInsetRight());
+                bottom=Math.max(bottom,insets.getDisplayCutout().getSafeInsetBottom());
+            }
+            view.setPadding(left,top,right,bottom+bottomGap);
+            WindowInsets handled=insets.consumeSystemWindowInsets();
+            return Build.VERSION.SDK_INT>=28?handled.consumeDisplayCutout():handled;
+        });
         web=new WebView(this);
         web.getSettings().setJavaScriptEnabled(true);
         web.getSettings().setDomStorageEnabled(true);
@@ -48,10 +84,25 @@ public class MainActivity extends Activity {
                 catch(IOException e){return new WebResourceResponse("text/plain","UTF-8",404,"Not Found",null,new ByteArrayInputStream(new byte[0]));}
             }
         });
-        setContentView(web);
-        // Insets keep controls away from system bars with Android 15 edge-to-edge.
-        web.setOnApplyWindowInsetsListener((view,insets)->{view.setPadding(insets.getSystemWindowInsetLeft(),insets.getSystemWindowInsetTop(),insets.getSystemWindowInsetRight(),insets.getSystemWindowInsetBottom());return insets;});
+        container.addView(web,new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,FrameLayout.LayoutParams.MATCH_PARENT));
+        setContentView(container);
+        applyTheme(false);
+        container.post(()->container.requestApplyInsets());
         web.loadUrl("https://"+HOST+"/");
+    }
+    private void applyTheme(boolean dark){
+        container.setBackgroundColor(Color.rgb(dark?46:255,dark?46:255,dark?46:255));
+        if(Build.VERSION.SDK_INT>=30){
+            WindowInsetsController controller=getWindow().getInsetsController();
+            if(controller!=null){
+                int light=WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS|WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+                controller.setSystemBarsAppearance(dark?0:light,light);
+            }
+        }else{
+            View decor=getWindow().getDecorView();
+            int light=View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR|View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+            decor.setSystemUiVisibility(dark?decor.getSystemUiVisibility()&~light:decor.getSystemUiVisibility()|light);
+        }
     }
     @Override protected void onActivityResult(int request,int result,Intent data){
         super.onActivityResult(request,result,data);
@@ -66,6 +117,7 @@ public class MainActivity extends Activity {
     @Override public void onDestroy(){web.removeJavascriptInterface("KektrackNative");web.destroy();executor.shutdown();super.onDestroy();}
     private final java.util.concurrent.ExecutorService executor=Executors.newSingleThreadExecutor();
     private class Sender {
+        @JavascriptInterface public void theme(boolean dark){runOnUiThread(()->{if(!isDestroyed())applyTheme(dark);});}
         @JavascriptInterface public void backup(String text){runOnUiThread(()->{backupText=text;Intent intent=new Intent(Intent.ACTION_CREATE_DOCUMENT);intent.addCategory(Intent.CATEGORY_OPENABLE);intent.setType("application/json");intent.putExtra(Intent.EXTRA_TITLE,"kektrack-backup.json");startActivityForResult(intent,3);});}
         @JavascriptInterface public void send(String id,String endpoint,String token,String body){
             executor.execute(()->{

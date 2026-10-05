@@ -22,7 +22,8 @@ if [[ "${KEKTRACK_DEBUG:-0}" == "1" ]]; then
   sed 's/<application /<application android:debuggable="true" /' AndroidManifest.xml > build/AndroidManifest.xml
   kektrack_manifest="build/AndroidManifest.xml"
 fi
-"$health_tools/aapt2" link -I "$health_jar" --manifest "$kektrack_manifest" -o build/resources.apk
+"$health_tools/aapt2" compile --dir res -o build/compiled-res.zip
+"$health_tools/aapt2" link build/compiled-res.zip -I "$health_jar" --manifest "$kektrack_manifest" -o build/resources.apk
 python3 - <<'PY'
 from pathlib import Path
 import zipfile

@@ -52,6 +52,7 @@ export default function App() {
       document.documentElement.removeAttribute('data-theme');
     }
     syncThemeColorToCssVar();
+    (window as any).KektrackNative?.theme?.(mode === 'dark');
   }, [mode]);
 
   React.useEffect(() => {
