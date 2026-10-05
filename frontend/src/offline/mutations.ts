@@ -14,6 +14,7 @@ import {
   queueSync,
 } from './repo';
 import { syncQueueNow } from './sync';
+import { scheduleHealthExport } from './healthExport';
 import { OFFLINE_ONLY } from '../config';
 
 function nowIso(): ISODateString {
@@ -21,6 +22,7 @@ function nowIso(): ISODateString {
 }
 
 async function maybeSync() {
+  scheduleHealthExport();
   if (OFFLINE_ONLY) return;
   if (navigator.onLine) await syncQueueNow();
 }

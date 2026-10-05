@@ -1,4 +1,5 @@
 import React from 'react';
+import HealthConnection from '../../components/HealthConnection';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Dropdown from '@uikit/components/Dropdown/Dropdown';
@@ -114,6 +115,7 @@ export default function Settings({ mode, setMode, mapSex, setMapSex }: {
         </div>
       )}
 
+      <HealthConnection />
       <div className={styles.footer}>
         <small>
           Build&nbsp;

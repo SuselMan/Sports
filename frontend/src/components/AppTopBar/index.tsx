@@ -1,4 +1,5 @@
 import React from 'react';
+import { OFFLINE_ONLY } from '../../config';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Button from '@uikit/components/Button/Button';
 import Sidebar from '@uikit/components/Sidebar/Sidebar';
@@ -17,9 +18,9 @@ export function AppTopBar() {
   return (
     <div className={styles.root}>
       <div className={styles.inner}>
-        <div className={styles.title}>kek</div>
+        <div className={styles.title}>Kektrack</div>
         <div className={styles.spacer} />
-        {token && (
+        {(OFFLINE_ONLY || token) && (
           <nav className={styles.nav}>
             <Button type="ghost" onClick={() => navigate('/')} className={location.pathname === '/' ? '' : ''}>
               {t('nav.home')}
@@ -35,13 +36,13 @@ export function AppTopBar() {
             </Button>
           </nav>
         )}
-        {token && (
+        {(OFFLINE_ONLY || token) && (
           <Button onClick={() => setOpen(true)} aria-label="menu" className={styles.menuBtn}>
             <BarIcon />
           </Button>
         )}
       </div>
-      {token && (
+      {(OFFLINE_ONLY || token) && (
         <Sidebar isOpen={open} close={() => setOpen(false)}>
           <div className={styles.mobileMenuActions}>
             <Button onClick={() => { setOpen(false); navigate('/'); }}>

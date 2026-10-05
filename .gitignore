@@ -14,3 +14,7 @@ mobile/.expo
 mobile/node_modules
 backend/node_modules
 
+
+android/build/
+frontend/dist/
+diagnostics/
