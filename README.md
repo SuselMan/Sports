@@ -82,3 +82,13 @@ npm run dev
 ## CI/CD
 Basic CI (backend build) and a deployment workflow to VPS via GitHub Actions are included. Required repository secrets:
 - `VPS_HOST`, `VPS_USER`, `VPS_KEY` (SSH private key), `APP_DIR` (remote directory)
+
+## Импорт упражнений (APK 1.2)
+
+«Упражнения» → «Файл упражнений JSON» → проверить список → «Добавить упражнения».
+Формат: `{"schema":"kektrack-exercises-v1","exercises":[{"name":"Тяга сидя","type":"REPS","muscles":["Lats"]}]}`.
+`name`: 1–100 знаков; `type`: REPS или TIME; `muscles`: массив кодов из shared/Shared.model.ts, можно пустой.
+Лимиты: 1 МиБ и 500 упражнений. Весь файл проверяется до записи; добавление атомарное.
+Повторные названия (без учёта регистра, краевых/повторных пробелов и Unicode NFKC) пропускаются, включая архивные.
+Импорт не меняет существующие упражнения, подходы или настройки. ID создаются приложением.
+Файл резервной копии kektrack-v1 восстанавливается отдельно в настройках.

@@ -15,6 +15,7 @@ import { useDbReload } from '../../offline/hooks';
 import { getExercisesLocal } from '../../offline/repo';
 import { archiveExerciseLocal, upsertExerciseLocal } from '../../offline/mutations';
 import styles from './styles.module.css';
+import ExerciseImport from '../../components/ExerciseImport';
 
 export default function Exercises() {
   const loader = React.useCallback(() => getExercisesLocal(), []);
@@ -77,6 +78,7 @@ export default function Exercises() {
         <div className={styles.title}>{t('exercises.title')}</div>
       </div>
 
+      <ExerciseImport />
       <div className={styles.list}>
         {isLoading ? (
           <div className={styles.loading}>
