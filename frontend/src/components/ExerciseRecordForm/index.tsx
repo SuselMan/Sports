@@ -166,7 +166,6 @@ export function ExerciseRecordForm({
           </div>
           {selectedExercise?.unilateral && (
             <div role="group" aria-label="Сторона тела" className={styles.sideSelector}>
-              <span>Сторона тела</span>
               <div className={styles.sideControl}>
                 <span className={form.side === 'left' ? styles.activeSide : styles.inactiveSide}>Левая</span>
                 <Toggle
