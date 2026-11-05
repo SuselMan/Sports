@@ -1,7 +1,8 @@
 .root {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
+  min-width: 0;
 }
 
 .step {
@@ -50,7 +51,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-sm);
-  padding: var(--spacing-sm);
+  padding: 0;
 }
 
 .selectedName {
@@ -63,4 +64,52 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
+}
+
+.sideControl {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+}
+
+.activeSide {
+  color: var(--main-active-color);
+  font-weight: 700;
+}
+
+.inactiveSide {
+  color: var(--disabled-text-color);
+}
+
+.selectedMap {
+  width: 100%;
+  height: 220px;
+  margin: var(--spacing-sm) 0;
+}
+
+.root > label {
+  width: 100%;
+  min-width: 0;
+}
+
+.root input {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.sideSwitch {
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-round);
+}
+
+.sideSwitch > div {
+  border-radius: var(--border-radius-round);
+  background-color: var(--main-text-color);
+}
+
+:global([data-theme="dark"]) .root input[type="date"] {
+  color-scheme: dark;
 }

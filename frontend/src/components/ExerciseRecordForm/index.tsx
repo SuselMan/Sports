@@ -7,7 +7,7 @@ import type { Exercise } from '@shared/Exercise.model';
 import type { Muscles } from '@shared/Shared.model';
 import Input from '@uikit/components/Input/Input';
 import Button from '@uikit/components/Button/Button';
-import ToggleButton from '@uikit/components/ToggleButton/ToggleButton';
+import Toggle from '@uikit/components/Toggle/Toggle';
 import DatePicker from '@uikit/components/DatePicker/DatePicker';
 import styles from './styles.module.css';
 import { getLastRecordDefaults } from '../../utils/lastRecordDefaults';
@@ -67,6 +67,10 @@ export function ExerciseRecordForm({
     () => exercises.find((x) => x._id === form.exerciseId) ?? null,
     [exercises, form.exerciseId],
   );
+
+  React.useEffect(() => {
+    if (selectedExercise?.unilateral && !form.side) onChange({ ...form, side: 'left' });
+  }, [selectedExercise, form, onChange]);
 
   const filteredExercises = React.useMemo(() => {
     let result = exercises;
@@ -163,17 +167,20 @@ export function ExerciseRecordForm({
           {selectedExercise?.unilateral && (
             <div role="group" aria-label="Сторона тела" className={styles.sideSelector}>
               <span>Сторона тела</span>
-              <ToggleButton
-                options={['Левая', 'Правая']}
-                current={form.side ? { left: 'Левая', right: 'Правая' }[form.side] : ''}
-                onChange={(value) => onChange({ ...form, side: value === 'Левая' ? 'left' : 'right' })}
-                type="ghost"
-                size="md"
-              />
+              <div className={styles.sideControl}>
+                <span className={form.side === 'left' ? styles.activeSide : styles.inactiveSide}>Левая</span>
+                <Toggle
+                  className={styles.sideSwitch}
+                  checked={form.side === 'right'}
+                  callback={() => onChange({ ...form, side: form.side === 'right' ? 'left' : 'right' })}
+                  aria-label="Правая сторона"
+                />
+                <span className={form.side === 'right' ? styles.activeSide : styles.inactiveSide}>Правая</span>
+              </div>
             </div>
           )}
           {selectedExercise && (
-            <div style={{ height: 240 }}>
+            <div className={styles.selectedMap}>
               {isFemaleMap
                 ? <MusclesMapFemale muscles={selectedExercise.muscles} side={form.side} />
                 : <MusclesMap muscles={selectedExercise.muscles} side={form.side} />}

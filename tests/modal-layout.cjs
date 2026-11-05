@@ -40,6 +40,20 @@ const fs = require('node:fs');
   await page.locator('h3').filter({hasText:'Жим гири исправлен'}).click();
   const recordDialog=page.getByRole('dialog').filter({has:page.getByRole('button',{name:'Сохранить',exact:true})});
   await recordDialog.waitFor();
+  for(const theme of ['light','dark']) {
+   await page.setViewportSize({width:390,height:844});
+   await page.evaluate(theme=>document.documentElement.setAttribute('data-theme',theme),theme);
+   const inputs=await recordDialog.locator('input').evaluateAll(es=>es.map(e=>{const r=e.getBoundingClientRect();return {x:r.x,right:r.right,width:r.width};}));
+   assert(inputs.length>=3);
+   assert(inputs.every(r=>Math.abs(r.x-inputs[0].x)<1&&Math.abs(r.right-inputs[0].right)<1),'date, reps and weight must share edges');
+   const title=await recordDialog.getByText('Жим гири исправлен',{exact:true}).boundingBox();
+   assert(Math.abs(title.x-inputs[0].x)<1,'exercise title must align with fields');
+   const sideSwitch=recordDialog.getByRole('switch',{name:'Правая сторона',exact:true});
+   await sideSwitch.click();
+   await page.waitForTimeout(250);
+   await page.screenshot({path:'diagnostics/record-layout-'+theme+'.png'});
+  }
+  await page.setViewportSize({width:390,height:360});
   await recordDialog.getByRole('button',{name:'Сохранить',exact:true}).scrollIntoViewIfNeeded();
   const recordRect=await recordDialog.boundingBox();
   const saveRect=await recordDialog.getByRole('button',{name:'Сохранить',exact:true}).boundingBox();
