@@ -31,6 +31,7 @@ export async function upsertExerciseLocal(input: {
   _id?: string;
   name: string;
   type: ExerciseType;
+  unilateral?: boolean;
   muscles: Muscles[];
 }) {
   const _id = input._id ?? createObjectId();
@@ -41,6 +42,7 @@ export async function upsertExerciseLocal(input: {
     _id,
     name: input.name,
     type: input.type,
+    unilateral: input.unilateral ?? false,
     muscles: input.muscles,
     archived: existing?.archived ?? false,
     createdAt: existing?.createdAt ?? t,
@@ -51,6 +53,7 @@ export async function upsertExerciseLocal(input: {
     _id,
     name: entity.name,
     type: entity.type,
+    unilateral: entity.unilateral,
     muscles: entity.muscles,
   });
   await maybeSync();
@@ -117,6 +120,7 @@ export async function upsertExerciseRecordLocal(input: {
   note?: string;
   weight?: number;
   rpe?: number;
+  side?: 'left' | 'right';
   restSec?: number;
 }) {
   const _id = input._id ?? createObjectId();
@@ -135,6 +139,7 @@ export async function upsertExerciseRecordLocal(input: {
     note: input.note,
     weight: input.weight,
     rpe: input.rpe,
+    side: input.side,
     restSec: input.restSec,
     archived: existing?.archived ?? false,
     createdAt: existing?.createdAt ?? t,
@@ -153,6 +158,7 @@ export async function upsertExerciseRecordLocal(input: {
     note: entity.note,
     weight: entity.weight,
     rpe: entity.rpe,
+    side: entity.side,
     restSec: entity.restSec,
   });
   await maybeSync();

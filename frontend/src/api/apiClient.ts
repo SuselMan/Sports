@@ -3,7 +3,10 @@ import type {
   ExerciseListResponse,
   ExerciseRecordsListResponse,
   ExerciseRecordResponse,
-  ExerciseType,
+  ExerciseCreateRequest,
+  ExerciseUpdateRequest,
+  ExerciseRecordCreateRequest,
+  ExerciseRecordUpdateRequest,
 } from '@shared/Exercise.model';
 import type { Muscles, PaginationRequestData, ISODateString } from '@shared/Shared.model';
 import type {
@@ -56,12 +59,12 @@ class ApiClient {
     return resp.data as ExerciseListResponse;
   }
 
-  async createExercise(payload: { _id?: string; name: string; type: ExerciseType; muscles: Muscles[] }): Promise<Exercise> {
+  async createExercise(payload: ExerciseCreateRequest): Promise<Exercise> {
     const resp = await api.post('/exercises', payload);
     return resp.data as Exercise;
   }
 
-  async updateExercise(exerciseId: string, payload: { name?: string; type?: ExerciseType; muscles?: Muscles[] }): Promise<Exercise> {
+  async updateExercise(exerciseId: string, payload: ExerciseUpdateRequest): Promise<Exercise> {
     const resp = await api.put(`/exercises/${exerciseId}`, payload);
     return resp.data as Exercise;
   }
@@ -93,32 +96,12 @@ class ApiClient {
     return resp.data as ExerciseRecordsListResponse;
   }
 
-  async createExerciseRecord(exerciseId: string, payload: {
-    _id?: string;
-    kind: ExerciseType;
-    repsAmount?: number;
-    durationMs?: number;
-    date: ISODateString;
-    note?: string;
-    weight?: number;
-    rpe?: number;
-    restSec?: number;
-  }): Promise<ExerciseRecordResponse> {
+  async createExerciseRecord(exerciseId: string, payload: ExerciseRecordCreateRequest): Promise<ExerciseRecordResponse> {
     const resp = await api.post(`/exercises/${exerciseId}/records`, payload);
     return resp.data as ExerciseRecordResponse;
   }
 
-  async updateExerciseRecord(recordId: string, payload: {
-    exerciseId?: string;
-    kind: ExerciseType;
-    repsAmount?: number;
-    durationMs?: number;
-    date: ISODateString;
-    note?: string;
-    weight?: number;
-    rpe?: number;
-    restSec?: number;
-  }): Promise<ExerciseRecordResponse> {
+  async updateExerciseRecord(recordId: string, payload: ExerciseRecordUpdateRequest): Promise<ExerciseRecordResponse> {
     const resp = await api.put(`/exercises/records/${recordId}`, payload);
     return resp.data as ExerciseRecordResponse;
   }

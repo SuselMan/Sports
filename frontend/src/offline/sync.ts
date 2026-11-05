@@ -82,21 +82,25 @@ async function syncQueueItem(item: ToSyncItem) {
         }
         return;
       }
-      const p = item.payload as { _id: string; name: string; type: ExerciseType; muscles: any[] };
+      const p = item.payload as { _id: string; name: string; type: ExerciseType; muscles: any[]; unilateral?: boolean };
       if (item.op === 'create') {
         try {
-          await apiClient.createExercise({ _id: item._id, name: p.name, type: p.type, muscles: p.muscles });
+          await apiClient.createExercise({
+            _id: item._id, name: p.name, type: p.type, muscles: p.muscles, unilateral: p.unilateral,
+          });
         } catch (e: any) {
           // If already exists (e.g. retried), fall back to update.
-          await apiClient.updateExercise(item._id, { name: p.name, type: p.type, muscles: p.muscles });
+          await apiClient.updateExercise(item._id, { name: p.name, type: p.type, muscles: p.muscles, unilateral: p.unilateral });
         }
         return;
       }
       try {
-        await apiClient.updateExercise(item._id, { name: p.name, type: p.type, muscles: p.muscles });
+        await apiClient.updateExercise(item._id, { name: p.name, type: p.type, muscles: p.muscles, unilateral: p.unilateral });
       } catch (e: any) {
         if (e?.response?.status === 404) {
-          await apiClient.createExercise({ _id: item._id, name: p.name, type: p.type, muscles: p.muscles });
+          await apiClient.createExercise({
+            _id: item._id, name: p.name, type: p.type, muscles: p.muscles, unilateral: p.unilateral,
+          });
         } else {
           throw e;
         }
@@ -151,6 +155,7 @@ async function syncQueueItem(item: ToSyncItem) {
         note?: string;
         weight?: number;
         rpe?: number;
+        side?: 'left' | 'right';
         restSec?: number;
       };
       if (item.op === 'create') {
@@ -164,6 +169,7 @@ async function syncQueueItem(item: ToSyncItem) {
             note: p.note,
             weight: p.weight,
             rpe: p.rpe,
+            side: p.side,
             restSec: p.restSec,
           });
         } catch (e: any) {
@@ -176,6 +182,7 @@ async function syncQueueItem(item: ToSyncItem) {
             note: p.note,
             weight: p.weight,
             rpe: p.rpe,
+            side: p.side,
             restSec: p.restSec,
           });
         }
@@ -191,6 +198,7 @@ async function syncQueueItem(item: ToSyncItem) {
           note: p.note,
           weight: p.weight,
           rpe: p.rpe,
+          side: p.side,
           restSec: p.restSec,
         });
       } catch (e: any) {
@@ -204,6 +212,7 @@ async function syncQueueItem(item: ToSyncItem) {
             note: p.note,
             weight: p.weight,
             rpe: p.rpe,
+            side: p.side,
             restSec: p.restSec,
           });
         } else {

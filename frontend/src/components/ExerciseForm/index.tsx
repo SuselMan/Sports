@@ -14,6 +14,7 @@ import { MUSCLES_OPTIONS } from '../../constants/muscles';
 export type ExerciseFormValue = {
   name: string;
   type: 'REPS' | 'TIME';
+  unilateral?: boolean;
   muscles: Muscles[];
 };
 
@@ -25,6 +26,7 @@ export function ExerciseForm({
   onChange: (next: ExerciseFormValue) => void;
 }) {
   const { t } = useTranslation();
+  const unilateralId = React.useId();
   const toggleMuscle = (m: Muscles) => {
     const exists = form.muscles.includes(m);
     const next = exists ? form.muscles.filter((x) => x !== m) : [...form.muscles, m];
@@ -61,6 +63,11 @@ export function ExerciseForm({
           </Button>
         </div>
       </Dropdown>
+
+      <label htmlFor={unilateralId}>
+        <input id={unilateralId} type="checkbox" checked={!!form.unilateral} onChange={(e) => onChange({ ...form, unilateral: e.target.checked })} />
+        Одностороннее упражнение
+      </label>
 
       <SearchSelect
         options={MUSCLES_OPTIONS}

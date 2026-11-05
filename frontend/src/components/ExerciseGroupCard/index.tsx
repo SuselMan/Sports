@@ -15,12 +15,14 @@ export function ExerciseGroupCard({
   onDeleted,
   onRepeated,
   onOpen,
+  onAddSet,
 }: {
   exercise?: Exercise;
   records: ExerciseRecordResponse[];
   onDeleted?: (id: string) => void;
   onRepeated?: (rec: ExerciseRecordResponse) => void;
   onOpen?: (rec: ExerciseRecordResponse) => void;
+  onAddSet?: (rec: ExerciseRecordResponse) => void;
 }) {
   const [isOpen, setIsOpen] = React.useState(false);
   const { t } = useTranslation();
@@ -55,6 +57,7 @@ export function ExerciseGroupCard({
 
   const toggleOpen = () => setIsOpen((v) => !v);
   const onHeaderKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
+    if (e.target !== e.currentTarget) return;
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       toggleOpen();
@@ -74,6 +77,7 @@ export function ExerciseGroupCard({
       note: last.note,
       weight: last.weight,
       rpe: last.rpe,
+      side: last.side,
       restSec: last.restSec,
     });
     setLastRecordDefaults(last.exerciseId, {
@@ -105,6 +109,7 @@ export function ExerciseGroupCard({
           {/*  </div>*/}
           {/*)}*/}
         </div>
+        {onAddSet && <Button size="sm" onClick={(e) => { e.stopPropagation(); onAddSet(records[records.length - 1]); }}>Ещё подход</Button>}
         <Button
           type="ghost"
           size="sm"
@@ -132,6 +137,7 @@ export function ExerciseGroupCard({
               onDeleted={onDeleted}
               onRepeated={onRepeated}
               onOpen={onOpen}
+              onAddSet={onAddSet}
               showMuscles={false}
               showName={false}
             />

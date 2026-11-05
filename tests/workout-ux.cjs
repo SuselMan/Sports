@@ -1,0 +1,51 @@
+const { chromium } = require(process.env.PLAYWRIGHT_MODULE || '/home/suselman/projects/pencil/node_modules/playwright');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+(async () => {
+ const browser = await chromium.launch({headless:true});
+ try {
+ const context = await browser.newContext({viewport:{width:390,height:844},locale:'ru-RU',timezoneId:'Europe/Vilnius',isMobile:true,userAgent:'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/130.0.0.0 Mobile Safari/537.36'});
+ const page = await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('http://127.0.0.1:5188/');
+ await page.evaluate(async()=>{
+ localStorage.setItem('sports_language',JSON.stringify('ru'));
+ localStorage.setItem('sports_homeDateRange',JSON.stringify({from:'2020-01-01T00:00:00Z',to:'2020-01-02T00:00:00Z'}));
+ const {upsertExerciseLocal,upsertExerciseRecordLocal}=await import('/src/offline/mutations.ts');
+ const date=new Date().toISOString();
+ await upsertExerciseLocal({_id:'111111111111111111111111',name:'Жим гири',type:'REPS',muscles:['Lats','LateralDeltoid'],unilateral:true});
+ for(let i=0;i<7;i++)await upsertExerciseRecordLocal({exerciseId:'111111111111111111111111',kind:'REPS',repsAmount:10,weight:i===6?24:16,side:'left',date});
+ });
+ await page.reload(); await page.getByText('Жим гири',{exact:false}).first().waitFor();
+ const leftStops=await page.locator('linearGradient').evaluateAll(es=>es.filter(e=>e.id.includes('Lats')).map(e=>[...e.children].map(x=>x.getAttribute('stop-color'))));
+ assert(leftStops.some(s=>s[0]!==s[1]),'one side alone highlighted');
+ const dates=await page.locator('input[type=date]').evaluateAll(es=>es.map(e=>e.value));
+ assert(dates.every(d=>d===new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Vilnius'}).format(new Date())));
+ await page.getByLabel('toggle',{exact:true}).click();
+ await page.getByLabel('repeat last set',{exact:true}).scrollIntoViewIfNeeded();
+ const before=await page.getByLabel('repeat last set',{exact:true}).boundingBox();
+ await page.getByLabel('repeat last set',{exact:true}).click();
+ await page.waitForFunction(async()=>{const {getDb}=await import('/src/offline/db.ts');return (await (await getDb()).count('exerciseRecords'))===8;});
+ await page.waitForFunction(()=>document.querySelectorAll('button[aria-label=repeat]').length===8);
+ const after=await page.getByLabel('repeat last set',{exact:true}).boundingBox();assert(Math.abs(before.y-after.y)<2);
+ await page.getByRole('button',{name:'Ещё подход',exact:true}).first().click();
+ assert.equal(await page.locator('label').filter({hasText:'Вес (кг)'}).locator('input').inputValue(),'24');
+ await page.getByLabel('Сторона тела').selectOption('right');
+ const preview=await page.locator('linearGradient').evaluateAll(es=>es.filter(e=>e.id.includes('Lats')).map(e=>[...e.children].map(x=>x.getAttribute('stop-color'))));
+ assert(preview.some(s=>s[0]!==s[1]),'side preview');
+ await page.getByRole('button',{name:'Сохранить',exact:true}).click();
+ await page.waitForFunction(async()=>{const {getDb}=await import('/src/offline/db.ts');return (await (await getDb()).getAll('exerciseRecords')).some(r=>r.side==='right'&&r.weight===24);});
+ await page.getByRole('button',{name:'Сохранить',exact:true}).waitFor({state:'hidden'});
+ await page.evaluate(()=>window.scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'}));
+ const last=page.getByRole('button',{name:'Ещё подход',exact:true}).last();
+ const rect=await last.boundingBox();assert(rect.y+rect.height<844-80,'last action must clear FAB');
+ await page.screenshot({path:'diagnostics/workout-1.3.png'});
+ await page.reload();await page.getByText('Жим гири',{exact:false}).first().waitFor();
+ const sides=await page.locator('linearGradient').evaluateAll(es=>es.filter(e=>e.id.includes('Lats')).map(e=>[...e.children].map(x=>x.getAttribute('stop-color'))));
+ assert(sides.some(s=>s.every(c=>c==='rgb(106, 187, 185)')),'both recorded sides highlighted');
+ await page.goto('http://127.0.0.1:5188/exercises');await page.getByText('Жим гири',{exact:true}).click();
+ assert(await page.getByLabel('Одностороннее упражнение').isChecked());
+ assert.deepEqual(errors,[]);
+ fs.writeFileSync('diagnostics/workout-ux-results.json',JSON.stringify({today:true,repeatKeepsExpansion:true,repeatHeaderShift:after.y-before.y,latestWeight:true,sidePersisted:true,fabClearance:true,sidesHighlighted:true,exerciseEdit:true,errors},null,2));
+ console.log('Workout UX checks passed');
+ }finally{await browser.close();}
+})().catch(e=>{console.error(e);process.exitCode=1;});

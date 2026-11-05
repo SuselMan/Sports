@@ -12,10 +12,10 @@ export const exercisesRouter = Router();
 exercisesRouter.post('/', async (req: AuthedRequest, res) => {
   try {
     const userId = req.userId!;
-    const { _id, name, type, muscles } = req.body as ExerciseCreateRequest;
+    const { _id, name, type, muscles, unilateral } = req.body as ExerciseCreateRequest;
     const created = await ExerciseModel.create({
       ...(typeof _id === 'string' ? { _id: new mongoose.Types.ObjectId(_id) } : {}),
-      userId, name, type, muscles,
+      userId, name, type, muscles, unilateral,
     });
     res.json(created);
   } catch (e: any) {
@@ -51,10 +51,11 @@ exercisesRouter.put('/:exerciseId', async (req: AuthedRequest, res) => {
     const userId = new mongoose.Types.ObjectId(req.userId!);
     const { exerciseId } = req.params;
     const _id = new mongoose.Types.ObjectId(exerciseId);
-    const { name, type, muscles } = req.body as { name?: string; type?: ExerciseType; muscles?: Muscles[] };
+    const { name, type, muscles, unilateral } = req.body as { name?: string; type?: ExerciseType; muscles?: Muscles[]; unilateral?: boolean };
     const update: any = {};
     if (name != null) update.name = name;
     if (type != null) update.type = type;
+    if (unilateral != null) update.unilateral = unilateral;
     if (muscles != null) update.muscles = muscles;
     const updated = await ExerciseModel.findOneAndUpdate({ _id, userId }, update, { new: true });
     if (!updated) return res.status(404).json({ error: 'Exercise not found' });
@@ -115,10 +116,10 @@ exercisesRouter.put('/records/:recordId', async (req: AuthedRequest, res) => {
       note,
       weight,
       rpe,
-      restSec,
+      restSec, side,
     } = req.body as any;
     const update: any = {
-      kind, date, note, weight, rpe, restSec,
+      kind, date, note, weight, rpe, restSec, side,
     };
     if (exerciseId) update.exerciseId = new mongoose.Types.ObjectId(exerciseId);
     if (kind === 'REPS') {
@@ -147,7 +148,7 @@ exercisesRouter.post('/:exerciseId/records', async (req: AuthedRequest, res) => 
     const { exerciseId } = req.params;
     const exerciseObjectId = new mongoose.Types.ObjectId(exerciseId);
     const {
-      _id, kind, repsAmount, durationMs, date, note, weight, rpe, restSec,
+      _id, kind, repsAmount, durationMs, date, note, weight, rpe, restSec, side,
     } = req.body as ExerciseRecordCreateRequest;
     const created = await ExerciseRecordModel.create({
       userId,
@@ -160,7 +161,7 @@ exercisesRouter.post('/:exerciseId/records', async (req: AuthedRequest, res) => 
       note,
       weight,
       rpe,
-      restSec,
+      restSec, side,
     });
     res.json(created);
   } catch (e: any) {
@@ -243,6 +244,7 @@ exercisesRouter.get('/records', async (req: AuthedRequest, res) => {
         weight: 1,
         rpe: 1,
         restSec: 1,
+        side: 1,
         exercise: {
           _id: '$exercise._id',
           userId: '$exercise.userId',
@@ -252,6 +254,7 @@ exercisesRouter.get('/records', async (req: AuthedRequest, res) => {
           name: '$exercise.name',
           type: '$exercise.type',
           muscles: '$exercise.muscles',
+          unilateral: '$exercise.unilateral',
         },
       },
     },

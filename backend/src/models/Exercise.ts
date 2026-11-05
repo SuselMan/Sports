@@ -9,6 +9,7 @@ const exerciseSchema = new mongoose.Schema(
       type: String, required: true, maxlength: 100, index: true,
     },
     type: { type: String, enum: ['REPS', 'TIME'], required: true },
+    unilateral: { type: Boolean, default: false },
     muscles: { type: [String], required: true, default: [] },
     archived: { type: Boolean, default: false, index: true },
   },
@@ -29,6 +30,7 @@ const exerciseRecordBase = {
   note: { type: String, maxlength: 300 },
   weight: { type: Number },
   rpe: { type: Number },
+  side: { type: String, enum: ['left', 'right'] },
   restSec: { type: Number },
   archived: { type: Boolean, default: false, index: true },
 };

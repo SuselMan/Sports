@@ -32,6 +32,7 @@ export function ExerciseRecordCard({
   onDeleted,
   onRepeated,
   onOpen,
+  onAddSet,
   showMuscles = true,
   showName = true,
   showReps = true,
@@ -40,6 +41,7 @@ export function ExerciseRecordCard({
   onDeleted?: (id: string) => void;
   onRepeated?: (rec: ExerciseRecordResponse) => void;
   onOpen?: (rec: ExerciseRecordResponse) => void;
+  onAddSet?: (rec: ExerciseRecordResponse) => void;
   showMuscles?: boolean;
   showName?: boolean;
   showReps?: boolean;
@@ -47,6 +49,7 @@ export function ExerciseRecordCard({
   const { t } = useTranslation();
   const onCardKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
     if (!onOpen) return;
+    if (e.target !== e.currentTarget) return;
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       onOpen(record);
@@ -69,6 +72,7 @@ export function ExerciseRecordCard({
       note: record.note,
       weight: record.weight,
       rpe: record.rpe,
+      side: record.side,
       restSec: record.restSec,
     });
     const withExercise: ExerciseRecordResponse = { ...created, exercise: record.exercise ?? (created as any).exercise };
@@ -128,6 +132,8 @@ export function ExerciseRecordCard({
           {record.exercise.muscles.join(', ')}
         </div>
       )}
+      {record.side && <div className={styles.caption}>{record.side === 'left' ? 'Левая сторона' : 'Правая сторона'}</div>}
+      {onAddSet && <Button size="sm" onClick={(e) => { e.stopPropagation(); onAddSet(record); }}>Ещё подход</Button>}
       <div className={styles.caption}>
         {dayjs(record.date).format('DD/MM/YYYY')}
       </div>

@@ -67,7 +67,8 @@ const Home: React.FC<{ mapSex?: MapSex }> = ({ mapSex = 'male' }) => {
     () => (allExerciseRecords
       .filter((r) => !r.archived)
       .filter((r) => inRange(r.date))
-      .map((r) => ({ ...r, exercise: r.exercise ?? exerciseById.get(r.exerciseId) })) as ExerciseRecordResponse[]),
+      .sort((a, b) => (a.createdAt ?? a.date).localeCompare(b.createdAt ?? b.date))
+      .map((r) => ({ ...r, exercise: exerciseById.get(r.exerciseId) ?? r.exercise })) as ExerciseRecordResponse[]),
     [allExerciseRecords, inRange, exerciseById],
   );
 
@@ -109,6 +110,15 @@ const Home: React.FC<{ mapSex?: MapSex }> = ({ mapSex = 'male' }) => {
     [records],
   );
 
+  const highlightedSides = useMemo(() => {
+    const result: Partial<Record<Muscles, Array<'left' | 'right'>>> = {};
+    records.forEach((r) => r.exercise?.muscles?.forEach((m) => {
+      const sides = r.side ? [r.side] : ['left', 'right'] as const;
+      result[m] = Array.from(new Set([...(result[m] ?? []), ...sides]));
+    }));
+    return result;
+  }, [records]);
+
   const groups = useMemo<{ exercise?: Exercise; records: ExerciseRecordResponse[] }[]>(() => {
     const order: string[] = [];
     const map = new Map<string, { exercise?: Exercise; records: ExerciseRecordResponse[] }>();
@@ -124,13 +134,31 @@ const Home: React.FC<{ mapSex?: MapSex }> = ({ mapSex = 'male' }) => {
     return order.map((k) => map.get(k)!).filter(Boolean);
   }, [records]);
 
+  const openAnotherSet = (record: ExerciseRecordResponse) => {
+    const last = allExerciseRecords
+      .filter((r) => !r.archived && r.exerciseId === record.exerciseId)
+      .sort((a, b) => (b.createdAt ?? b.date).localeCompare(a.createdAt ?? a.date))[0] ?? record;
+    setForm({
+      exerciseId: last.exerciseId,
+      kind: last.kind,
+      date: range.from,
+      weight: last.weight == null ? undefined : String(last.weight),
+      repsAmount: last.repsAmount == null ? undefined : String(last.repsAmount),
+      durationMs: last.durationMs == null ? undefined : String(last.durationMs),
+      side: last.side ?? (exerciseById.get(last.exerciseId)?.unilateral ? 'left' : undefined),
+    });
+    setMuscleFilterForForm([]);
+    setCurrentModal('ExerciseCreate');
+  };
+
   const submit = async () => {
-    if (!form.exerciseId || submitting) return;
+    if (!form.exerciseId || submitting || (exerciseById.get(form.exerciseId)?.unilateral && !form.side)) return;
     setSubmitting(true);
     try {
       await upsertExerciseRecordLocal({
         exerciseId: form.exerciseId,
         kind: form.kind,
+        side: form.side,
         repsAmount: form.kind === 'REPS' ? Number(form.repsAmount) : undefined,
         durationMs: form.kind === 'TIME' ? Number(form.durationMs) : undefined,
         date: form.date,
@@ -189,12 +217,12 @@ const Home: React.FC<{ mapSex?: MapSex }> = ({ mapSex = 'male' }) => {
       {!!records.length && (
         <div className={styles.musclesBox}>
           {mapSex === 'female'
-            ? <MusclesMapFemale muscles={highlightedMuscles} onMuscleClicked={(m: Muscles) => {
+            ? <MusclesMapFemale muscles={highlightedMuscles} sides={highlightedSides} onMuscleClicked={(m: Muscles) => {
               setForm({ exerciseId: '', kind: 'REPS', date: range.from });
               setMuscleFilterForForm([m]);
               setCurrentModal('ExerciseCreate');
             }} />
-            : <MusclesMap muscles={highlightedMuscles} onMuscleClicked={(m: Muscles) => {
+            : <MusclesMap muscles={highlightedMuscles} sides={highlightedSides} onMuscleClicked={(m: Muscles) => {
               setForm({ exerciseId: '', kind: 'REPS', date: range.from });
               setMuscleFilterForForm([m]);
               setCurrentModal('ExerciseCreate');
@@ -215,11 +243,13 @@ const Home: React.FC<{ mapSex?: MapSex }> = ({ mapSex = 'male' }) => {
                 record={g.records[0]}
                 showReps={false}
                 showMuscles={false}
+                onAddSet={openAnotherSet}
                 onOpen={(r) => {
                   setEditId(r._id);
                   setForm({
                     exerciseId: r.exerciseId,
                     kind: r.kind,
+                    side: r.side,
                     repsAmount: r.kind === 'REPS' ? String(r.repsAmount ?? '') : undefined,
                     durationMs: r.kind === 'TIME' ? String(r.durationMs ?? '') : undefined,
                     weight: r.weight != null ? String(r.weight) : undefined,
@@ -234,11 +264,13 @@ const Home: React.FC<{ mapSex?: MapSex }> = ({ mapSex = 'male' }) => {
                 key={g.exercise?._id || g.records[0]._id}
                 exercise={g.exercise}
                 records={g.records}
+                onAddSet={openAnotherSet}
                 onOpen={(r) => {
                   setEditId(r._id);
                   setForm({
                     exerciseId: r.exerciseId,
                     kind: r.kind,
+                    side: r.side,
                     repsAmount: r.kind === 'REPS' ? String(r.repsAmount ?? '') : undefined,
                     durationMs: r.kind === 'TIME' ? String(r.durationMs ?? '') : undefined,
                     weight: r.weight != null ? String(r.weight) : undefined,
@@ -351,7 +383,7 @@ const Home: React.FC<{ mapSex?: MapSex }> = ({ mapSex = 'male' }) => {
                 <div className={styles.modalActions}>
                   <Button onClick={() => setCurrentModal(null)}>{t('actions.cancel')}</Button>
                   <Button
-                    disabled={submitting}
+                    disabled={submitting || !form.exerciseId || !!(exerciseById.get(form.exerciseId)?.unilateral && !form.side)}
                     onClick={async () => {
                       if (submitting) return;
                       if (currentModal === 'ExerciseCreate') {
@@ -365,6 +397,7 @@ const Home: React.FC<{ mapSex?: MapSex }> = ({ mapSex = 'male' }) => {
                           _id: editId,
                           exerciseId: form.exerciseId,
                           kind: form.kind,
+                          side: form.side,
                           repsAmount: form.kind === 'REPS' ? Number(form.repsAmount) : undefined,
                           durationMs: form.kind === 'TIME' ? Number(form.durationMs) : undefined,
                           date: form.date,

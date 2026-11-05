@@ -20,6 +20,7 @@ export type ExerciseRecordFormValue = {
   repsAmount?: string;
   durationMs?: string;
   date: string;
+  side?: 'left' | 'right';
   weight?: string;
   note?: string;
 };
@@ -37,6 +38,7 @@ export function ExerciseRecordForm({
   initialMuscleFilter?: Muscles[];
   onClose?: () => void;
 }) {
+  const sideId = React.useId();
   const today = dayjs();
   const dateValue = dayjs(form.date);
   const { t } = useTranslation();
@@ -82,6 +84,7 @@ export function ExerciseRecordForm({
       ...form,
       exerciseId: e._id,
       kind: e.type,
+      side: e.unilateral ? 'left' : undefined,
       repsAmount: defaults?.repsAmount ?? form.repsAmount,
       durationMs: defaults?.durationMs ?? form.durationMs,
       weight: defaults?.weight ?? '0',
@@ -157,6 +160,23 @@ export function ExerciseRecordForm({
               </Button>
             )}
           </div>
+          {selectedExercise?.unilateral && (
+            <label htmlFor={sideId}>
+              Сторона тела
+              <select id={sideId} value={form.side ?? ''} onChange={(e) => onChange({ ...form, side: e.target.value as 'left' | 'right' })}>
+                <option value="" disabled>Выбери сторону</option>
+                <option value="left">Левая</option>
+                <option value="right">Правая</option>
+              </select>
+            </label>
+          )}
+          {selectedExercise && (
+            <div style={{ height: 240 }}>
+              {isFemaleMap
+                ? <MusclesMapFemale muscles={selectedExercise.muscles} side={form.side} />
+                : <MusclesMap muscles={selectedExercise.muscles} side={form.side} />}
+            </div>
+          )}
       {isMobile ? (
         <Input
           label={t('records.date')}

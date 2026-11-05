@@ -23,14 +23,14 @@ export default function Exercises() {
   const list = useMemo(() => all.filter((x) => !x.archived), [all]);
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState<{ name: string; type: ExerciseType; muscles: Muscles[] }>({
+  const [form, setForm] = useState<{ name: string; type: ExerciseType; muscles: Muscles[]; unilateral?: boolean }>({
     name: '',
     type: 'REPS',
     muscles: [],
   });
   const [editOpen, setEditOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<{ name: string; type: ExerciseType; muscles: Muscles[] }>({
+  const [editForm, setEditForm] = useState<{ name: string; type: ExerciseType; muscles: Muscles[]; unilateral?: boolean }>({
     name: '',
     type: 'REPS',
     muscles: [],
@@ -60,7 +60,9 @@ export default function Exercises() {
     if (submitting) return;
     setSubmitting(true);
     try {
-      await upsertExerciseLocal({ name: form.name, type: form.type, muscles: form.muscles });
+      await upsertExerciseLocal({
+        name: form.name, type: form.type, muscles: form.muscles, unilateral: form.unilateral,
+      });
       closeCreateDialog();
       setForm({ name: '', type: 'REPS', muscles: [] });
     } finally {
@@ -95,7 +97,9 @@ export default function Exercises() {
                 }}
                 onOpen={(ex) => {
                   setEditId(ex._id);
-                  setEditForm({ name: ex.name, type: ex.type, muscles: ex.muscles });
+                  setEditForm({
+                    name: ex.name, type: ex.type, muscles: ex.muscles, unilateral: ex.unilateral,
+                  });
                   setEditOpen(true);
                 }}
               />
@@ -140,6 +144,7 @@ export default function Exercises() {
                       name: editForm.name,
                       type: editForm.type,
                       muscles: editForm.muscles,
+                      unilateral: editForm.unilateral,
                     });
                     setEditOpen(false);
                   } finally {

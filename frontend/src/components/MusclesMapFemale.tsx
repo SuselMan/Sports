@@ -1,8 +1,18 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, {
+  useEffect, useMemo, useRef, useId,
+} from 'react';
 import { Muscles, muscleIdMap } from '@shared/Shared.model';
 
-export function MusclesMapFemale({ muscles, onMuscleClicked = () => {} }: { muscles: Array<Muscles>, onMuscleClicked: Function }) {
+export function MusclesMapFemale({
+  muscles, side, sides, onMuscleClicked = () => {},
+}: {
+  muscles: Array<Muscles>;
+  side?: 'left' | 'right';
+  sides?: Partial<Record<Muscles, Array<'left' | 'right'>>>;
+  onMuscleClicked?: Function;
+}) {
+  const gradientId = useId().replace(/:/g, '');
   const frontRef = useRef<HTMLDivElement | null>(null);
   const backRef = useRef<HTMLDivElement | null>(null);
   const highlighted = useMemo(() => new Set<Muscles>(muscles), [muscles]);
@@ -25,7 +35,24 @@ export function MusclesMapFemale({ muscles, onMuscleClicked = () => {} }: { musc
       }
       elements.forEach((el) => {
         const element = el as HTMLElement;
+        const selectedSides = sides?.[muscle] ?? (side ? [side] : ['left', 'right']);
+        const svg = element.closest('svg');
+        const isFront = frontRef.current?.contains(element);
+        const leftActive = highlighted.has(muscle) && selectedSides.includes(isFront ? 'right' : 'left');
+        const rightActive = highlighted.has(muscle) && selectedSides.includes(isFront ? 'left' : 'right');
+        const id = gradientId + muscle + (isFront ? 'front' : 'back');
+        const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+        gradient.id = id;
+        gradient.setAttribute('gradientUnits', 'userSpaceOnUse');
+        gradient.setAttribute('x1', '0');
+        gradient.setAttribute('x2', '676.49');
+        gradient.setAttribute('y1', '0');
+        gradient.setAttribute('y2', '0');
+        gradient.innerHTML = `<stop offset="50%" stop-color="${leftActive ? ACTIVE : DEFAULT}"/><stop offset="50%" stop-color="${rightActive ? ACTIVE : DEFAULT}"/>`;
+        svg?.prepend(gradient);
         element.style.color = highlighted.has(muscle) ? ACTIVE : DEFAULT;
+        element.querySelectorAll('path').forEach((path) => { path.style.fill = leftActive !== rightActive ? `url(#${id})` : ''; });
+        cleanups.push(() => gradient.remove());
         (element as any).style.cursor = 'pointer';
         const enter = () => {
           if (!highlighted.has(muscle)) (element as any).style.color = HOVER;
@@ -51,7 +78,7 @@ export function MusclesMapFemale({ muscles, onMuscleClicked = () => {} }: { musc
       });
     });
     return () => { cleanups.forEach((fn) => fn()); };
-  }, [highlighted, onMuscleClicked]);
+  }, [highlighted, onMuscleClicked, side, sides, gradientId]);
   return (
     <div style={{
       display: 'flex', flexDirection: 'row', width: '100%', height: '100%',

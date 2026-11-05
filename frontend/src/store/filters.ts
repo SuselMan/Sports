@@ -13,7 +13,7 @@ type DateRangeState = {
 };
 
 function createDateRangeStore(storageKey: string, defaultRange: DateRangeValue) {
-  const initial = storage.get<DateRangeValue>(storageKey, defaultRange);
+  const initial = storageKey === 'homeDateRange' ? defaultRange : storage.get<DateRangeValue>(storageKey, defaultRange);
   return create<DateRangeState>((set) => ({
     range: initial,
     setRange: (range) => {

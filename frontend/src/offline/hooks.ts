@@ -7,7 +7,7 @@ function useDbReload<T>(loader: () => Promise<T>, initial: T) {
   useEffect(() => {
     let alive = true;
     const load = async () => {
-      setLoading(true);
+      // Keep mounted cards and their expansion state during background reloads.
       try {
         const v = await loader();
         if (alive) setData(v);

@@ -12,6 +12,7 @@ export type Exercise = SyncMetaData & {
     _id: string, // client-visible id (stored as ObjectId in Mongo)
     name: string, // MAX 100 SYMBOLS 
     type: ExerciseType,
+    unilateral?: boolean;
     muscles: Muscles[] // list of muscles codes
 };
 
@@ -21,12 +22,14 @@ export type ExerciseCreateRequest = {
     _id?: string; // optional client-generated id (ObjectId hex string)
     name: string;
     type: ExerciseType;
+    unilateral?: boolean;
     muscles: Muscles[];
 };
 
 export type ExerciseUpdateRequest = {
     name?: string;
     type?: ExerciseType;
+    unilateral?: boolean;
     muscles?: Muscles[];
 };
 
@@ -54,6 +57,7 @@ type ExerciseRecordBase = SyncMetaData & {
     note?: string,
     weight?: number,
     rpe?: number,
+    side?: 'left' | 'right',
     restSec?: number,
 };
 
@@ -89,6 +93,7 @@ export type ExerciseRecordCreateRequest = {
     note?: string;
     weight?: number;
     rpe?: number;
+    side?: 'left' | 'right';
     restSec?: number;
 };
 
@@ -101,6 +106,7 @@ export type ExerciseRecordUpdateRequest = {
     note?: string;
     weight?: number;
     rpe?: number;
+    side?: 'left' | 'right';
     restSec?: number;
 };
 
