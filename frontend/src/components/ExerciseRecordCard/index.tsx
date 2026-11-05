@@ -6,6 +6,7 @@ import durationPlugin from 'dayjs/plugin/duration';
 import Button from '@uikit/components/Button/Button';
 import TrashIcon from '@uikit/icons/trash.svg?react';
 import RetryIcon from '@uikit/icons/arrow-path.svg?react';
+import PlusIcon from '@uikit/icons/plus.svg?react';
 import styles from './styles.module.css';
 import { setLastRecordDefaults } from '../../utils/lastRecordDefaults';
 import { archiveExerciseRecordLocal, upsertExerciseRecordLocal } from '../../offline/mutations';
@@ -133,7 +134,18 @@ export function ExerciseRecordCard({
         </div>
       )}
       {record.side && <div className={styles.caption}>{record.side === 'left' ? 'Левая сторона' : 'Правая сторона'}</div>}
-      {onAddSet && <Button size="sm" onClick={(e) => { e.stopPropagation(); onAddSet(record); }}>Ещё подход</Button>}
+      {onAddSet && (
+        <Button
+          type="ghost"
+          size="md"
+          className={styles.iconAddSet}
+          aria-label="Ещё подход"
+          title="Ещё подход"
+          onClick={(e) => { e.stopPropagation(); onAddSet(record); }}
+        >
+          <PlusIcon />
+        </Button>
+      )}
       <div className={styles.caption}>
         {dayjs(record.date).format('DD/MM/YYYY')}
       </div>

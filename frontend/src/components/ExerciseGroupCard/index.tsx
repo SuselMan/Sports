@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Button from '@uikit/components/Button/Button';
 import ChevronDownIcon from '@uikit/icons/chevron-down.svg?react';
 import RetryIcon from '@uikit/icons/arrow-path.svg?react';
+import PlusIcon from '@uikit/icons/plus.svg?react';
 import styles from './styles.module.css';
 import { ExerciseRecordCard } from '../ExerciseRecordCard';
 import { setLastRecordDefaults } from '../../utils/lastRecordDefaults';
@@ -109,7 +110,17 @@ export function ExerciseGroupCard({
           {/*  </div>*/}
           {/*)}*/}
         </div>
-        {onAddSet && <Button size="sm" onClick={(e) => { e.stopPropagation(); onAddSet(records[records.length - 1]); }}>Ещё подход</Button>}
+        {onAddSet && (
+          <Button
+            type="ghost"
+            size="sm"
+            aria-label="Ещё подход"
+            title="Ещё подход"
+            onClick={(e) => { e.stopPropagation(); onAddSet(records[records.length - 1]); }}
+          >
+            <PlusIcon />
+          </Button>
+        )}
         <Button
           type="ghost"
           size="sm"
