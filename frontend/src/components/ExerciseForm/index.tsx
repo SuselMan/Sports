@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Input from '@uikit/components/Input/Input';
 import Dropdown from '@uikit/components/Dropdown/Dropdown';
 import Button from '@uikit/components/Button/Button';
+import Toggle from '@uikit/components/Toggle/Toggle';
 import SearchSelect from '@uikit/components/SearchSelect/SearchSelect';
 import styles from './styles.module.css';
 import { MusclesMap } from '../MusclesMap';
@@ -26,7 +27,6 @@ export function ExerciseForm({
   onChange: (next: ExerciseFormValue) => void;
 }) {
   const { t } = useTranslation();
-  const unilateralId = React.useId();
   const toggleMuscle = (m: Muscles) => {
     const exists = form.muscles.includes(m);
     const next = exists ? form.muscles.filter((x) => x !== m) : [...form.muscles, m];
@@ -64,10 +64,14 @@ export function ExerciseForm({
         </div>
       </Dropdown>
 
-      <label htmlFor={unilateralId}>
-        <input id={unilateralId} type="checkbox" checked={!!form.unilateral} onChange={(e) => onChange({ ...form, unilateral: e.target.checked })} />
-        Одностороннее упражнение
-      </label>
+      <div className={styles.switchRow}>
+        <span>Одностороннее упражнение</span>
+        <Toggle
+          checked={!!form.unilateral}
+          callback={() => onChange({ ...form, unilateral: !form.unilateral })}
+          aria-label="Одностороннее упражнение"
+        />
+      </div>
 
       <SearchSelect
         options={MUSCLES_OPTIONS}

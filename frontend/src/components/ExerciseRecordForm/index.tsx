@@ -7,6 +7,7 @@ import type { Exercise } from '@shared/Exercise.model';
 import type { Muscles } from '@shared/Shared.model';
 import Input from '@uikit/components/Input/Input';
 import Button from '@uikit/components/Button/Button';
+import ToggleButton from '@uikit/components/ToggleButton/ToggleButton';
 import DatePicker from '@uikit/components/DatePicker/DatePicker';
 import styles from './styles.module.css';
 import { getLastRecordDefaults } from '../../utils/lastRecordDefaults';
@@ -38,7 +39,6 @@ export function ExerciseRecordForm({
   initialMuscleFilter?: Muscles[];
   onClose?: () => void;
 }) {
-  const sideId = React.useId();
   const today = dayjs();
   const dateValue = dayjs(form.date);
   const { t } = useTranslation();
@@ -161,14 +161,16 @@ export function ExerciseRecordForm({
             )}
           </div>
           {selectedExercise?.unilateral && (
-            <label htmlFor={sideId}>
-              Сторона тела
-              <select id={sideId} value={form.side ?? ''} onChange={(e) => onChange({ ...form, side: e.target.value as 'left' | 'right' })}>
-                <option value="" disabled>Выбери сторону</option>
-                <option value="left">Левая</option>
-                <option value="right">Правая</option>
-              </select>
-            </label>
+            <div role="group" aria-label="Сторона тела" className={styles.sideSelector}>
+              <span>Сторона тела</span>
+              <ToggleButton
+                options={['Левая', 'Правая']}
+                current={form.side ? { left: 'Левая', right: 'Правая' }[form.side] : ''}
+                onChange={(value) => onChange({ ...form, side: value === 'Левая' ? 'left' : 'right' })}
+                type="ghost"
+                size="md"
+              />
+            </div>
           )}
           {selectedExercise && (
             <div style={{ height: 240 }}>

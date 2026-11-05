@@ -1,4 +1,13 @@
 .root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
 }
 
-
+.switchRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) 0;
+}

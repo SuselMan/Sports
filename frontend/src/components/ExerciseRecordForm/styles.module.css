@@ -58,3 +58,9 @@
   color: var(--main-text-color);
 }
 
+
+.sideSelector {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
