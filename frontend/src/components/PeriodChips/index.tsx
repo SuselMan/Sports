@@ -37,7 +37,7 @@ function buildChips(
   const yearSet = new Set<string>();
   for (const r of records) {
     if (r.archived) continue;
-    const d = dayjs(r.date);
+    const d = dayjs(r.calendarDate || r.date);
     daySet.add(d.format('YYYY-MM-DD'));
     monthSet.add(d.format('YYYY-MM'));
     yearSet.add(d.format('YYYY'));

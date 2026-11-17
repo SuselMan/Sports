@@ -1,8 +1,6 @@
-import React, { useEffect, useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import {
-  ComposedChart, Area, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer,
-} from 'recharts';
+import React, { useEffect, useMemo, useId } from 'react';
+import { useParams } from 'react-router-dom';
+import { ComposedChart, Area, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
 import Spinner from '@uikit/components/Spinner/Spinner';
@@ -11,33 +9,12 @@ import Card from '@uikit/components/Card/Card';
 import type { Exercise, ExerciseRecordResponse } from '@shared/Exercise.model';
 import { useStatisticsDateRangeStore } from '../../store/filters';
 import { DateRange } from '../../components/DateRange';
+import { PeriodChips } from '../../components/PeriodChips';
 import { useDbReload } from '../../offline/hooks';
 import { getExerciseRecordsLocal, getExercisesLocal } from '../../offline/repo';
+import { storage } from '../../utils/storage';
+import { buildStatistics, METRICS, type MetricKey, type MetricData } from './data';
 import styles from './styles.module.css';
-
-function computeE1rm(weight: number, reps: number): number {
-  return weight * (1 + reps / 30);
-}
-
-function dayKey(iso: string): string {
-  return dayjs(iso).format('YYYY-MM-DD');
-}
-
-/** Add a `trend` field to each point using least-squares linear regression. */
-function addTrendLine<T extends { value: number }>(data: T[]): (T & { trend: number })[] {
-  const n = data.length;
-  if (n < 2) return data.map((d) => ({ ...d, trend: d.value }));
-  let sumX = 0; let sumY = 0; let sumXY = 0; let sumX2 = 0;
-  data.forEach((d, i) => {
-    sumX += i;
-    sumY += d.value;
-    sumXY += i * d.value;
-    sumX2 += i * i;
-  });
-  const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-  const intercept = (sumY - slope * sumX) / n;
-  return data.map((d, i) => ({ ...d, trend: Math.round((intercept + slope * i) * 100) / 100 }));
-}
 
 function useCssVar(name: string, fallback: string): string {
   const read = () => getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
@@ -52,266 +29,53 @@ function useCssVar(name: string, fallback: string): string {
   return value;
 }
 
+
+function StatChart({ metric, label, unit, color, grid }: {metric: MetricData;label:string;unit:string;color:string;grid:string}) {
+  const id = useId().replace(/:/g,'');
+  return <div className={styles.chartBox} aria-label={`${label}, ${unit}`}>
+    <ResponsiveContainer width="100%" height="100%">
+      <ComposedChart data={metric.points} margin={{right:12}}>
+        <defs><linearGradient id={id} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={color} stopOpacity={0.15}/><stop offset="100%" stopColor={color} stopOpacity={0}/></linearGradient></defs>
+        <CartesianGrid stroke={grid}/>
+        <XAxis dataKey="date" tickFormatter={d=>dayjs(d).format('DD/MM')}/>
+        <YAxis width={45} allowDecimals={metric.key==='e1rm'||metric.key==='weight'}/>
+        <Tooltip labelFormatter={d=>dayjs(String(d)).format('DD/MM/YYYY')} formatter={v=>[`${Number(v).toLocaleString(undefined,{maximumFractionDigits:1})} ${unit}`,label]}/>
+        <Area name={label} type="linear" dataKey="value" stroke={color} strokeWidth={2} fill={`url(#${id})`} dot={{r:3}}/>
+        {metric.points.length>1&&<Line type="linear" dataKey="trend" stroke={color} strokeDasharray="6 3" strokeOpacity={0.5} dot={false} activeDot={false} tooltipType="none"/>}
+      </ComposedChart>
+    </ResponsiveContainer>
+  </div>;
+}
+
 export default function Statistics() {
-  const range = useStatisticsDateRangeStore((s) => s.range);
-  const setRange = useStatisticsDateRangeStore((s) => s.setRange);
-  const navigate = useNavigate();
-  const params = useParams();
-  const exerciseId = (params.exerciseId || '').trim();
-  const { t } = useTranslation();
-  const mainColor = useCssVar('--main-active-color', '#ef6c00');
-  const gridColor = useCssVar('--chart-grid-color', 'rgba(0,0,0,0.1)');
-
-  const exercisesLoader = React.useCallback(() => getExercisesLocal(), []);
-  const { data: allExercises, loading: isLoadingExercises } = useDbReload<Exercise[]>(exercisesLoader, []);
-  const exercises = useMemo(() => allExercises.filter((e) => !e.archived), [allExercises]);
-
-  const recordsLoader = React.useCallback(() => getExerciseRecordsLocal(), []);
-  const { data: allRecords, loading: isLoadingRecords } = useDbReload<ExerciseRecordResponse[]>(recordsLoader, []);
-
-  useEffect(() => {
-    if (!exerciseId && exercises.length) {
-      navigate(`/statistics/${exercises[0]._id}`, { replace: true });
-    }
-  }, [exerciseId, exercises, navigate]);
-
-  const selectedExercise = useMemo(
-    () => exercises.find((x) => x._id === exerciseId) ?? null,
-    [exercises, exerciseId],
-  );
-
-  const exerciseRecordsAllTime = useMemo(
-    () => allRecords.filter((r) => !r.archived && r.exerciseId === exerciseId),
-    [allRecords, exerciseId],
-  );
-
-  const exerciseRecords = useMemo(
-    () => exerciseRecordsAllTime.filter((r) => r.date >= range.from && r.date <= range.to),
-    [exerciseRecordsAllTime, range],
-  );
-
-  const repsRecords = useMemo(
-    () => exerciseRecords.filter((r) => r.kind === 'REPS' && typeof r.repsAmount === 'number'),
-    [exerciseRecords],
-  );
-
-  const repsRecordsAllTime = useMemo(
-    () => exerciseRecordsAllTime.filter((r) => r.kind === 'REPS' && typeof r.repsAmount === 'number'),
-    [exerciseRecordsAllTime],
-  );
-
-  const maxRepsSet = useMemo(() => {
-    let max = 0;
-    repsRecords.forEach((r) => {
-      const v = r.repsAmount ?? 0;
-      if (typeof v === 'number' && v > max) max = v;
-    });
-    return max;
-  }, [repsRecords]);
-
-  const repsPerDayTotal = useMemo(() => {
-    const map = new Map<string, number>();
-    repsRecords.forEach((r) => {
-      const key = dayKey(r.date);
-      map.set(key, (map.get(key) || 0) + (r.repsAmount as number));
-    });
-    return map;
-  }, [repsRecords]);
-
-  const maxRepsDay = useMemo(() => {
-    const map = new Map<string, number>();
-    repsRecordsAllTime.forEach((r) => {
-      const key = dayKey(r.date);
-      map.set(key, (map.get(key) || 0) + (r.repsAmount as number));
-    });
-    let max = 0;
-    map.forEach((v) => {
-      if (v > max) max = v;
-    });
-    return max;
-  }, [repsRecordsAllTime]);
-
-  // reps per day (total reps for the day)
-  const repsPerDaySeries = useMemo(() => addTrendLine(
-    Array.from(repsPerDayTotal.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([date, value]) => ({ date, value })),
-  ), [repsPerDayTotal]);
-
-  const e1rmRecords = useMemo(() => repsRecords
-    .filter((r) => typeof r.weight === 'number' && (r.weight as number) > 0)
-    .map((r) => ({
-      date: r.date,
-      e1rm: computeE1rm(r.weight as number, r.repsAmount as number),
-    })), [repsRecords]);
-
-  const bestE1rm = useMemo(() => {
-    let max = 0;
-    e1rmRecords.forEach((r) => {
-      if (r.e1rm > max) max = r.e1rm;
-    });
-    return max;
-  }, [e1rmRecords]);
-
-  const weightRecords = useMemo(
-    () => exerciseRecords.filter((r) => typeof r.weight === 'number' && (r.weight as number) > 0),
-    [exerciseRecords],
-  );
-
-  const bestWeight = useMemo(() => {
-    let max = 0;
-    weightRecords.forEach((r) => {
-      if ((r.weight as number) > max) max = r.weight as number;
-    });
-    return max;
-  }, [weightRecords]);
-
-  const dailyMaxWeightSeries = useMemo(() => {
-    const map = new Map<string, number>();
-    weightRecords.forEach((r) => {
-      const key = dayKey(r.date);
-      map.set(key, Math.max(map.get(key) || 0, r.weight as number));
-    });
-    return addTrendLine(
-      Array.from(map.entries())
-        .sort(([a], [b]) => a.localeCompare(b))
-        .map(([date, value]) => ({ date, value })),
-    );
-  }, [weightRecords]);
-
-  const dailyMaxE1rmSeries = useMemo(() => {
-    const map = new Map<string, number>();
-    e1rmRecords.forEach((r) => {
-      const key = dayKey(r.date);
-      map.set(key, Math.max(map.get(key) || 0, r.e1rm));
-    });
-    return addTrendLine(
-      Array.from(map.entries())
-        .sort(([a], [b]) => a.localeCompare(b))
-        .map(([date, value]) => ({ date, value })),
-    );
-  }, [e1rmRecords]);
-
-  return (
-    <div className={styles.root}>
-      <DateRange value={range} onChange={setRange} />
-
-      {(isLoadingExercises || isLoadingRecords) ? (
-        <div className={styles.loading}>
-          <Spinner size="lg" />
-        </div>
-      ) : (
-        <>
-          {!exercises.length ? (
-            <EmptyView title={t('home.noExercisesPrefix')}>
-              <div>{t('home.noExercisesSuffix')}</div>
-            </EmptyView>
-          ) : !exerciseId ? null : !exerciseRecords.length ? (
-            <EmptyView title={t('commonTexts.noDataForPeriod')} />
-          ) : (
-            <>
-              <div className={styles.blockTitle}>
-                {selectedExercise?.name || t('statistics.exerciseLabel')}
-              </div>
-
-              <div className={styles.highlights}>
-                <Card className={styles.highlightCard}>
-                  <div className={styles.highlightLabel}>{t('statistics.maxRepsSet')}</div>
-                  <div className={styles.highlightValue}>{maxRepsSet || '-'}</div>
-                </Card>
-                <Card className={styles.highlightCard}>
-                  <div className={styles.highlightLabel}>{t('statistics.maxRepsDay')}</div>
-                  <div className={styles.highlightValue}>{maxRepsDay || '-'}</div>
-                </Card>
-                <Card className={styles.highlightCard}>
-                  <div className={styles.highlightLabel}>{t('statistics.bestE1rm')}</div>
-                  <div className={styles.highlightValue}>{bestE1rm ? bestE1rm.toFixed(1) : '-'}</div>
-                </Card>
-                {!!weightRecords.length && (
-                  <Card className={styles.highlightCard}>
-                    <div className={styles.highlightLabel}>{t('statistics.bestWeight')}</div>
-                    <div className={styles.highlightValue}>{bestWeight || '-'}</div>
-                  </Card>
-                )}
-              </div>
-
-              <div className={styles.blockTitle}>{t('statistics.chartMaxRepsPerDay')}</div>
-              <div className={styles.chartBox}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={repsPerDaySeries}>
-                    <defs>
-                      <linearGradient id="fillReps" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor={mainColor} stopOpacity={0.15} />
-                        <stop offset="100%" stopColor={mainColor} stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid stroke={gridColor} />
-                    <XAxis dataKey="date" tickFormatter={(d) => dayjs(d).format('DD/MM')} />
-                    <YAxis width={35} />
-                    <Tooltip labelFormatter={(d) => dayjs(String(d)).format('DD/MM/YYYY')} />
-                    <Area type="monotone" dataKey="value" stroke={mainColor} strokeWidth={2} fill="url(#fillReps)" />
-                    <Line type="linear" dataKey="trend" stroke={mainColor} strokeDasharray="6 3" strokeOpacity={0.5} dot={false} activeDot={false} tooltipType="none" />
-                  </ComposedChart>
-                </ResponsiveContainer>
-              </div>
-
-              {!!dailyMaxE1rmSeries.length && (
-                <>
-                  <div className={styles.blockTitle}>{t('statistics.chartE1rmPerDay')}</div>
-                  <div className={styles.chartBox}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <ComposedChart data={dailyMaxE1rmSeries}>
-                        <defs>
-                          <linearGradient id="fillE1rm" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor={mainColor} stopOpacity={0.15} />
-                            <stop offset="100%" stopColor={mainColor} stopOpacity={0} />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid stroke={gridColor} />
-                        <XAxis dataKey="date" tickFormatter={(d) => dayjs(d).format('DD/MM')} />
-                        <YAxis width={35} />
-                        <Tooltip
-                          labelFormatter={(d) => dayjs(String(d)).format('DD/MM/YYYY')}
-                          formatter={(v) => [Number(v).toFixed(1), 'e1RM']}
-                        />
-                        <Area type="monotone" dataKey="value" stroke={mainColor} strokeWidth={2} fill="url(#fillE1rm)" />
-                        <Line type="linear" dataKey="trend" stroke={mainColor} strokeDasharray="6 3" strokeOpacity={0.5} dot={false} activeDot={false} tooltipType="none" />
-                      </ComposedChart>
-                    </ResponsiveContainer>
-                  </div>
-                </>
-              )}
-
-              {!!dailyMaxWeightSeries.length && (
-                <>
-                  <div className={styles.blockTitle}>{t('statistics.chartBestWeightPerDay')}</div>
-                  <div className={styles.chartBox}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <ComposedChart data={dailyMaxWeightSeries}>
-                        <defs>
-                          <linearGradient id="fillWeight" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor={mainColor} stopOpacity={0.15} />
-                            <stop offset="100%" stopColor={mainColor} stopOpacity={0} />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid stroke={gridColor} />
-                        <XAxis dataKey="date" tickFormatter={(d) => dayjs(d).format('DD/MM')} />
-                        <YAxis width={35} />
-                        <Tooltip
-                          labelFormatter={(d) => dayjs(String(d)).format('DD/MM/YYYY')}
-                          formatter={(v) => [Number(v), t('records.weightKg')]}
-                        />
-                        <Area type="monotone" dataKey="value" stroke={mainColor} strokeWidth={2} fill="url(#fillWeight)" />
-                        <Line type="linear" dataKey="trend" stroke={mainColor} strokeDasharray="6 3" strokeOpacity={0.5} dot={false} activeDot={false} tooltipType="none" />
-                      </ComposedChart>
-                    </ResponsiveContainer>
-                  </div>
-                </>
-              )}
-            </>
-          )}
-        </>
-      )}
+  const range=useStatisticsDateRangeStore(s=>s.range), setRange=useStatisticsDateRangeStore(s=>s.setRange);
+  const {exerciseId=''}=useParams();const {t}=useTranslation();
+  const color=useCssVar('--main-active-color','#ef6c00'),grid=useCssVar('--chart-grid-color','rgba(0,0,0,0.1)');
+  const [selected,setSelected]=React.useState<MetricKey[]>(()=>{
+    const saved=storage.get<unknown>('statisticsMetrics',METRICS);
+    return Array.isArray(saved)?saved.filter((k):k is MetricKey=>METRICS.includes(k as MetricKey)):[...METRICS];
+  });
+  const exerciseLoader=React.useCallback(()=>getExercisesLocal(),[]),recordLoader=React.useCallback(()=>getExerciseRecordsLocal(),[]);
+  const {data:exercises,loading:loadingExercises}=useDbReload<Exercise[]>(exerciseLoader,[]);
+  const {data:records,loading:loadingRecords}=useDbReload<ExerciseRecordResponse[]>(recordLoader,[]);
+  const groups=useMemo(()=>buildStatistics(exercises,records,range.from,range.to,exerciseId),[exercises,records,range,exerciseId]);
+  const labels:Record<MetricKey,string>={maxReps:t('statistics.maxRepsSet'),dailyReps:t('statistics.maxRepsDay'),e1rm:t('statistics.bestE1rm'),weight:t('statistics.bestWeight'),duration:t('statistics.duration')};
+  const unit=(key:MetricKey)=>key==='weight'||key==='e1rm'?'кг':key==='duration'?'сек.':'повт.';
+  const toggle=(key:MetricKey)=>setSelected(previous=>{const next=previous.includes(key)?previous.filter(k=>k!==key):[...previous,key];storage.set('statisticsMetrics',next);return next;});
+  const visible=groups.map(g=>({...g,metrics:g.metrics.filter(m=>selected.includes(m.key))})).filter(g=>g.metrics.length);
+  return <div className={styles.root}>
+    <h1 className={styles.pageTitle}>{t('nav.statistics')}</h1>
+    <DateRange value={range} onChange={setRange}/>
+    <PeriodChips range={range} onChange={setRange} records={records}/>
+    <div className={styles.metricChips} role="group" aria-label="Показатели статистики">
+      {METRICS.map(key=><button key={key} type="button" aria-pressed={selected.includes(key)} className={`${styles.metricChip} ${selected.includes(key)?styles.metricChipActive:''}`} onClick={()=>toggle(key)}>{labels[key]}</button>)}
     </div>
-  );
+    {(loadingExercises||loadingRecords)?<div className={styles.loading}><Spinner size="lg"/></div>:!selected.length?<p>Выбери хотя бы один показатель.</p>:!visible.length?<EmptyView title={t('commonTexts.noDataForPeriod')}/>:visible.map(group=><section key={group.exercise._id} className={styles.exerciseSection} aria-label={group.exercise.name}>
+      <h2 className={styles.blockTitle}>{group.exercise.name}</h2>
+      <div className={styles.highlights}>{group.metrics.map(metric=><Card key={metric.key} className={styles.highlightCard}>
+        <div className={styles.highlightLabel}>{labels[metric.key]}</div><div className={styles.highlightValue}>{metric.best.toLocaleString(undefined,{maximumFractionDigits:metric.key==='e1rm'?1:2})} <small>{unit(metric.key)}</small></div>
+      </Card>)}</div>
+      {group.metrics.map(metric=><div key={metric.key}><h3 className={styles.chartTitle}>{metric.key==='dailyReps'?'Сумма повторений за день':labels[metric.key]}</h3><StatChart metric={metric} label={labels[metric.key]} unit={unit(metric.key)} color={color} grid={grid}/></div>)}
+    </section>)}
+  </div>;
 }

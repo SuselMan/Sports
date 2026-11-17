@@ -48,3 +48,12 @@
  }
  
 
+
+.pageTitle { font-size: var(--font-size-lg); margin: 0; }
+.metricChips { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); }
+.metricChip { border: 1px solid var(--border-color); border-radius: 999px; padding: 8px 12px; background: var(--main-bg); color: var(--main-text-color); font: inherit; cursor: pointer; }
+.metricChipActive { background: var(--main-active-color); color: var(--main-bg); border-color: var(--main-active-color); }
+.metricChip:focus-visible { outline: 2px solid var(--main-active-color); outline-offset: 3px; }
+.exerciseSection { min-width: 0; border-top: 1px solid var(--border-color); padding-top: var(--spacing-lg); display: grid; gap: var(--spacing-md); }
+.chartTitle { font-size: var(--font-size-sm); font-weight: 400; margin: 0 0 8px; }
+.chartBox { min-width: 0; }
