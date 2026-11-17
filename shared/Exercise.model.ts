@@ -54,6 +54,7 @@ type ExerciseRecordBase = SyncMetaData & {
     repsAmount?: number,
     durationMs?: number,
     date: string,
+    calendarDate?: string; // YYYY-MM-DD as selected in the diary
     note?: string,
     weight?: number,
     rpe?: number,

@@ -57,6 +57,7 @@ export type MetricRecord = SyncMetaData & {
   metricId: string; // Metric id
   value: number;
   date: ISODateString;
+  calendarDate?: string; // YYYY-MM-DD as selected in the diary
   note?: string;
 };
 

@@ -2,6 +2,7 @@ import type { Exercise, ExerciseType, ExerciseRecordResponse } from '@shared/Exe
 import type { ISODateString, Muscles } from '@shared/Shared.model';
 import type { Metric, MetricRecordResponse, Unit } from '@shared/Metrics.model';
 import { createObjectId } from './objectId';
+import { calendarDate } from './calendarDate';
 import {
   getExerciseRecordsLocal,
   getExercisesLocal,
@@ -136,6 +137,7 @@ export async function upsertExerciseRecordLocal(input: {
     repsAmount: input.repsAmount,
     durationMs: input.durationMs,
     date: input.date,
+    calendarDate: calendarDate(input.date),
     note: input.note,
     weight: input.weight,
     rpe: input.rpe,
@@ -192,6 +194,7 @@ export async function upsertMetricRecordLocal(input: {
     metricId: input.metricId,
     value: input.value,
     date: input.date,
+    calendarDate: calendarDate(input.date),
     note: input.note,
     archived: existing?.archived ?? false,
     createdAt: existing?.createdAt ?? t,

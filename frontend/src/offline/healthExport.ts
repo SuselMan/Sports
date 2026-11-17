@@ -1,4 +1,5 @@
 import { getDb } from './db';
+import { withCalendarDate } from './calendarDate';
 
 type Settings = { enabled: boolean; endpoint: string; token: string; lastSent?: string; lastDigest?: string; error?: string };
 const KEY = 'kektrack_health_sync';
@@ -23,7 +24,7 @@ export function sendHealthData(force = false): Promise<void> {
       tx.objectStore('metrics').getAll(), tx.objectStore('metricRecords').getAll(),
     ]);
     await tx.done;
-    const content = { schema: 'kektrack-v1', exercises, exerciseRecords, metrics, metricRecords };
+    const content = { schema: 'kektrack-v1', exercises, exerciseRecords: exerciseRecords.map(withCalendarDate), metrics, metricRecords: metricRecords.map(withCalendarDate) };
     const digestBytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify([settings.endpoint, settings.token, content])));
     const digest = Array.from(new Uint8Array(digestBytes)).map((v) => v.toString(16).padStart(2, '0')).join('');
     if (!force && settings.lastDigest === digest) return;
@@ -66,6 +67,8 @@ export async function localBackup() {
   const result: any = { schema: 'kektrack-v1', exportedAt: new Date().toISOString() };
   await Promise.all(['exercises', 'exerciseRecords', 'metrics', 'metricRecords'].map(async (table) => { result[table] = await tx.objectStore(table as any).getAll(); }));
   await tx.done;
+  result.exerciseRecords = result.exerciseRecords.map(withCalendarDate);
+  result.metricRecords = result.metricRecords.map(withCalendarDate);
   return result;
 }
 export async function importBackup(text: string) {
